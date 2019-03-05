@@ -13,52 +13,24 @@ import vars.Scl;
  * @author Seth Gillett
  *
  */
-public class Parser {
-	/**
-	 * The parser's token reader
-	 */
-	public TokenReader tr;
-	/**
-	 * Used to print error messages
-	 */
-	public ErrorPrinter ep;
-	/**
-	 * Variable registry for scalars
-	 */
-	public HashMap<String, Scl> sclReg;
-	
-	/**
-	 * Variable registry for matrices
-	 */
-	public HashMap<String, Mtx> mtxReg;
-	/**
-	 * Deals with all direct commands
-	 */
-	protected CmdReader cmdReader;
-	/**
-	 * Deals with assignments to scalars
-	 */
-	protected SclReader sclReader;
-	/**
-	 * Deals with assignments to matrices
-	 */
-	protected MtxReader mtxReader;
-	
+public class Parser extends ParserType {	
 	/**
 	 * Instantiates the token reader, error printer, and all other classes
 	 */
 	public Parser() {
+		// Does nothing - this is the primary parser
+		super();
 		// Initialize token reader and tokens
 		this.initTokenReader();
 		// Initialize error printer
 		ep = new ErrorPrinter(tr);
-		// Initialize sub parsers
-		cmdReader = new CmdReader(this);
-		sclReader = new SclReader(this);
-		mtxReader = new MtxReader(this);
 		// Initialize variable registries
 		sclReg = new HashMap<>();
 		mtxReg = new HashMap<>();
+		// LAST - Initialize sub parsers
+		cmdReader = new CmdReader(this);
+		sclReader = new SclReader(this);
+		mtxReader = new MtxReader(this);
 	}
 	
 	/**
@@ -134,7 +106,7 @@ public class Parser {
 		}
 		// Otherwise, print an error
 		else {
-			ep.expectedError("cmd, scl, mtx, or assignment", tr.lastTokenStr());
+			ep.expectedError("expression, command, or assignment", tr.lastTokenStr());
 		}
 	}
 	

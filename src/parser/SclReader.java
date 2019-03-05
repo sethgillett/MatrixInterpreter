@@ -22,50 +22,6 @@ public class SclReader extends ParserType {
 		ArrayList<Object> infix = readExpr();
 		// Evaluation the expression
 		return evaluateExpr(infix);
-//		// Reads the next token
-//		tr.nextToken();
-//		// If the next token is a number
-//		if (tr.tk == Tk.NUMLIT) {
-//			// Read the number
-//			Scl num = new Scl(tr.lastTokenStr());
-//			// Read the next token
-//			tr.nextToken();
-//			// If that token is the EOL, return the number
-//			if (tr.tk == Tk.EOL) {
-//				return num;
-//			}
-//			// Otherwise if that token is a math operator, read and eval the expression
-//			else if (Tk.isMathOp(tr.tk)) {
-//				// Read the expression
-//				ArrayList<Object> infix = readExpr(num, tr.tk);
-//				// Evaluation the expression
-//				return evaluateExpr(infix);
-//			}
-//			// Otherwise the token does not belong in an expression
-//			else {
-//				p.ep.expectedError("arithmetic expression or number", tr.lastTokenStr());
-//				return null;
-//			}
-//		}
-//		// If the next token is a -
-//		else if (tr.tk == Tk.SUB_OP) {
-//			// Read the expression with negation operator
-//			ArrayList<Object> infix = readExpr(Tk.NEG_OP);
-//			// Evaluate and return
-//			return evaluateExpr(infix);
-//		}
-//		// If the next token is a (
-//		else if (tr.tk == Tk.LPAREN) {
-//			// Read the expression with negation operator
-//			ArrayList<Object> infix = readExpr(Tk.LPAREN);
-//			// Evaluate and return
-//			return evaluateExpr(infix);
-//		}
-//		// Assignment should not have something else after it
-//		else {
-//			ep.expectedError("( or number", tr.lastTokenStr());
-//			return null;
-//		}
 	}
 	
 	/**
@@ -76,6 +32,8 @@ public class SclReader extends ParserType {
 	public ArrayList<Object> readExpr(Object...prevTokens) {
 		// The infix form of the expression
 		ArrayList<Object> infix = new ArrayList<>();
+		// Used to make sure all parantheses match
+		int parenCount = 0;
 		// Adds tokens into the expression that were already read
 		for (Object token : prevTokens) {
 			infix.add(token);
@@ -102,8 +60,19 @@ public class SclReader extends ParserType {
 					infix.add(Tk.SUB_OP);
 				}
 			}
+			// Adds in and counts parantheses
+			else if (tr.tk == Tk.LPAREN || tr.tk == Tk.RPAREN) {
+				// Add 1 if (
+				if (tr.tk == Tk.LPAREN) {
+					parenCount += 1;
+				}
+				// Subtract 1 if )
+				else {
+					parenCount -= 1;
+				}
+			}
 			// Adds in tokens that are math operators
-			else if (Tk.isMathOp(tr.tk) || tr.tk == Tk.LPAREN || tr.tk == Tk.RPAREN) {
+			else if (Tk.isMathOp(tr.tk)) {
 				infix.add(tr.tk);
 			}
 			// Adds in scalars
@@ -120,7 +89,20 @@ public class SclReader extends ParserType {
 			i++;
 //			System.out.println("Infix array: " + infix);
 		}
-		return infix;
+		// All parantheses matched
+		if (parenCount == 0) {
+			return infix;
+		}
+		// Unmatched parantheses
+		else {
+			if (parenCount < 0) {
+				ep.customError("Need %d more ( in expression", -parenCount);
+			}
+			else {
+				ep.customError("Need %d more ) in expression", parenCount);
+			}
+			return null;
+		}
 	}
 	
 	/**
