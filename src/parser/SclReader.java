@@ -15,13 +15,23 @@ public class SclReader extends ParserType {
 	
 	/**
 	 * Evaluates and returns a scalar expression as a scalar
+	 * @param prevTokens Any previous tokens in the expression that were already read over
 	 * @return The scalar result of the following expression
 	 */
-	public Scl SCLEXPR() {
+	public Scl SCLEXPR(Object...prevTokens) {
+		// If any step in the process fails, return null
 		// Read the expression
-		ArrayList<Object> infix = readExpr();
-		// Evaluation the expression
-		return evaluateExpr(infix);
+		ArrayList<Object> infix = readExpr(prevTokens);
+		// If the expression can't be read return null
+		if (infix == null) return null;
+		// Convert the expression from infix to postfix
+		ArrayList<Object> postfix = toPostfix(infix);
+		// If the expression can't be converted return null
+		if (postfix == null) return null;
+		// Evaluate the expression
+		Scl result = evaluateExpr(postfix);
+		// Return the result
+		return result;
 	}
 	
 	/**
@@ -36,6 +46,17 @@ public class SclReader extends ParserType {
 		int parenCount = 0;
 		// Adds tokens into the expression that were already read
 		for (Object token : prevTokens) {
+			// Adds in and counts parantheses
+			if (tr.tk == Tk.LPAREN || tr.tk == Tk.RPAREN) {
+				// Add 1 if (
+				if (tr.tk == Tk.LPAREN) {
+					parenCount += 1;
+				}
+				// Subtract 1 if )
+				else {
+					parenCount -= 1;
+				}
+			}
 			infix.add(token);
 		}
 		// Read the expression in infix form
@@ -70,6 +91,8 @@ public class SclReader extends ParserType {
 				else {
 					parenCount -= 1;
 				}
+				// Adds paren to expression
+				infix.add(tr.tk);
 			}
 			// Adds in tokens that are math operators
 			else if (Tk.isMathOp(tr.tk)) {
@@ -177,16 +200,8 @@ public class SclReader extends ParserType {
 	 * @param postfix The arithmetic expression in infix form
 	 * @return The resulting scalar
 	 */
-	public Scl evaluateExpr(ArrayList<Object> infix) {
-		// Make sure expressions were valid
-		if (infix == null)
-			return null;
-		
-		ArrayList<Object> postfix = toPostfix(infix);
-		if (postfix == null)
-			return null;
-		
-		// If they were perform the described operations
+	public Scl evaluateExpr(ArrayList<Object> postfix) {		
+		// Perform operations described in postfix
 		Deque<Scl> opStack = new LinkedList<>();
 		
 		for (Object o : postfix) {
@@ -225,6 +240,7 @@ public class SclReader extends ParserType {
 						res = Scl.NEG(b);
 					break;
 				default:
+					ep.customError("Invalid token in arithmetic expression");
 					return null;
 					
 				}

@@ -91,24 +91,36 @@ public class Parser extends ParserType {
 		}
 		// If the expression starts with a number, evaluate it
 		else if (tr.tk == Tk.NUMLIT) {
-			this.sclReg.put("ans",(sclReader.evaluateExpr(sclReader.readExpr(new Scl(tr.lastTokenStr())))));
-			print("ans");
+			print(sclReader.SCLEXPR(Tk.NUMLIT));
 		}
 		// If the expression starts with a negative sign, evaluate it
 		else if (tr.tk == Tk.SUB_OP) {
-			this.sclReg.put("ans",(sclReader.evaluateExpr(sclReader.readExpr(Tk.NEG_OP))));
-			print("ans");
+			print(sclReader.SCLEXPR(Tk.NEG_OP));
 		}
 		// If the expression starts with paranthesis, evaluate it
 		else if (tr.tk == Tk.LPAREN) {
-			this.sclReg.put("ans",(sclReader.evaluateExpr(sclReader.readExpr(tr.tk))));
-			print("ans");
+			print(sclReader.SCLEXPR(Tk.LPAREN));
 		}
 		// Otherwise, print an error
 		else {
 			ep.expectedError("expression, command, or assignment", tr.lastTokenStr());
 		}
 	}
+	/**
+	 * An overrided version of print that directly takes in a scalar
+	 * @param scl The scalar to print
+	 */
+	private void print(Scl scl) {
+		System.out.println(scl);
+	}
+	
+	/**
+	 * An override version of print that directly takes in a matrix
+	 * @param mtx The matrix to print
+	 */
+//	private void print(Mtx mtx) {
+//		System.out.println(mtx);
+//	}
 	
 	/**
 	 * Prints out the supplied variable if it is found in any variable registry
