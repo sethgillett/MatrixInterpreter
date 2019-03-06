@@ -6,15 +6,19 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		Parser p = new Parser();
-		
 		Scanner s = new Scanner(System.in);
+		
+		Parser p = new Parser(s);
 		
 		String input = "";
 		
 		while (true) {
 			System.out.print(">>> ");
 			input = s.nextLine();
+			
+			if (input.matches("^(\\s*)$")) {
+				continue;
+			}
 			
 			if (input.matches("^\\s*(end|exit|quit)\\s*$")) {
 				break;

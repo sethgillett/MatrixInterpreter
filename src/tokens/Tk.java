@@ -9,7 +9,7 @@ public enum Tk {
 	ERROR(0), EOL(0),
 	// PRIORITY 1: Reserved symbols
 	CMD(1), TYPE(1), LPAREN(1), RPAREN(1), ASSIGNMENT(1),
-	LBRACKET(1), RBRACKET(1), 
+	LBRACKET(1), RBRACKET(1), COMMA(1),
 	// PRIORITY 2-7: Math operators
 	EXP_OP(2), MULT_OP(3), DIV_OP(4), NEG_OP(5), ADD_OP(6), SUB_OP(7),
 	// PRIORITY 20+: User defined symbols

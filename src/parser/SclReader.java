@@ -14,12 +14,24 @@ public class SclReader extends ParserType {
 	}
 	
 	/**
+	 * Creates a new scalar and assigns a value to it
+	 */
+	public void SCLASSIGN() {
+		tr.nextToken();
+		String sclName = tr.tokenStr();
+		tr.nextToken();
+		
+		Scl var = SCLEXPR();
+		sclReg.put(sclName, var);
+	}
+	
+	/**
 	 * Evaluates and returns a scalar expression as a scalar
 	 * @param prevTokens Any previous tokens in the expression that were already read over
 	 * @return The scalar result of the following expression
 	 */
 	public Scl SCLEXPR() {
-		// If any step in the process fails, return null
+		// If any part fails return null
 		// Read the expression
 		ArrayList<Object> infix = readExpr();
 		// If the expression can't be read return null
@@ -256,17 +268,5 @@ public class SclReader extends ParserType {
 		else {
 			return null;
 		}
-	}
-	
-	/**
-	 * Creates a new scalar and assigns a value to it
-	 */
-	public void SCLASSIGN() {
-		tr.nextToken();
-		String sclName = tr.tokenStr();
-		tr.nextToken();
-		
-		Scl var = SCLEXPR();
-		sclReg.put(sclName, var);
 	}
 }

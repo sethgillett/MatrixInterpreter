@@ -116,6 +116,22 @@ public class Scl {
 		this.decimalPlaces = decimalPlaces;
 	}
 	
+	/**
+	 * Checks if the current scalar is an int
+	 * @return True or false
+	 */
+	public boolean isInt() {
+		return val == Math.floor(val);
+	}
+	
+	/**
+	 * Returns the current scalar as an int
+	 * @return The scalar as an int
+	 */
+	public int valueAsInt() {
+		return (int) Math.floor(val);
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("%." + decimalPlaces + "f", val);

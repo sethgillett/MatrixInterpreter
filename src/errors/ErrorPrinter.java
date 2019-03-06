@@ -28,6 +28,14 @@ public class ErrorPrinter {
 	}
 	
 	/**
+	 * Error in the format of "Expected [expected], got [last token]"
+	 * @param expected The expected token
+	 */
+	public void expectedError(String expected) {
+		expectedError(expected, tr.tokenStr());
+	}
+	
+	/**
 	 * An error with a custom message
 	 * @param msg The message to be printed
 	 * @param args Any arguments to go with the message

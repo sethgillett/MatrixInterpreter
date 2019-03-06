@@ -1,8 +1,11 @@
 package parser;
 
 import java.util.HashMap;
+import java.util.Scanner;
 
 import errors.ErrorPrinter;
+import tokens.Tk;
+import tokens.TokenMatcher;
 import tokens.TokenReader;
 import vars.Mtx;
 import vars.Scl;
@@ -13,6 +16,10 @@ import vars.Scl;
  *
  */
 public class ParserType {
+	/**
+	 * The primary scanner used in the program
+	 */
+	private Scanner scan;
 	/**
 	 * The parser's token reader
 	 */
@@ -45,20 +52,69 @@ public class ParserType {
 	
 	/**
 	 * For all other parsers
-	 * @param primary The primary parser
+	 * @param s The primary parser
 	 */
-	public ParserType(ParserType primary) {
-		this.tr = primary.tr;
-		this.ep = primary.ep;
-		this.sclReg = primary.sclReg;
-		this.mtxReg = primary.mtxReg;
-		this.cmdReader = primary.cmdReader;
-		this.sclReader = primary.sclReader;
-		this.mtxReader = primary.mtxReader;
+	public ParserType(ParserType s) {
+		this.scan = s.scan;
+		this.tr = s.tr;
+		this.ep = s.ep;
+		this.sclReg = s.sclReg;
+		this.mtxReg = s.mtxReg;
+		this.cmdReader = s.cmdReader;
+		this.sclReader = s.sclReader;
+		this.mtxReader = s.mtxReader;
 	}
 	
 	/**
-	 * Gets a scalar or returns null if it doesn't exist or has no value
+	 * For primary parser only
+	 * @param s The primary scanner
+	 */
+	public ParserType(Scanner s) {
+		this.scan = s;
+		this.tr = initTokenReader();
+	}
+	
+	/**
+	 * Initializes the token reader and the tokens
+	 */
+	private TokenReader initTokenReader() {
+		return new TokenReader(				
+			// The new, delete, print, input, and identity commands
+			new TokenMatcher("\\b(new|del|prn|inp|id)\\b", Tk.CMD),
+			// The rref, ref, and inverse commands
+			new TokenMatcher("\\b(rref|ref|inv)\\b", Tk.CMD),
+			// Matrix
+			new TokenMatcher("\\b(mat)\\b", Tk.TYPE),
+			// Scalar
+			new TokenMatcher("\\b(scl)\\b", Tk.TYPE),
+			// Name of a matrix: all capital letters
+			new TokenMatcher("\\b([A-Z]+)\\b", Tk.MTX_NAME),
+			// Name of a scalar: lower case letter followed by any letters
+			new TokenMatcher("\\b([a-z][A-Za-z]*)\\b", Tk.SCL_NAME),
+			// Left and right paranthesis
+			new TokenMatcher("\\(", Tk.LPAREN),
+			new TokenMatcher("\\)", Tk.RPAREN),
+			// Comma
+			new TokenMatcher("\\,", Tk.COMMA),
+			// Left and right brackets
+			new TokenMatcher("\\[", Tk.LBRACKET),
+			new TokenMatcher("\\]", Tk.RBRACKET),
+			// Arithmetic operators
+			new TokenMatcher("\\+", Tk.ADD_OP),
+			new TokenMatcher("\\-", Tk.SUB_OP),
+			// NO RECOGNIZER FOR NEGATE OPERATOR, it cannot be differentiated from SUB
+			new TokenMatcher("\\*", Tk.MULT_OP),
+			new TokenMatcher("\\/", Tk.DIV_OP),
+			new TokenMatcher("\\^", Tk.EXP_OP),
+			// Number literal
+			new TokenMatcher("(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?", Tk.NUM_LIT),
+			// Assignment operator
+			new TokenMatcher("=", Tk.ASSIGNMENT)
+		);
+	}
+	
+	/**
+	 * Gets a scalar or returns null and prints an error if it doesn't exist or has no value
 	 * @param name The name of the scalar
 	 * @return The scalar or null
 	 */
@@ -80,6 +136,35 @@ public class ParserType {
 	}
 	
 	/**
+	 * Reads in a postitive parameter and returns its value as an int
+	 * @return The int value of the parameter or -1
+	 */
+	public int readPositiveIntParam() {
+		tr.nextToken();
+		if (tr.tk == Tk.NUM_LIT || tr.tk == Tk.SCL_NAME) {
+			Scl rowCount;
+			if (tr.tk == Tk.NUM_LIT) {
+				rowCount = new Scl(tr.tokenStr());
+			}
+			else {
+				rowCount = getScl(tr.tokenStr());
+			}
+			
+			if (rowCount.isInt() && rowCount.valueAsInt() >= 0) {
+				return rowCount.valueAsInt();
+			}
+			else {
+				ep.expectedError("postive integer");
+				return -1;
+			}
+		}
+		else {
+			ep.expectedError("number or scl");
+			return -1;
+		}
+	}
+	
+	/**
 	 * Prints out the supplied variable if it is found in any variable registry
 	 * @param varName The name of the variable to print
 	 */
@@ -87,7 +172,7 @@ public class ParserType {
 		if (sclReg.containsKey(varName)) {
 			Scl s = sclReg.get(varName);
 			if (s == null) {
-				System.out.println("Scl '" + varName + "' has no value assigned");
+				ep.customError("Scl '%s' has no value assigned", varName);
 			}
 			else {
 				System.out.println(sclReg.get(varName));
@@ -117,17 +202,19 @@ public class ParserType {
 	}
 	
 	/**
-	 * An override version of print that directly takes in a matrix
+	 * An overrided version of print that directly takes in a matrix
 	 * @param mtx The matrix to print
 	 */
-//	private void print(Mtx mtx) {
-//		System.out.println(mtx);
-//	}
+	protected void print(Mtx mtx) {
+		if (mtx != null)
+			System.out.println(mtx);
+	}
 	
 	/**
-	 * For primary parser only
+	 * Scans a new line with the primary scanner
+	 * @return The new line
 	 */
-	public ParserType() {
-		// Do nothing - for primary parser only
+	public String scanNewLine() {
+		return scan.nextLine();
 	}
 }
