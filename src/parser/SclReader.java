@@ -100,12 +100,12 @@ public class SclReader extends ParserType {
 			}
 			// Adds in scalars
 			else if (tr.tk == Tk.NUMLIT) {
-				Scl num = new Scl(tr.lastTokenStr());
+				Scl num = new Scl(tr.tokenStr());
 				infix.add(num);
 			}
 			// Otherwise error
 			else {
-				ep.expectedError("arithmetic symbol", tr.lastTokenStr());
+				ep.expectedError("arithmetic symbol", tr.tokenStr());
 				return null;
 			}
 			tr.nextToken();
@@ -261,18 +261,18 @@ public class SclReader extends ParserType {
 	 */
 	public void SCLASSIGN() {
 		
-		String sclName = tr.lastTokenStr();
+		String sclName = tr.tokenStr();
 		tr.nextToken();
 		
 		// If there is no next token, print out the value of that scalar
 		if (tr.tk == Tk.EOL) {
-			p.print(sclName);
+			print(sclName);
 		}
 		
 		// Otherwise, make a new scalar and assign it the result of the next expression
 		else if (tr.tk == Tk.ASSIGNMENT) {
 			Scl var = SCLEXPR();
-			p.sclReg.put(sclName, var);
+			sclReg.put(sclName, var);
 		}
 		
 //		// If the next token is a command, perform that command and return result
@@ -300,7 +300,7 @@ public class SclReader extends ParserType {
 		
 		// Invalid token
 		else {
-			ep.expectedError("=", tr.lastTokenStr());
+			ep.expectedError("=", tr.tokenStr());
 		}
 	}
 }

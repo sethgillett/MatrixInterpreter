@@ -8,7 +8,7 @@ public class CmdReader extends ParserType {
 	}
 	
 	public void CMD() {
-		String tokenLit = tr.lastTokenStr();
+		String tokenLit = tr.tokenStr();
 		if (tokenLit.equals("new")) {
 			ep.customError("'new' must be assigned to a scl or mtx");
 		}

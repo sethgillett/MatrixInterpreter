@@ -22,7 +22,7 @@ public class ErrorPrinter {
 	 */
 	public void expectedError(String expected, String found) {
 		// Prints pointer to the token that caused the error
-		tr.printLastTokenPointer();
+		tr.tokenPtr();
 		// Prints what token was expected and what token was gotten
 		System.out.printf("ERROR\n\nExpected '%s', got '%s'\n", expected, found);
 	}

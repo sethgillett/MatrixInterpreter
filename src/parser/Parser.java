@@ -5,8 +5,6 @@ import errors.ErrorPrinter;
 import tokens.Tk;
 import tokens.TokenMatcher;
 import tokens.TokenReader;
-import vars.Mtx;
-import vars.Scl;
 
 /**
  * Primary parser/interpreter for the program
@@ -103,50 +101,7 @@ public class Parser extends ParserType {
 		}
 		// Otherwise, print an error
 		else {
-			ep.expectedError("expression, command, or assignment", tr.lastTokenStr());
-		}
-	}
-	/**
-	 * An overrided version of print that directly takes in a scalar
-	 * @param scl The scalar to print
-	 */
-	private void print(Scl scl) {
-		System.out.println(scl);
-	}
-	
-	/**
-	 * An override version of print that directly takes in a matrix
-	 * @param mtx The matrix to print
-	 */
-//	private void print(Mtx mtx) {
-//		System.out.println(mtx);
-//	}
-	
-	/**
-	 * Prints out the supplied variable if it is found in any variable registry
-	 * @param varName The name of the variable to print
-	 */
-	public void print(String varName) {
-		if (sclReg.containsKey(varName)) {
-			Scl s = sclReg.get(varName);
-			if (s == null) {
-				System.out.println("Scl '" + varName + "' has no value assigned");
-			}
-			else {
-				System.out.println(sclReg.get(varName));
-			}
-		}
-		else if (mtxReg.containsKey(varName)) {
-			Mtx m = mtxReg.get(varName);
-			if (m == null) {
-				ep.customError("Mtx '%s' has no value assigned", varName);
-			}
-			else {
-				System.out.println(mtxReg.get(varName));
-			}
-		}
-		else {
-			ep.customError("'%s' does not exist", varName);
+			ep.expectedError("expression, command, or assignment", tr.tokenStr());
 		}
 	}
 	
