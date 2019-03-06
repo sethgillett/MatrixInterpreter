@@ -13,7 +13,7 @@ public enum Tk {
 	// PRIORITY 2-7: Math operators
 	EXP_OP(2), MULT_OP(3), DIV_OP(4), NEG_OP(5), ADD_OP(6), SUB_OP(7),
 	// PRIORITY 20+: User defined symbols
-	MTXNAME(20), SCLNAME(20), NUMLIT(20);
+	MTX_NAME(20), SCL_NAME(20), NUM_LIT(20);
 	
 	final int priority;
 	
@@ -25,6 +25,10 @@ public enum Tk {
 		return (tk == Tk.MULT_OP || tk == Tk.DIV_OP 
 				|| tk == Tk.ADD_OP || tk == Tk.SUB_OP
 				|| tk == Tk.EXP_OP);
+	}
+	
+	public static boolean isParen(Tk tk) {
+		return (tk == Tk.LPAREN || tk == Tk.RPAREN);
 	}
 	
 	/**

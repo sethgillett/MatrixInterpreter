@@ -18,10 +18,10 @@ public class SclReader extends ParserType {
 	 * @param prevTokens Any previous tokens in the expression that were already read over
 	 * @return The scalar result of the following expression
 	 */
-	public Scl SCLEXPR(Object...prevTokens) {
+	public Scl SCLEXPR() {
 		// If any step in the process fails, return null
 		// Read the expression
-		ArrayList<Object> infix = readExpr(prevTokens);
+		ArrayList<Object> infix = readExpr();
 		// If the expression can't be read return null
 		if (infix == null) return null;
 		// Convert the expression from infix to postfix
@@ -29,7 +29,16 @@ public class SclReader extends ParserType {
 		// If the expression can't be converted return null
 		if (postfix == null) return null;
 		// Evaluate the expression
-		Scl result = evaluateExpr(postfix);
+		Scl result;
+		try {
+			result = evaluateExpr(postfix);
+		}
+		// If it fails to parse, throw an error
+		catch (Exception e) {
+			//e.printStackTrace();
+			ep.customError("Invalid arithmetic expression");
+			return null;
+		}
 		// Return the result
 		return result;
 	}
@@ -39,26 +48,11 @@ public class SclReader extends ParserType {
 	 * @param first The first scalar of the expression
 	 * @return The expression in infix form
 	 */
-	public ArrayList<Object> readExpr(Object...prevTokens) {
+	public ArrayList<Object> readExpr() {
 		// The infix form of the expression
 		ArrayList<Object> infix = new ArrayList<>();
 		// Used to make sure all parantheses match
 		int parenCount = 0;
-		// Adds tokens into the expression that were already read
-		for (Object token : prevTokens) {
-			// Adds in and counts parantheses
-			if (tr.tk == Tk.LPAREN || tr.tk == Tk.RPAREN) {
-				// Add 1 if (
-				if (tr.tk == Tk.LPAREN) {
-					parenCount += 1;
-				}
-				// Subtract 1 if )
-				else {
-					parenCount -= 1;
-				}
-			}
-			infix.add(token);
-		}
 		// Read the expression in infix form
 		tr.nextToken();
 		// Index in infix
@@ -82,7 +76,7 @@ public class SclReader extends ParserType {
 				}
 			}
 			// Adds in and counts parantheses
-			else if (tr.tk == Tk.LPAREN || tr.tk == Tk.RPAREN) {
+			else if (Tk.isParen(tr.tk)) {
 				// Add 1 if (
 				if (tr.tk == Tk.LPAREN) {
 					parenCount += 1;
@@ -98,9 +92,17 @@ public class SclReader extends ParserType {
 			else if (Tk.isMathOp(tr.tk)) {
 				infix.add(tr.tk);
 			}
-			// Adds in scalars
-			else if (tr.tk == Tk.NUMLIT) {
+			// Adds in numerical literals
+			else if (tr.tk == Tk.NUM_LIT) {
 				Scl num = new Scl(tr.tokenStr());
+				infix.add(num);
+			}
+			// Adds in any scalar variables
+			else if (tr.tk == Tk.SCL_NAME) {
+				Scl num = this.getScl(tr.tokenStr());
+				// If a scalar doesn't exist return null
+				if (num == null)
+					return null;
 				infix.add(num);
 			}
 			// Otherwise error
@@ -260,47 +262,11 @@ public class SclReader extends ParserType {
 	 * Creates a new scalar and assigns a value to it
 	 */
 	public void SCLASSIGN() {
-		
+		tr.nextToken();
 		String sclName = tr.tokenStr();
 		tr.nextToken();
 		
-		// If there is no next token, print out the value of that scalar
-		if (tr.tk == Tk.EOL) {
-			print(sclName);
-		}
-		
-		// Otherwise, make a new scalar and assign it the result of the next expression
-		else if (tr.tk == Tk.ASSIGNMENT) {
-			Scl var = SCLEXPR();
-			sclReg.put(sclName, var);
-		}
-		
-//		// If the next token is a command, perform that command and return result
-//		else if (tr.tk == Tk.CMD) {
-//			// Stores the cmd used
-//			String cmdName = tr.lastTokenStr();
-//			tr.nextToken();
-//			// Must have '(' after cmd
-//			if (tr.tk == Tk.LPAREN) {
-//				switch(cmdName) {
-//				
-//				case "new":
-//					p.cmdReader.NEW();
-//					break;
-//				
-//				default:
-//					//TODO: Program other commands and expressions
-//					System.out.println(cmdName + " not programmed yet.");
-//				}
-//			}
-//			else {
-//				ep.expectedError("(", tr.lastTokenStr());
-//			}
-//		}
-		
-		// Invalid token
-		else {
-			ep.expectedError("=", tr.tokenStr());
-		}
+		Scl var = SCLEXPR();
+		sclReg.put(sclName, var);
 	}
 }

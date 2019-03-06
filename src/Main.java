@@ -16,7 +16,7 @@ public class Main {
 			System.out.print(">>> ");
 			input = s.nextLine();
 			
-			if (input.matches("^\\s*(end)\\s*$")) {
+			if (input.matches("^\\s*(end|exit|quit)\\s*$")) {
 				break;
 			}
 			

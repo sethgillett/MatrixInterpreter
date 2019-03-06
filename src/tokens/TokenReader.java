@@ -79,13 +79,26 @@ public class TokenReader {
 	 * Moves the current token BACK
 	 */
 	public void prevToken() {
-		// Must be at least 2 tokens
+		// At least 2 tokens present
 		if (tkHstIdx >= 2) {
 			// Token history is 1 ahead of current token
 			tk = tkHst.get(tkHstIdx - 2).token;
 			// Decrement token history index
 			tkHstIdx -= 1;
 		}
+		// If only 1 token is present, tk will be set to null
+		else if (tkHstIdx == 1) {
+			tk = null;
+			tkHstIdx = 0;
+		}
+	}
+	
+	/**
+	 * Restarts the reader at the beginning of the line
+	 */
+	public void restartLine() {
+		tk = null;
+		tkHstIdx = 0;
 	}
 	
 	/**
@@ -93,7 +106,7 @@ public class TokenReader {
 	 */
 	private void matchNextToken() {
 		if (lineIdx == currentLine.length()) {
-			// Add token to history
+			// Add EOL token to history
 			tkHst.add(new ReadToken(-1, Tk.EOL, "EOL"));
 			// Return
 			return;
@@ -127,14 +140,7 @@ public class TokenReader {
 			// Prints a pointer to the unrecognized token
 			System.out.printf("%" + (lineIdx+5) + "s", "^");
 			System.out.println(" unrecognized token");
-			// Attempts to capture the token string by advancing line idx past non-whitespace
-			int lastLineIdx = lineIdx;
-			errorAdvanceNonWhitespace();
 			
-			String tokenStr = currentLine.substring(lastLineIdx, lineIdx);
-			// Adds error to token history
-			tkHst.add(new ReadToken(lastLineIdx, Tk.ERROR, tokenStr));
-			// Return
 			return;
 		}
 	}
@@ -164,12 +170,4 @@ public class TokenReader {
 		}
 	}
 	
-	/**
-	 * Advances past non-whitespace to discover a token that caused an error
-	 */
-	private void errorAdvanceNonWhitespace() {
-		while (lineIdx < currentLine.length() && currentLine.charAt(lineIdx) != ' ') {
-			lineIdx ++;
-		}
-	}
 }

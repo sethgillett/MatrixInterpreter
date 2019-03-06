@@ -45,9 +45,9 @@ public class Parser extends ParserType {
 			// Scalar
 			new TokenMatcher("\\b(scl)\\b", Tk.TYPE),
 			// Name of a matrix: all capital letters
-			new TokenMatcher("\\b([A-Z]+)\\b", Tk.MTXNAME),
+			new TokenMatcher("\\b([A-Z]+)\\b", Tk.MTX_NAME),
 			// Name of a scalar: lower case letter followed by any letters
-			new TokenMatcher("\\b([a-z][A-Za-z]*)\\b", Tk.SCLNAME),
+			new TokenMatcher("\\b([a-z][A-Za-z]*)\\b", Tk.SCL_NAME),
 			// Left and right paranthesis
 			new TokenMatcher("\\(", Tk.LPAREN),
 			new TokenMatcher("\\)", Tk.RPAREN),
@@ -62,7 +62,7 @@ public class Parser extends ParserType {
 			new TokenMatcher("\\/", Tk.DIV_OP),
 			new TokenMatcher("\\^", Tk.EXP_OP),
 			// Number literal
-			new TokenMatcher("(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?", Tk.NUMLIT),
+			new TokenMatcher("(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?", Tk.NUM_LIT),
 			// Assignment operator
 			new TokenMatcher("=", Tk.ASSIGNMENT)
 		);
@@ -78,26 +78,38 @@ public class Parser extends ParserType {
 		// Look for a command
 		if (tr.tk == Tk.CMD) {
 			//TODO
+			System.out.println("No commands have been programmed yet");
 		}
-		// If an expression has a scl name, send it to scl assignment method
-		else if (tr.tk == Tk.SCLNAME) {
-			sclReader.SCLASSIGN();
+		// If an expression has a scl name
+		else if (tr.tk == Tk.SCL_NAME) {
+			tr.nextToken();
+			// If scl name is followed by assignment, send to scl assignment
+			if (tr.tk == Tk.ASSIGNMENT) {
+				tr.restartLine();
+				sclReader.SCLASSIGN();
+			}
+			else if (tr.tk == Tk.EOL) {
+				// If there is no next token, print out the value of that scalar
+				tr.prevToken();
+				print(tr.tokenStr());
+			}
+			else if (Tk.isMathOp(tr.tk) || Tk.isParen(tr.tk)){
+				// If it's an expression print out the value of the expression
+				tr.restartLine();
+				print(sclReader.SCLEXPR());
+			}
+			else {
+				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());
+			}
 		}
 		// If an expression has a mtx name, send it to mtx assignment method
-		else if (tr.tk == Tk.MTXNAME) {
+		else if (tr.tk == Tk.MTX_NAME) {
 			mtxReader.MTXASSIGN();
 		}
 		// If the expression starts with a number, evaluate it
-		else if (tr.tk == Tk.NUMLIT) {
-			print(sclReader.SCLEXPR(Tk.NUMLIT));
-		}
-		// If the expression starts with a negative sign, evaluate it
-		else if (tr.tk == Tk.SUB_OP) {
-			print(sclReader.SCLEXPR(Tk.NEG_OP));
-		}
-		// If the expression starts with paranthesis, evaluate it
-		else if (tr.tk == Tk.LPAREN) {
-			print(sclReader.SCLEXPR(Tk.LPAREN));
+		else if (tr.tk == Tk.NUM_LIT | tr.tk == Tk.SUB_OP || tr.tk == Tk.LPAREN) {
+			tr.prevToken();
+			print(sclReader.SCLEXPR());
 		}
 		// Otherwise, print an error
 		else {

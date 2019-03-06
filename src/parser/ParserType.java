@@ -58,6 +58,28 @@ public class ParserType {
 	}
 	
 	/**
+	 * Gets a scalar or returns null if it doesn't exist or has no value
+	 * @param name The name of the scalar
+	 * @return The scalar or null
+	 */
+	public Scl getScl(String name) {
+		if (sclReg.containsKey(name)) {
+			Scl scl = sclReg.get(name);
+			if (scl == null) {
+				ep.customError("'%s' has no value", name);
+				return null;
+			}
+			else {
+				return scl;
+			}
+		}
+		else {
+			ep.customError("'%s' does not exist", name);
+			return null;
+		}
+	}
+	
+	/**
 	 * Prints out the supplied variable if it is found in any variable registry
 	 * @param varName The name of the variable to print
 	 */
@@ -90,7 +112,8 @@ public class ParserType {
 	 * @param scl The scalar to print
 	 */
 	protected void print(Scl scl) {
-		System.out.println(scl);
+		if (scl != null)
+			System.out.println(scl);
 	}
 	
 	/**
