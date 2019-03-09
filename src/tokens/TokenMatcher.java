@@ -82,4 +82,9 @@ public class TokenMatcher implements Comparable<TokenMatcher> {
 	public int compareTo(TokenMatcher other) {
 		return this.token.priority - other.token.priority;
 	}
+	
+	@Override
+	public String toString() {
+		return p + " - " + token;
+	}
 }

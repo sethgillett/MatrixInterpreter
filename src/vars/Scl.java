@@ -111,7 +111,7 @@ public class Scl {
 	 * @param val The double value
 	 * @param decimalPlaces The number of decimal places to preserve
 	 */
-	private Scl(Double val, int decimalPlaces) {
+	protected Scl(double val, int decimalPlaces) {
 		this.val = val;
 		this.decimalPlaces = decimalPlaces;
 	}
@@ -121,7 +121,7 @@ public class Scl {
 	 * @return True or false
 	 */
 	public boolean isInt() {
-		return val == Math.floor(val);
+		return (val <= Integer.MAX_VALUE && val >= Integer.MIN_VALUE && val == Math.floor(val));
 	}
 	
 	/**

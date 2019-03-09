@@ -24,13 +24,15 @@ public class MtxReader extends ParserType {
 		Mtx var;
 		if (tr.tk == Tk.CMD) {
 			switch(tr.tokenStr()) {
-			
-			case "inp":
-				var = MTXINP();
-				break;
 				
 			case "id":
-				var = MTXID();
+				int[] sizeId = readMtxSizeParams();
+				var = Mtx.identity(sizeId[0], sizeId[1]);
+				break;
+			
+			case "zero":
+				int[] sizeZ = readMtxSizeParams();
+				var = Mtx.zero(sizeZ[0], sizeZ[1]);
 				break;
 				
 			default:
@@ -38,16 +40,20 @@ public class MtxReader extends ParserType {
 				return;
 			}
 		}
+		else if (tr.tk == Tk.EOL) {
+			var = readMtxInputTerminal();
+		}
 		else {
-			var = MTXEXPR();
+			var = this.exprReader.<Mtx>EXPR();
 		}
 		mtxReg.put(mtxName, var);
 	}
 	
 	/**
-	 * Function to handle creation of an identity matrix
+	 * Reads in two parameters for size from a function call
+	 * @return [rows, cols]
 	 */
-	public Mtx MTXID() {
+	public int[] readMtxSizeParams() {
 		tr.nextToken();
 		if (tr.tk == Tk.LPAREN) {
 			tr.nextToken();
@@ -60,7 +66,7 @@ public class MtxReader extends ParserType {
 				int cols = this.readPositiveIntParam();
 				if (cols == -1)
 					return null;
-				return Mtx.identity(rows, cols);
+				return new int[] {rows, cols};
 			}
 			else {
 				ep.expectedError(",");
@@ -73,33 +79,13 @@ public class MtxReader extends ParserType {
 	}
 	
 	/**
-	 * Function to handle entering matrices into terminal
-	 * @return The matrix result
-	 */
-	public Mtx MTXINP() {
-		tr.nextToken();
-		if (tr.tk == Tk.LPAREN) {
-			tr.nextToken();
-			if (tr.tk == Tk.RPAREN) {
-				return readMtxInput();
-			}
-			else {
-				ep.expectedError(")", tr.tokenStr());
-			}
-		}
-		else {
-			ep.expectedError("(", tr.tokenStr());
-		}
-		return null;
-	}
-	
-	/**
 	 * Reads in a matrix via the terminal
 	 * @return The matrix read in
 	 */
-	public Mtx readMtxInput() {
+	public Mtx readMtxInputTerminal() {
 		ArrayList<ArrayList<Scl>> mtx = new ArrayList<>();
 		String lineStr;
+		Integer lineLen = null;
 		do {
 			System.out.print("[");
 			lineStr = scanNewLine();
@@ -127,12 +113,22 @@ public class MtxReader extends ParserType {
 					ep.expectedError("scalar", tr.tokenStr());
 					return null;
 				}
-				tr.nextToken();
 			}
 			
 			if (!line.isEmpty()) {
-				mtx.add(line);
+				if (lineLen != null && line.size() != lineLen) {
+					int dif = line.size() - lineLen;
+					// Matrix row has [number] too [few | many] parameters
+					ep.customError("Matrix row has %d too %s parameters", Math.abs(dif), dif<0? "few":"many");
+					return null;
+				}
+				else {
+					mtx.add(line);
+				}
 			}
+			
+			if (lineLen == null)
+				lineLen = line.size();
 			
 		} while (!lineStr.matches("^(\\s*)$"));
 		
@@ -162,8 +158,4 @@ public class MtxReader extends ParserType {
 		return new FullMtx(mtxArray);
 	}
 	
-	public Mtx MTXEXPR() {
-		//TODO
-		return null;
-	}
 }

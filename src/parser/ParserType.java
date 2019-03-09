@@ -49,20 +49,32 @@ public class ParserType {
 	 * Deals with assignments to matrices
 	 */
 	protected MtxReader mtxReader;
+	/**
+	 * Reads expressions
+	 */
+	protected ExprReader exprReader;
 	
 	/**
 	 * For all other parsers
 	 * @param s The primary parser
 	 */
-	public ParserType(ParserType s) {
+	protected ParserType(ParserType s) {
 		this.scan = s.scan;
 		this.tr = s.tr;
 		this.ep = s.ep;
 		this.sclReg = s.sclReg;
 		this.mtxReg = s.mtxReg;
+	}
+	
+	/**
+	 * Connects each parser type to all the others
+	 * @param s The primary parser
+	 */
+	public void connect(ParserType s) {
 		this.cmdReader = s.cmdReader;
 		this.sclReader = s.sclReader;
 		this.mtxReader = s.mtxReader;
+		this.exprReader = s.exprReader;
 	}
 	
 	/**
@@ -79,8 +91,8 @@ public class ParserType {
 	 */
 	private TokenReader initTokenReader() {
 		return new TokenReader(				
-			// The new, delete, print, input, and identity commands
-			new TokenMatcher("\\b(new|del|prn|inp|id)\\b", Tk.CMD),
+			// The new, delete, print, identity, and zero commands
+			new TokenMatcher("\\b(new|del|prn|id|zero)\\b", Tk.CMD),
 			// The rref, ref, and inverse commands
 			new TokenMatcher("\\b(rref|ref|inv)\\b", Tk.CMD),
 			// Matrix
@@ -88,9 +100,9 @@ public class ParserType {
 			// Scalar
 			new TokenMatcher("\\b(scl)\\b", Tk.TYPE),
 			// Name of a matrix: all capital letters
-			new TokenMatcher("\\b([A-Z]+)\\b", Tk.MTX_NAME),
+			new TokenMatcher("\\b([A-Z][a-z]*)\\b", Tk.MTX_NAME),
 			// Name of a scalar: lower case letter followed by any letters
-			new TokenMatcher("\\b([a-z][A-Za-z]*)\\b", Tk.SCL_NAME),
+			new TokenMatcher("\\b([a-z]+)\\b", Tk.SCL_NAME),
 			// Left and right paranthesis
 			new TokenMatcher("\\(", Tk.LPAREN),
 			new TokenMatcher("\\)", Tk.RPAREN),
@@ -127,6 +139,28 @@ public class ParserType {
 			}
 			else {
 				return scl;
+			}
+		}
+		else {
+			ep.customError("'%s' does not exist", name);
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets a matrix or returns null if it doesn't exist or has no value
+	 * @param name The name of the matrix
+	 * @return The matrix or null
+	 */
+	public Mtx getMtx(String name) {
+		if (mtxReg.containsKey(name)) {
+			Mtx mtx = mtxReg.get(name);
+			if (mtx == null) {
+				ep.customError("'%s' has no value", name);
+				return null;
+			}
+			else {
+				return mtx;
 			}
 		}
 		else {

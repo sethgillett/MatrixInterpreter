@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 import errors.ErrorPrinter;
 import tokens.Tk;
+import vars.Mtx;
+import vars.Scl;
 
 /**
  * Primary parser/interpreter for the program
@@ -23,10 +25,16 @@ public class Parser extends ParserType {
 		// Initialize variable registries
 		sclReg = new HashMap<>();
 		mtxReg = new HashMap<>();
-		// LAST - Initialize sub parsers
+		// Initialize sub parsers
 		cmdReader = new CmdReader(this);
 		sclReader = new SclReader(this);
 		mtxReader = new MtxReader(this);
+		exprReader = new ExprReader(this);
+		// Connect all the parsers
+		cmdReader.connect(this);
+		sclReader.connect(this);
+		mtxReader.connect(this);
+		exprReader.connect(this);
 	}
 	
 	/**
@@ -38,16 +46,31 @@ public class Parser extends ParserType {
 		tr.nextToken();
 		// Look for a command
 		if (tr.tk == Tk.CMD) {
-			//TODO
-			System.out.println("No commands have been programmed yet");
-		}
-		// If an expression has a scl name
-		else if (tr.tk == Tk.SCL_NAME) {
+			String cmd = tr.tokenStr();
 			tr.nextToken();
-			// If scl name is followed by assignment, send to scl assignment
+			if (tr.tk == Tk.LPAREN) {
+				tr.nextToken();
+				switch (cmd) {
+				case "prn":
+					String varName = tr.tokenStr();
+					print(varName);
+					break;
+				default:
+					ep.customError("No commands have been programmed yet");
+					break;
+				}
+			}
+		}
+		// If an expression has a scl or mtx name
+		else if (tr.tk == Tk.SCL_NAME || tr.tk == Tk.MTX_NAME) {
+			tr.nextToken();
+			// If name is followed by assignment, send to appropriate assignment
 			if (tr.tk == Tk.ASSIGNMENT) {
 				tr.restartLine();
-				sclReader.SCLASSIGN();
+				if (tr.tk == Tk.SCL_NAME)
+					sclReader.SCLASSIGN();
+				else
+					mtxReader.MTXASSIGN();
 			}
 			else if (tr.tk == Tk.EOL) {
 				// If there is no next token, print out the value of that scalar
@@ -57,29 +80,10 @@ public class Parser extends ParserType {
 			else if (Tk.isMathOp(tr.tk) || Tk.isParen(tr.tk)){
 				// If it's an expression print out the value of the expression
 				tr.restartLine();
-				print(sclReader.SCLEXPR());
-			}
-			else {
-				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());
-			}
-		}
-		// If an expression has a mtx name
-		else if (tr.tk == Tk.MTX_NAME) {
-			tr.nextToken();
-			// If mtx name is followed by assignment, send to mtx assignment
-			if (tr.tk == Tk.ASSIGNMENT) {
-				tr.restartLine();
-				mtxReader.MTXASSIGN();
-			}
-			else if (tr.tk == Tk.EOL) {
-				// If there is no next token, print out the value of that matrix
-				tr.prevToken();
-				print(tr.tokenStr());
-			}
-			else if (Tk.isMathOp(tr.tk) || Tk.isParen(tr.tk)){
-				// If it's an expression print out the value of the expression
-				tr.restartLine();
-				print(mtxReader.MTXEXPR());
+				if (tr.tk == Tk.SCL_NAME)
+					print(exprReader.<Scl>EXPR());
+				else
+					print(exprReader.<Mtx>EXPR());
 			}
 			else {
 				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());
@@ -88,7 +92,13 @@ public class Parser extends ParserType {
 		// If the expression starts with a number, evaluate it
 		else if (tr.tk == Tk.NUM_LIT | tr.tk == Tk.SUB_OP || tr.tk == Tk.LPAREN) {
 			tr.prevToken();
-			print(sclReader.SCLEXPR());
+			Object res = exprReader.EXPR();
+			if (res instanceof Scl) {
+				print((Scl) res);
+			}
+			else {
+				print((Mtx) res);
+			}
 		}
 		// Otherwise, print an error
 		else {
