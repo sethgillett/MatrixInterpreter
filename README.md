@@ -1,5 +1,5 @@
 # MatrixInterpreter
-A command line program that will ultimately be able to perform matrix and scalar algebra and basic matrix operations.
+A command line program that can perform matrix and scalar algebra and basic matrix operations.
 
 **Current State:**
 
@@ -15,7 +15,14 @@ You can see the result of any of these operations by typing the name of the scal
 
 Or, to make a simple matrix:
 ```
-A = inp()
+A = 
+[1 2
+[3 4
 B = id(4,4)
+C =
+[5 6
+[7 8
+A*B
+A*C
 ```
 Again, the results can be seen by simply typing the name of the matrix.
