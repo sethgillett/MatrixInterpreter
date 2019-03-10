@@ -14,7 +14,33 @@ public class ExprReader extends ParserType {
 		super(s);
 	}
 	
-	public <Term> Term EXPR() {
+	public Mtx MTXEXPR() {
+		Object result = EXPR();
+		try {
+			return (Mtx) result;
+		}
+		catch (ClassCastException e) {
+			ep.customError("Expression resulted in scalar, not matrix");
+			return null;
+		}
+	}
+	
+	public Scl SCLEXPR() {
+		Object result = EXPR();
+		try {
+			return (Scl) result;
+		}
+		catch (ClassCastException e) {
+			ep.customError("Expression resulted in matrix, not scalar");
+			return null;
+		}
+	}
+	
+	public Object UNKNOWNEXPR() {
+		return EXPR();
+	}
+	
+	private Object EXPR() {
 		// If any part fails return null
 		// Read the expression
 		ArrayList<Object> infix = readExpr();
@@ -25,9 +51,11 @@ public class ExprReader extends ParserType {
 		// If the expression can't be converted return null
 		if (postfix == null) return null;
 		// Evaluate the expression
-		Term result;
+		Object result;
 		try {
-			result = evaluateExpr(postfix);
+			result = this.evaluateExpr(postfix);
+			// Return the result
+			return result;
 		}
 		// If it fails to parse, throw an error
 		catch (Exception e) {
@@ -35,8 +63,6 @@ public class ExprReader extends ParserType {
 			ep.customError("Invalid arithmetic expression");
 			return null;
 		}
-		// Return the result
-		return result;
 	}
 	/**
 	 * Reads an arithmetic expression from tokens in infix form
@@ -167,7 +193,7 @@ public class ExprReader extends ParserType {
 					}
 					// If there is no ( invalid expression
 					if (!exprStack.isEmpty() && !(exprStack.peek() == Tk.LPAREN)) {
-						ep.customError("Invalid arithmetic expression");
+						ep.customError("Missing (");
 						return null;
 					}
 					// If there is a ( pop it off
@@ -205,8 +231,7 @@ public class ExprReader extends ParserType {
 	 * @param postfix The arithmetic expression in infix form
 	 * @return The resulting scalar
 	 */
-	@SuppressWarnings("unchecked")
-	public <Term> Term evaluateExpr(ArrayList<Object> postfix) {		
+	public Object evaluateExpr(ArrayList<Object> postfix) {		
 		// Perform operations described in postfix
 		Deque<Object> opStack = new LinkedList<>();
 		
@@ -310,15 +335,10 @@ public class ExprReader extends ParserType {
 		}
 		// The last scalar on the stack is the answer
 		if (opStack.size() == 1) {
-			try {
-				return (Term) opStack.pop();
-			}
-			catch (Exception e) {
-				ep.customError("Expression result was not the correct type");
-				return null;
-			}
+			return opStack.pop();
 		}
 		else {
+			ep.customError("Expression evaluation failed");
 			return null;
 		}
 	}

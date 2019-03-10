@@ -15,14 +15,7 @@ public class SclReader extends ParserType {
 		tr.nextToken();
 		String sclName = tr.tokenStr();
 		tr.nextToken();
-		Scl var = null;
-		try {
-			var = exprReader.EXPR();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			ep.customError("Scalar expression contains matrices");
-		}
+		Scl var = exprReader.SCLEXPR();
 		sclReg.put(sclName, var);
 	}
 	

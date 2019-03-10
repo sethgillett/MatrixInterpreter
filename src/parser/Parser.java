@@ -63,14 +63,21 @@ public class Parser extends ParserType {
 		}
 		// If an expression has a scl or mtx name
 		else if (tr.tk == Tk.SCL_NAME || tr.tk == Tk.MTX_NAME) {
+			// Record the type for reference
+			Tk type = tr.tk;
+			// Next token
 			tr.nextToken();
 			// If name is followed by assignment, send to appropriate assignment
 			if (tr.tk == Tk.ASSIGNMENT) {
-				tr.restartLine();
-				if (tr.tk == Tk.SCL_NAME)
+				tr.nextToken();
+				if (type == Tk.SCL_NAME) {
+					tr.restartLine();
 					sclReader.SCLASSIGN();
-				else
+				}
+				else {
+					tr.restartLine();
 					mtxReader.MTXASSIGN();
+				}
 			}
 			else if (tr.tk == Tk.EOL) {
 				// If there is no next token, print out the value of that scalar
@@ -81,9 +88,9 @@ public class Parser extends ParserType {
 				// If it's an expression print out the value of the expression
 				tr.restartLine();
 				if (tr.tk == Tk.SCL_NAME)
-					print(exprReader.<Scl>EXPR());
+					print(exprReader.SCLEXPR());
 				else
-					print(exprReader.<Mtx>EXPR());
+					print(exprReader.MTXEXPR());
 			}
 			else {
 				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());
@@ -92,7 +99,7 @@ public class Parser extends ParserType {
 		// If the expression starts with a number, evaluate it
 		else if (tr.tk == Tk.NUM_LIT | tr.tk == Tk.SUB_OP || tr.tk == Tk.LPAREN) {
 			tr.prevToken();
-			Object res = exprReader.EXPR();
+			Object res = exprReader.UNKNOWNEXPR();
 			if (res instanceof Scl) {
 				print((Scl) res);
 			}

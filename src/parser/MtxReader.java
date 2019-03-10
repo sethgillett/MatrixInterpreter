@@ -44,7 +44,8 @@ public class MtxReader extends ParserType {
 			var = readMtxInputTerminal();
 		}
 		else {
-			var = this.exprReader.<Mtx>EXPR();
+			tr.prevToken();
+			var = exprReader.MTXEXPR();
 		}
 		mtxReg.put(mtxName, var);
 	}
