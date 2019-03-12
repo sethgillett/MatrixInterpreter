@@ -140,7 +140,7 @@ public class TokenReader {
 			// Prints a pointer to the unrecognized token
 			System.out.printf("%" + (lineIdx+5) + "s", "^");
 			System.out.println(" unrecognized token");
-			
+			tkHst.add(new ReadToken(lineIdx, Tk.ERROR, "ERROR"));
 			return;
 		}
 	}

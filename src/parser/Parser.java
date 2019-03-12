@@ -1,11 +1,9 @@
 package parser;
-import java.util.HashMap;
 import java.util.Scanner;
 
-import errors.ErrorPrinter;
 import tokens.Tk;
-import vars.Mtx;
-import vars.Scl;
+import vars.mtx.Mtx;
+import vars.scl.Scl;
 
 /**
  * Primary parser/interpreter for the program
@@ -18,13 +16,8 @@ public class Parser extends ParserType {
 	 * @param s The primary scanner
 	 */
 	public Parser(Scanner s) {
-		// Initializes tokens
+		// Initializes token reader, registries, and error printer
 		super(s);
-		// Initialize error printer
-		ep = new ErrorPrinter(tr);
-		// Initialize variable registries
-		sclReg = new HashMap<>();
-		mtxReg = new HashMap<>();
 		// Initialize sub parsers
 		cmdReader = new CmdReader(this);
 		sclReader = new SclReader(this);
@@ -87,10 +80,7 @@ public class Parser extends ParserType {
 			else if (Tk.isMathOp(tr.tk) || Tk.isParen(tr.tk)){
 				// If it's an expression print out the value of the expression
 				tr.restartLine();
-				if (tr.tk == Tk.SCL_NAME)
-					print(exprReader.SCLEXPR());
-				else
-					print(exprReader.MTXEXPR());
+				print(exprReader.UNKNOWNEXPR());
 			}
 			else {
 				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());

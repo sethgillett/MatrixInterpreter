@@ -5,8 +5,9 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import tokens.Tk;
-import vars.Mtx;
-import vars.Scl;
+import vars.mtx.Mtx;
+import vars.scl.Scl;
+import vars.scl.SimpleScl;
 
 public class ExprReader extends ParserType {
 
@@ -77,25 +78,24 @@ public class ExprReader extends ParserType {
 		// Read the expression in infix form
 		tr.nextToken();
 		// Index in infix
-//		int i = infix.size() - 1;
+		int i = 0;
 		while (tr.tk != Tk.EOL) {
 //			// If token is a "-" with nothing before, it is actually the negation operator
 			if (tr.tk == Tk.SUB_OP) {
-//				// If the token has no elements prior
-//				if (i == 0) {
-//					// The sub_op is the neg_op
-//					infix.add(Tk.NEG_OP);
-//				}
-//				// If the token has an element prior AND that element is a token
-//				else if (i > 0 && infix.get(i-1) instanceof Tk) {
-//					// The sub_op is actually the neg_op
-//					infix.add(Tk.NEG_OP);
-//				}
-//				else {
-//					// Otherwise, it's just the subtraction operator
-//					infix.add(Tk.SUB_OP);
-//				}
-				infix.add(Tk.SUB_OP);
+				// If the token has no elements prior
+				if (i == 0) {
+					// The sub_op is the neg_op
+					infix.add(Tk.NEG_OP);
+				}
+				// If the token has an element prior AND that element is a token
+				else if (i > 0 && infix.get(i-1) instanceof Tk) {
+					// The sub_op is actually the neg_op
+					infix.add(Tk.NEG_OP);
+				}
+				else {
+					// Otherwise, it's just the subtraction operator
+					infix.add(Tk.SUB_OP);
+				}
 			}
 			// Adds in and counts parantheses
 			else if (Tk.isParen(tr.tk)) {
@@ -116,7 +116,7 @@ public class ExprReader extends ParserType {
 			}
 			// Adds in numerical literals
 			else if (tr.tk == Tk.NUM_LIT) {
-				Scl num = new Scl(tr.tokenStr());
+				Scl num = new SimpleScl(tr.tokenStr());
 				infix.add(num);
 			}
 			// Adds in any scalar variables
@@ -141,6 +141,7 @@ public class ExprReader extends ParserType {
 				return null;
 			}
 			tr.nextToken();
+			i += 1;
 //			System.out.println("Infix array: " + infix);
 		}
 		// All parantheses matched
@@ -248,16 +249,20 @@ public class ExprReader extends ParserType {
 					a = opStack.pop();
 				
 				Object res;
-				if (a == null && b instanceof Scl) {
+				if (a == null && b == null) {
+					ep.customError("%s has no numbers to operate on", token);
+					return null;
+				}
+				else if (a == null && b instanceof Scl) {
 					switch (token) {
 					case ADD_OP:
 						res = b;
 						break;
-					case SUB_OP:
-						res = Scl.NEG((Scl) b);
+					case NEG_OP:
+						res = Scl.neg((Scl) b);
 						break;
 					default:
-						ep.customError("Invalid operator before scalar: %s", token);
+						ep.customError("Invalid operator before or after scalar: %s", token);
 						return null;
 					}
 				}
@@ -270,7 +275,7 @@ public class ExprReader extends ParserType {
 						res = Mtx.NEG((Mtx) b);
 						break;
 					default:
-						ep.customError("Invalid operator before matrix: %s", token);
+						ep.customError("Invalid operator before or after matrix: %s", token);
 						return null;
 					}
 				}
@@ -278,9 +283,17 @@ public class ExprReader extends ParserType {
 					switch (token) {
 					case ADD_OP:
 						res = Mtx.ADD((Mtx) a, (Mtx) b);
+						if (res == null) {
+							ep.customError("Dimensions do not match in added matrices: \n%s \nand \n%s", a, b);
+							return null;
+						}
 						break;
 					case SUB_OP:
 						res = Mtx.SUB((Mtx) a, (Mtx) b);
+						if (res == null) {
+							ep.customError("Dimensions do not match in subtracted matrices: \n%s \nand \n%s", a, b);
+							return null;
+						}
 						break;
 					case MULT_OP:
 						res = Mtx.MULT((Mtx) a, (Mtx) b);
@@ -305,19 +318,19 @@ public class ExprReader extends ParserType {
 					switch (token) {
 					
 					case EXP_OP:
-						res = Scl.EXP((Scl) a, (Scl) b);
+						res = Scl.exp((Scl) a, (Scl) b);
 						break;
 					case MULT_OP:
-						res = Scl.MULT((Scl) a, (Scl) b);
+						res = Scl.mult((Scl) a, (Scl) b);
 						break;
 					case DIV_OP:
-						res = Scl.DIV((Scl) a, (Scl) b);
+						res = Scl.div((Scl) a, (Scl) b);
 						break;
 					case ADD_OP:
-						res = Scl.ADD((Scl) a, (Scl) b);
+						res = Scl.add((Scl) a, (Scl) b);
 						break;
 					case SUB_OP:
-						res = Scl.SUB((Scl) a, (Scl) b);
+						res = Scl.sub((Scl) a, (Scl) b);
 						break;
 					default:
 						ep.customError("Invalid token in arithmetic expression");

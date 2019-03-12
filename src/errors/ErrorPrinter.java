@@ -44,4 +44,13 @@ public class ErrorPrinter {
 		// Prints the error message and any arguments
 		System.out.printf("ERROR: " + msg + "\n", args);
 	}
+	
+	/**
+	 * Printer for errors that occur within the software
+	 * @param msg The message to be printed
+	 * @param args Any additional arguments
+	 */
+	public void internalError(String msg, Object...args) {
+		System.out.printf("INTERNAL ERROR: " + msg + "\n", args);
+	}
 }

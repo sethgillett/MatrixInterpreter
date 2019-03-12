@@ -1,4 +1,6 @@
-package vars;
+package vars.mtx;
+
+import vars.scl.Scl;
 
 public class IdMtx extends Mtx {
 	IdMtx(int rows, int cols) {

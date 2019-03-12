@@ -1,4 +1,6 @@
-package vars;
+package vars.mtx;
+
+import vars.scl.Scl;
 
 public class FullMtx extends Mtx {
 	private Scl [][] rows;

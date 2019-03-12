@@ -3,9 +3,10 @@ package parser;
 import java.util.ArrayList;
 
 import tokens.Tk;
-import vars.FullMtx;
-import vars.Mtx;
-import vars.Scl;
+import vars.mtx.FullMtx;
+import vars.mtx.Mtx;
+import vars.scl.Scl;
+import vars.scl.SimpleScl;
 
 public class MtxReader extends ParserType {
 
@@ -27,16 +28,22 @@ public class MtxReader extends ParserType {
 				
 			case "id":
 				int[] sizeId = readMtxSizeParams();
-				var = Mtx.identity(sizeId[0], sizeId[1]);
+				if (sizeId == null)
+					var = null;
+				else
+					var = Mtx.identity(sizeId[0], sizeId[1]);
 				break;
 			
 			case "zero":
 				int[] sizeZ = readMtxSizeParams();
-				var = Mtx.zero(sizeZ[0], sizeZ[1]);
+				if (sizeZ == null)
+					var = null;
+				else
+					var = Mtx.zero(sizeZ[0], sizeZ[1]);
 				break;
 				
 			default:
-				ep.customError("Command %s hasn't been coded yet", tr.tokenStr());
+				ep.internalError("Command %s hasn't been coded yet", tr.tokenStr());
 				return;
 			}
 		}
@@ -47,7 +54,7 @@ public class MtxReader extends ParserType {
 			tr.prevToken();
 			var = exprReader.MTXEXPR();
 		}
-		mtxReg.put(mtxName, var);
+		setMtx(mtxName, var);
 	}
 	
 	/**
@@ -57,13 +64,11 @@ public class MtxReader extends ParserType {
 	public int[] readMtxSizeParams() {
 		tr.nextToken();
 		if (tr.tk == Tk.LPAREN) {
-			tr.nextToken();
 			int rows = this.readPositiveIntParam();
 			if (rows == -1)
 				return null;
 			tr.nextToken();
 			if (tr.tk == Tk.COMMA) {
-				tr.nextToken();
 				int cols = this.readPositiveIntParam();
 				if (cols == -1)
 					return null;
@@ -98,7 +103,7 @@ public class MtxReader extends ParserType {
 					break;
 				}
 				else if (tr.tk == Tk.NUM_LIT) {
-					line.add(new Scl(tr.tokenStr()));
+					line.add(new SimpleScl(tr.tokenStr()));
 				}
 				else if (tr.tk == Tk.SCL_NAME) {
 					Scl s = getScl(tr.tokenStr());

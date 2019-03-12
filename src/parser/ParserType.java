@@ -7,8 +7,9 @@ import errors.ErrorPrinter;
 import tokens.Tk;
 import tokens.TokenMatcher;
 import tokens.TokenReader;
-import vars.Mtx;
-import vars.Scl;
+import vars.mtx.Mtx;
+import vars.scl.Scl;
+import vars.scl.SimpleScl;
 
 /**
  * Template for all parsers and sub-parsers
@@ -31,12 +32,12 @@ public class ParserType {
 	/**
 	 * Variable registry for scalars
 	 */
-	protected HashMap<String, Scl> sclReg;
+	private HashMap<String, Scl> sclReg;
 	
 	/**
 	 * Variable registry for matrices
 	 */
-	protected HashMap<String, Mtx> mtxReg;
+	private HashMap<String, Mtx> mtxReg;
 	/**
 	 * Deals with all direct commands
 	 */
@@ -82,8 +83,15 @@ public class ParserType {
 	 * @param s The primary scanner
 	 */
 	public ParserType(Scanner s) {
+		// Set reference to primary scanner
 		this.scan = s;
+		// Initialize token reader
 		this.tr = initTokenReader();
+		// Initialize variable registries
+		this.sclReg = new HashMap<>();
+		this.mtxReg = new HashMap<>();
+		// Initialize error printer
+		ep = new ErrorPrinter(tr);
 	}
 	
 	/**
@@ -170,18 +178,36 @@ public class ParserType {
 	}
 	
 	/**
-	 * Reads in a postitive parameter and returns its value as an int
-	 * @return The int value of the parameter or -1
+	 * Adds a scalar to the scalar registry
+	 * @param name The name of the scalar
+	 * @param scl The scalar
+	 */
+	public void setScl(String name, Scl scl) {
+		sclReg.put(name, scl);
+	}
+	
+	/**
+	 * Adds a matrix to the scalar registy
+	 * @param name The name of the matrix
+	 * @param mtx The matrix
+	 */
+	public void setMtx(String name, Mtx mtx) {
+		mtxReg.put(name, mtx);
+	}
+	
+	/**
+	 * Reads in a <i>postitive</i> parameter and returns its value as an int
+	 * @return The int value of the parameter <i>or -1</i>
 	 */
 	public int readPositiveIntParam() {
 		tr.nextToken();
 		if (tr.tk == Tk.NUM_LIT || tr.tk == Tk.SCL_NAME) {
-			Scl rowCount;
+			SimpleScl rowCount;
 			if (tr.tk == Tk.NUM_LIT) {
-				rowCount = new Scl(tr.tokenStr());
+				rowCount = new SimpleScl(tr.tokenStr());
 			}
 			else {
-				rowCount = getScl(tr.tokenStr());
+				rowCount = (SimpleScl) getScl(tr.tokenStr());
 			}
 			
 			if (rowCount.isInt() && rowCount.valueAsInt() >= 0) {
@@ -199,7 +225,7 @@ public class ParserType {
 	}
 	
 	/**
-	 * Prints out the supplied variable if it is found in any variable registry
+	 * Prints out the supplied variable <b><i>if</i></b> it is found in any variable registry
 	 * @param varName The name of the variable to print
 	 */
 	public void print(String varName) {
@@ -209,7 +235,7 @@ public class ParserType {
 				ep.customError("Scl '%s' has no value assigned", varName);
 			}
 			else {
-				System.out.println(sclReg.get(varName));
+				print(sclReg.get(varName));
 			}
 		}
 		else if (mtxReg.containsKey(varName)) {
@@ -218,7 +244,7 @@ public class ParserType {
 				ep.customError("Mtx '%s' has no value assigned", varName);
 			}
 			else {
-				System.out.println(mtxReg.get(varName));
+				print(mtxReg.get(varName));
 			}
 		}
 		else {
@@ -227,21 +253,19 @@ public class ParserType {
 	}
 	
 	/**
-	 * An overrided version of print that directly takes in a scalar
-	 * @param scl The scalar to print
+	 * An overrided version of print that <b>directly</b> takes in a scalar or matrix
+	 * @param var The scalar or matrix to print
 	 */
-	protected void print(Scl scl) {
-		if (scl != null)
-			System.out.println(scl);
-	}
-	
-	/**
-	 * An overrided version of print that directly takes in a matrix
-	 * @param mtx The matrix to print
-	 */
-	protected void print(Mtx mtx) {
-		if (mtx != null)
-			System.out.println(mtx);
+	protected void print(Object var) {
+		if (var != null && (var instanceof Mtx || var instanceof Scl)) {
+			System.out.println(var);
+		}
+		else if (var == null) {
+			ep.internalError("Var cannot be printed because it is null");
+		}
+		else {
+			ep.internalError("Var '%s' cannot be printed because it is not of the correct type", var);
+		}
 	}
 	
 	/**

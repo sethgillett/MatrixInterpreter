@@ -11,7 +11,7 @@ public enum Tk {
 	CMD(1), TYPE(1), LPAREN(1), RPAREN(1), ASSIGNMENT(1),
 	LBRACKET(1), RBRACKET(1), COMMA(1),
 	// PRIORITY 2-6: Math operators
-	EXP_OP(2), MULT_OP(3), DIV_OP(4), ADD_OP(5), SUB_OP(6),
+	EXP_OP(2), MULT_OP(3), DIV_OP(4), ADD_OP(5), SUB_OP(6), NEG_OP(7),
 	// PRIORITY 20+: User defined symbols
 	MTX_NAME(20), SCL_NAME(20), NUM_LIT(20);
 	

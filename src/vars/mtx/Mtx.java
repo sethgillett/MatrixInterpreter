@@ -1,4 +1,6 @@
-package vars;
+package vars.mtx;
+
+import vars.scl.Scl;
 
 public abstract class Mtx {
 	public int rCount, cCount;
@@ -42,7 +44,7 @@ public abstract class Mtx {
 		Mtx res = new FullMtx(m.rCount, m.cCount);
 		for (int r=0; r<m.rCount; r++) {
 			for (int c=0; c<m.cCount; c++) {
-				res.set(r, c, Scl.MULT(m.get(r, c), s));
+				res.set(r, c, Scl.mult(m.get(r, c), s));
 			}
 		}
 		return res;
@@ -72,7 +74,7 @@ public abstract class Mtx {
 				for (int s=0; s<a.cCount; s++) {
 					Scl aScl = a.get(r, s);
 					Scl bScl = b.get(s, c);
-					sum = Scl.ADD(sum, Scl.MULT(aScl, bScl));
+					sum = Scl.add(sum, Scl.mult(aScl, bScl));
 				}
 				res.set(r, c, sum);
 			}
@@ -98,7 +100,7 @@ public abstract class Mtx {
 			Mtx res = new FullMtx(a.rCount, a.cCount);
 			for (int r=0; r<a.rCount; r++) {
 				for (int c=0; c<a.cCount; c++) {
-					res.set(r, c, Scl.ADD(a.get(r, c), b.get(r, c)));
+					res.set(r, c, Scl.add(a.get(r, c), b.get(r, c)));
 				}
 			}
 			return res;
@@ -126,7 +128,7 @@ public abstract class Mtx {
 			Mtx res = new FullMtx(a.rCount, a.cCount);
 			for (int r=0; r<a.rCount; r++) {
 				for (int c=0; c<a.cCount; c++) {
-					res.set(r, c, Scl.ADD(a.get(r, c), b.get(r, c)));
+					res.set(r, c, Scl.add(a.get(r, c), b.get(r, c)));
 				}
 			}
 			return res;
@@ -148,7 +150,7 @@ public abstract class Mtx {
 		Mtx res = new FullMtx(a.rCount, a.cCount);
 		for (int r=0; r<a.rCount; r++) {
 			for (int c=0; c<a.cCount; c++) {
-				res.set(r, c, Scl.NEG(a.get(r, c)));
+				res.set(r, c, Scl.neg(a.get(r, c)));
 			}
 		}
 		return res;
@@ -156,13 +158,31 @@ public abstract class Mtx {
 	
 	@Override
 	public String toString() {
+		// Find how long the scalars in matrix are
+		int max = 1;
+		for (int r=0; r<rCount; r++) {
+			for (int c=0; c<cCount; c++) {
+				int len = get(r,c).strLength();
+				max = Math.max(len, max);
+			}
+		}
+		// Find out how long the last scalar in a matrix is
+		int maxLast = 1;
+		for (int r=0; r<rCount; r++) {
+			int len = get(r,cCount-1).strLength();
+			maxLast = Math.max(len, maxLast);
+		}
 		StringBuilder s = new StringBuilder();
 		for (int r=0; r<rCount; r++) {
 			s.append("[");
 			for (int c=0; c<cCount; c++) {
-				s.append(get(r, c));
-				if (c < cCount - 1)
-					s.append("\t");
+				// Prints scalars with appropriate spacing
+				if (c < cCount-1) {
+					s.append(String.format("%-" + (max+1) + "s", get(r, c)));
+				}
+				else {
+					s.append(String.format("%-" + (maxLast) + "s", get(r, c)));
+				}
 			}
 			s.append("]");
 			if (r < rCount - 1)
