@@ -9,7 +9,6 @@ import tokens.TokenMatcher;
 import tokens.TokenReader;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
-import vars.scl.SimpleScl;
 
 /**
  * Template for all parsers and sub-parsers
@@ -202,12 +201,12 @@ public class ParserType {
 	public int readPositiveIntParam() {
 		tr.nextToken();
 		if (tr.tk == Tk.NUM_LIT || tr.tk == Tk.SCL_NAME) {
-			SimpleScl rowCount;
+			Scl rowCount;
 			if (tr.tk == Tk.NUM_LIT) {
-				rowCount = new SimpleScl(tr.tokenStr());
+				rowCount = new Scl(tr.tokenStr());
 			}
 			else {
-				rowCount = (SimpleScl) getScl(tr.tokenStr());
+				rowCount = getScl(tr.tokenStr());
 			}
 			
 			if (rowCount.isInt() && rowCount.valueAsInt() >= 0) {

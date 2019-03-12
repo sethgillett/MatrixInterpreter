@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import tokens.Tk;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
-import vars.scl.SimpleScl;
 
 public class ExprReader extends ParserType {
 
@@ -116,7 +115,7 @@ public class ExprReader extends ParserType {
 			}
 			// Adds in numerical literals
 			else if (tr.tk == Tk.NUM_LIT) {
-				Scl num = new SimpleScl(tr.tokenStr());
+				Scl num = new Scl(tr.tokenStr());
 				infix.add(num);
 			}
 			// Adds in any scalar variables

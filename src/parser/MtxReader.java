@@ -6,7 +6,6 @@ import tokens.Tk;
 import vars.mtx.FullMtx;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
-import vars.scl.SimpleScl;
 
 public class MtxReader extends ParserType {
 
@@ -103,7 +102,7 @@ public class MtxReader extends ParserType {
 					break;
 				}
 				else if (tr.tk == Tk.NUM_LIT) {
-					line.add(new SimpleScl(tr.tokenStr()));
+					line.add(new Scl(tr.tokenStr()));
 				}
 				else if (tr.tk == Tk.SCL_NAME) {
 					Scl s = getScl(tr.tokenStr());

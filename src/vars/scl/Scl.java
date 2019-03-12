@@ -1,26 +1,30 @@
 package vars.scl;
 
-import vars.scl.complex.ComplexScl;
-
 /**
  * Scalars of any type, abstract or literal
  * @author Seth Gillett
  *
  */
-public abstract class Scl {
+public class Scl {
 	/**
-	 * If a subclass doesn't implement the toString method, it will not compile
-	 * @return The string representation of the scalar
+	 * The variable being stored
 	 */
-	@Override
-	public abstract String toString();
+	private double val;
+	
 	/**
-	 * Returns the length in characters of the scalar
-	 * @return The length in characters of the scalar
+	 * The number of decimal places (preserved) in the number
 	 */
-	public int strLength() {
-		return toString().length();
-	}
+	private int decimalPlaces;
+	
+	/**
+	 * Scalar representing zero
+	 */
+	public static Scl ZERO = new Scl(0.0, 0);
+	
+	/**
+	 * Scalar representing one
+	 */
+	public static Scl ONE = new Scl(1.0, 0);
 	/**
 	 * Returns the result of a + b
 	 * @param a The 1st scalar
@@ -28,10 +32,8 @@ public abstract class Scl {
 	 * @return The resulting scalar
 	 */
 	public static Scl add(Scl a, Scl b) {
-		if (a instanceof SimpleScl && b instanceof SimpleScl)
-			return SimpleScl.addSimple((SimpleScl) a,(SimpleScl) b);
-		else
-			return ComplexScl.add(a, b);
+		// Returns a new scalar representing the result with preserved decimal places
+		return new Scl(a.val + b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
 	}
 	
 	/**
@@ -41,10 +43,18 @@ public abstract class Scl {
 	 * @return The resulting scalar
 	 */
 	public static Scl sub(Scl a, Scl b) {
-		if (a instanceof SimpleScl && b instanceof SimpleScl)
-			return SimpleScl.subSimple((SimpleScl) a, (SimpleScl) b);
-		else
-			return ComplexScl.sub(a, b);
+		// Returns a new scalar representing the result with preserved decimal places
+		return new Scl(a.val - b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
+	}
+	
+	/**
+	 * Negates a scalar
+	 * @param a The scalar
+	 * @return The negated scalar
+	 */
+	public static Scl neg(Scl a) {
+		// Returns a new scalar representing the result with preserved decimal places
+		return new Scl(-a.val, a.decimalPlaces);
 	}
 	
 	/**
@@ -54,11 +64,8 @@ public abstract class Scl {
 	 * @return The resulting scalar
 	 */
 	public static Scl mult(Scl a, Scl b) {
-		if (a instanceof SimpleScl && b instanceof SimpleScl)
-			return SimpleScl.multSimple((SimpleScl) a, (SimpleScl) b);
-		else
-			return ComplexScl.mult(a, b);
-		
+		// Returns a new scalar representing the result with preserved decimal places
+		return new Scl(a.val * b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
 	}
 	
 	/**
@@ -68,10 +75,8 @@ public abstract class Scl {
 	 * @return The resulting scalar
 	 */
 	public static Scl div(Scl a, Scl b) {
-		if (a instanceof SimpleScl && b instanceof SimpleScl)
-			return SimpleScl.divSimple((SimpleScl) a, (SimpleScl) b);
-		else
-			return ComplexScl.div(a, b);
+		// Returns a new scalar representing the result with preserved decimal places
+		return new Scl(a.val / b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
 	}
 	
 	/**
@@ -81,31 +86,67 @@ public abstract class Scl {
 	 * @return The resulting scalar
 	 */
 	public static Scl exp(Scl a, Scl b) {
-		if (a instanceof SimpleScl && b instanceof SimpleScl)
-			return SimpleScl.expSimple((SimpleScl) a, (SimpleScl) b);
-		else
-			return null;
+		// Returns a new scalar representing the result with preserved decimal places
+		return new Scl(Math.pow(a.val, b.val), Math.max(a.decimalPlaces, b.decimalPlaces));
 	}
 	
 	/**
-	 * Returns -a
-	 * @param a The scalar
-	 * @return The negated scalar
+	 * Parses the value as a double and preserves the number of decimal places
+	 * @param val The string of the number
 	 */
-	public static Scl neg(Scl a) {
-		if (a instanceof SimpleScl)
-			return SimpleScl.negSimple((SimpleScl) a);
-		else
-			return null; 
+	public Scl(String val) {
+		int dotIdx = val.indexOf('.');
+		if (dotIdx != -1) {
+			this.decimalPlaces = val.length() - 1 - dotIdx;
+		}
+		else {
+			this.decimalPlaces = 0;
+		}
+		
+		this.val = Double.parseDouble(val);
 	}
 	
 	/**
-	 * Scalar representing zero
+	 * Creates a new scalar from a double and # of decimal places, will automatically extend or reduce decimals as needed
+	 * @param val The double value
+	 * @param decimalPlaces The number of decimal places to preserve
 	 */
-	public static Scl ZERO = new SimpleScl(0.0, 0);
+	Scl(double val, int decimalPlaces) {
+		this.val = val;
+		if (this.isInt()) {
+			this.decimalPlaces = 0;
+		}
+		else {
+			this.decimalPlaces = Math.max(decimalPlaces, 1);
+		}
+	}
 	
 	/**
-	 * Scalar representing one
+	 * Checks if the current scalar is an int
+	 * @return True or false
 	 */
-	public static Scl ONE = new SimpleScl(1.0, 0);
+	public boolean isInt() {
+		return (val <= Integer.MAX_VALUE && val >= Integer.MIN_VALUE && val == Math.floor(val));
+	}
+	
+	/**
+	 * Returns the current scalar as an int
+	 * @return The scalar as an int
+	 */
+	public int valueAsInt() {
+		return (int) Math.floor(val);
+	}
+	
+	/**
+	 * Finds the character length of the scalar
+	 * @return The character length of the scalar
+	 */
+	public int strLength() {
+		return this.toString().length();
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("%." + decimalPlaces + "f", val);
+	}
 }
