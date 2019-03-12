@@ -75,11 +75,11 @@ public class MtxReader extends ParserType {
 				return new int[] {rows, cols};
 			}
 			else {
-				ep.expectedError(",");
+				ep.expectedError(Tk.COMMA);
 			}
 		}
 		else {
-			ep.expectedError("(");
+			ep.expectedError(Tk.LPAREN);
 		}
 		return null;
 	}
@@ -116,7 +116,7 @@ public class MtxReader extends ParserType {
 					}
 				}
 				else {
-					ep.expectedError("scalar", tr.tokenStr());
+					ep.expectedError(Tk.SCL_NAME, Tk.NUM_LIT);
 					return null;
 				}
 			}

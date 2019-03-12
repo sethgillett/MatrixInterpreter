@@ -1,10 +1,12 @@
 package vars.scl.complex;
 
+import java.util.ArrayList;
+
 import vars.scl.Scl;
 
 /**
  * <ul>
- * 	<li>Scalar that CANNOT BE SIMPLIFIED because it is represented ABSTRACTLY (e.g. a/5 or a^6 + a^4)</li>
+ * 	<li>Scalar that CANNOT BE SIMPLIFIED because it is represented ABSTRACTLY (e.g. a/5 or (a^6)/3 + a^4)</li>
  * 	<li>Any scalar with no associated value automatically becomes abstract</li>
  * </ul>
  * 
@@ -15,15 +17,19 @@ import vars.scl.Scl;
  */
 public class ComplexScl extends Scl {
 	/**
-	 * The representation of the scalar
+	 * <p>
+	 * 	<br>The arraylist representing the expression in postfix form</br>
+	 * 	<br>Each operation will add to the expression, and terms will attempt to be simplified</br>
+	 * </p>
 	 */
-	private String rep;
+	private ArrayList<Object> expr;
 	/**
 	 * Instantiates a complex scalar
 	 * @param rep The original representation of the scalar
 	 */
 	public ComplexScl(String rep) {
-		this.rep = rep;
+		expr = new ArrayList<>();
+		expr.add(new Symbol(rep));
 	}
 	/**
 	 * Returns the result of a + b
@@ -79,9 +85,21 @@ public class ComplexScl extends Scl {
 	public static Scl neg(Scl a) {
 		return null; 
 	}
-
+	
+	/**
+	 * Converts the expression from postfix to infix
+	 * @return
+	 */
+	public ArrayList<Object> toInfix() {
+		return null;
+	}
+	
+	/**
+	 * Converts the infix expression to a readable string
+	 * @return The string representation of the expression
+	 */
 	@Override
 	public String toString() {
-		return rep;
+		return null;
 	}
 }

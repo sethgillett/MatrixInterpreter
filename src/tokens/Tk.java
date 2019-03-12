@@ -39,4 +39,50 @@ public enum Tk {
 	public boolean higherPrec(Tk other) {
 		return (this.priority < other.priority);
 	}
+	
+	@Override
+	public String toString() {
+		switch(this) {
+		case ADD_OP:
+			return "+";
+		case ASSIGNMENT:
+			return "=";
+		case CMD:
+			return "command";
+		case COMMA:
+			return ",";
+		case DIV_OP:
+			return "/";
+		case EOL:
+			return "EOL";
+		case ERROR:
+			return "ERROR";
+		case EXP_OP:
+			return "^";
+		case LBRACKET:
+			return "[";
+		case LPAREN:
+			return "(";
+		case MTX_NAME:
+			return "matrix name";
+		case MULT_OP:
+			return "*";
+		case NEG_OP:
+			return "-";
+		case NUM_LIT:
+			return "number";
+		case RBRACKET:
+			return "]";
+		case RPAREN:
+			return ")";
+		case SCL_NAME:
+			return "scalar name";
+		case SUB_OP:
+			return "-";
+		case TYPE:
+			return "matrix or scalar";
+		default:
+			return null;
+		}
+	}
 }

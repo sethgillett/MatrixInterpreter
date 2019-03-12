@@ -1,5 +1,9 @@
 package vars.scl.complex;
-
+/**
+ * A single abstract variable
+ * @author seth
+ *
+ */
 public class Symbol {
 	private String repr;
 	public Symbol(String repr) {

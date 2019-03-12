@@ -219,7 +219,7 @@ public class ParserType {
 			}
 		}
 		else {
-			ep.expectedError("number or scl");
+			ep.expectedError("number or scalar");
 			return -1;
 		}
 	}

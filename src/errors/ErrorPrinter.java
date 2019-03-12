@@ -1,4 +1,5 @@
 package errors;
+import tokens.Tk;
 import tokens.TokenReader;
 
 public class ErrorPrinter {
@@ -33,6 +34,18 @@ public class ErrorPrinter {
 	 */
 	public void expectedError(String expected) {
 		expectedError(expected, tr.tokenStr());
+	}
+	
+	/**
+	 * Error in the format of "Expected [expected_1] or [expected_2] or...or [expected_n], got [last token]"
+	 * @param expected The expected token
+	 */
+	public void expectedError(Tk expected1, Tk...expected) {
+		String errorStr = "" + expected1;
+		for (Tk exp : expected) {
+			errorStr += " or " + exp;
+		}
+		expectedError(errorStr, tr.tokenStr());
 	}
 	
 	/**

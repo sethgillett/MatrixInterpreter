@@ -99,7 +99,7 @@ public class Parser extends ParserType {
 		}
 		// Otherwise, print an error
 		else {
-			ep.expectedError("expression, command, or assignment", tr.tokenStr());
+			ep.expectedError("arithmetic expression, command, or assignment", tr.tokenStr());
 		}
 	}
 	
