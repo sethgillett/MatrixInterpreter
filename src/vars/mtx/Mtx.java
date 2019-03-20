@@ -156,10 +156,40 @@ public abstract class Mtx {
 		return res;
 	}
 	
+	/**
+	 * Checks if two matrices are equal
+	 * @param a The first matrix
+	 * @param b The second matrix
+	 * @return True or false
+	 */
+	public static Boolean EQUAL(Mtx a, Mtx b) {
+		if (a.rCount == b.rCount && a.cCount != b.cCount) {
+			if (a instanceof IdMtx && b instanceof IdMtx) {
+				return true;
+			}
+			else if (a instanceof ZeroMtx && b instanceof ZeroMtx) {
+				return true;
+			}
+			else {
+				for (int r=0; r<a.rCount; r++) {
+					for (int c=0; c<a.cCount; c++) {
+						if (a.get(r,c) != b.get(r, c)) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		}
+		else {
+			return null;
+		}
+	}
+	
 	@Override
 	public String toString() {
 		// Find how long the scalars in matrix are
-		int max = 1;
+		int max = 4;
 		for (int r=0; r<rCount; r++) {
 			for (int c=0; c<cCount; c++) {
 				int len = get(r,c).strLength();

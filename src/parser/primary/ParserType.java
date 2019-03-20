@@ -1,11 +1,13 @@
-package parser;
+package parser.primary;
 
 import java.util.HashMap;
-import java.util.Scanner;
 
 import errors.ErrorPrinter;
-import tokens.Tk;
-import tokens.TokenMatcher;
+import parser.CmdReader;
+import parser.ControlsReader;
+import parser.ExprReader;
+import parser.InputReader;
+import parser.VarReader;
 import tokens.TokenReader;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
@@ -16,10 +18,6 @@ import vars.scl.Scl;
  *
  */
 public class ParserType {
-	/**
-	 * The primary scanner used in the program
-	 */
-	private Scanner scan;
 	/**
 	 * The parser's token reader
 	 */
@@ -42,24 +40,27 @@ public class ParserType {
 	 */
 	protected CmdReader cmdReader;
 	/**
-	 * Deals with assignments to scalars
+	 * Deals with assignments to matrices and scalars
 	 */
-	protected SclReader sclReader;
-	/**
-	 * Deals with assignments to matrices
-	 */
-	protected MtxReader mtxReader;
+	protected VarReader varReader;
 	/**
 	 * Reads expressions
 	 */
 	protected ExprReader exprReader;
+	/**
+	 * Reads function input
+	 */
+	protected InputReader inpReader;
+	/**
+	 * Deals with control statements (if, while, for)
+	 */
+	protected ControlsReader controlsReader;
 	
 	/**
 	 * For all other parsers
 	 * @param s The primary parser
 	 */
 	protected ParserType(ParserType s) {
-		this.scan = s.scan;
 		this.tr = s.tr;
 		this.ep = s.ep;
 		this.sclReg = s.sclReg;
@@ -72,64 +73,24 @@ public class ParserType {
 	 */
 	public void connect(ParserType s) {
 		this.cmdReader = s.cmdReader;
-		this.sclReader = s.sclReader;
-		this.mtxReader = s.mtxReader;
+		this.varReader = s.varReader;
 		this.exprReader = s.exprReader;
+		this.inpReader = s.inpReader;
+		this.controlsReader = s.controlsReader;
 	}
 	
 	/**
 	 * For primary parser only
 	 * @param s The primary scanner
 	 */
-	public ParserType(Scanner s) {
-		// Set reference to primary scanner
-		this.scan = s;
+	public ParserType() {
 		// Initialize token reader
-		this.tr = initTokenReader();
+		this.tr = new TokenReader();
 		// Initialize variable registries
 		this.sclReg = new HashMap<>();
 		this.mtxReg = new HashMap<>();
 		// Initialize error printer
 		ep = new ErrorPrinter(tr);
-	}
-	
-	/**
-	 * Initializes the token reader and the tokens
-	 */
-	private TokenReader initTokenReader() {
-		return new TokenReader(				
-			// The new, delete, print, identity, and zero commands
-			new TokenMatcher("\\b(new|del|prn|id|zero)\\b", Tk.CMD),
-			// The rref, ref, and inverse commands
-			new TokenMatcher("\\b(rref|ref|inv)\\b", Tk.CMD),
-			// Matrix
-			new TokenMatcher("\\b(mat)\\b", Tk.TYPE),
-			// Scalar
-			new TokenMatcher("\\b(scl)\\b", Tk.TYPE),
-			// Name of a matrix: all capital letters
-			new TokenMatcher("\\b([A-Z][a-z]*)\\b", Tk.MTX_NAME),
-			// Name of a scalar: lower case letter followed by any letters
-			new TokenMatcher("\\b([a-z]+)\\b", Tk.SCL_NAME),
-			// Left and right paranthesis
-			new TokenMatcher("\\(", Tk.LPAREN),
-			new TokenMatcher("\\)", Tk.RPAREN),
-			// Comma
-			new TokenMatcher("\\,", Tk.COMMA),
-			// Left and right brackets
-			new TokenMatcher("\\[", Tk.LBRACKET),
-			new TokenMatcher("\\]", Tk.RBRACKET),
-			// Arithmetic operators
-			new TokenMatcher("\\+", Tk.ADD_OP),
-			new TokenMatcher("\\-", Tk.SUB_OP),
-			// NO RECOGNIZER FOR NEGATE OPERATOR, it cannot be differentiated from SUB
-			new TokenMatcher("\\*", Tk.MULT_OP),
-			new TokenMatcher("\\/", Tk.DIV_OP),
-			new TokenMatcher("\\^", Tk.EXP_OP),
-			// Number literal
-			new TokenMatcher("(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?", Tk.NUM_LIT),
-			// Assignment operator
-			new TokenMatcher("=", Tk.ASSIGNMENT)
-		);
 	}
 	
 	/**
@@ -155,7 +116,7 @@ public class ParserType {
 	}
 	
 	/**
-	 * Gets a matrix or returns null if it doesn't exist or has no value
+	 * Gets a matrix or returns null and throws an error if it doesn't exist or has no value
 	 * @param name The name of the matrix
 	 * @return The matrix or null
 	 */
@@ -195,31 +156,46 @@ public class ParserType {
 	}
 	
 	/**
-	 * Reads in a <i>postitive</i> parameter and returns its value as an int
-	 * @return The int value of the parameter <i>or -1</i>
+	 * Returns true if the specified scalar exists
+	 * @param name The name of the scalar
+	 * @return True or false
 	 */
-	public int readPositiveIntParam() {
-		tr.nextToken();
-		if (tr.tk == Tk.NUM_LIT || tr.tk == Tk.SCL_NAME) {
-			Scl rowCount;
-			if (tr.tk == Tk.NUM_LIT) {
-				rowCount = new Scl(tr.tokenStr());
-			}
-			else {
-				rowCount = getScl(tr.tokenStr());
-			}
-			
-			if (rowCount.isInt() && rowCount.valueAsInt() >= 0) {
-				return rowCount.valueAsInt();
-			}
-			else {
-				ep.expectedError("postive integer");
-				return -1;
-			}
+	public boolean hasScl(String name) {
+		return sclReg.containsKey(name);
+	}
+	
+	/**
+	 * Returns true if the specified matrix exists
+	 * @param name The name of the matrix
+	 * @return True or false
+	 */
+	public boolean hasMtx(String name) {
+		return mtxReg.containsKey(name);
+	}
+	
+	/**
+	 * Deletes a scalar or throws an error if it doesn't exist
+	 * @param name The name of the scalar
+	 */
+	public void delScl(String name) {
+		if (hasScl(name)) {
+			this.sclReg.remove(name);
 		}
 		else {
-			ep.expectedError("number or scalar");
-			return -1;
+			ep.customError("Scalar %s doesn't exist and can't be deleted", name);
+		}
+	}
+	
+	/**
+	 * Deletes a matrix or throws an error if it doesn't exist
+	 * @param name The name of the matrix
+	 */
+	public void delMtx(String name) {
+		if (hasMtx(name)) {
+			this.mtxReg.remove(name);
+		}
+		else {
+			ep.customError("Matrix %s doesn't exist and can't be deleted", name);
 		}
 	}
 	
@@ -251,27 +227,20 @@ public class ParserType {
 		}
 	}
 	
+	
 	/**
 	 * An overrided version of print that <b>directly</b> takes in a scalar or matrix
 	 * @param var The scalar or matrix to print
 	 */
 	protected void print(Object var) {
-		if (var != null && (var instanceof Mtx || var instanceof Scl)) {
+		if (var != null && (var instanceof Mtx || var instanceof Scl || var instanceof Boolean)) {
 			System.out.println(var);
 		}
 		else if (var == null) {
-			ep.internalError("Var cannot be printed because it is null");
+//			ep.internalError("Var cannot be printed because it is null");
 		}
 		else {
 			ep.internalError("Var '%s' cannot be printed because it is not of the correct type", var);
 		}
-	}
-	
-	/**
-	 * Scans a new line with the primary scanner
-	 * @return The new line
-	 */
-	public String scanNewLine() {
-		return scan.nextLine();
 	}
 }

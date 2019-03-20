@@ -1,9 +1,12 @@
-package parser;
-import java.util.Scanner;
+package parser.primary;
+import java.io.BufferedReader;
 
+import parser.CmdReader;
+import parser.ControlsReader;
+import parser.ExprReader;
+import parser.InputReader;
+import parser.VarReader;
 import tokens.Tk;
-import vars.mtx.Mtx;
-import vars.scl.Scl;
 
 /**
  * Primary parser/interpreter for the program
@@ -15,19 +18,21 @@ public class Parser extends ParserType {
 	 * Instantiates the token reader, error printer, and all other classes
 	 * @param s The primary scanner
 	 */
-	public Parser(Scanner s) {
+	public Parser(BufferedReader br) {
 		// Initializes token reader, registries, and error printer
-		super(s);
+		super();
 		// Initialize sub parsers
 		cmdReader = new CmdReader(this);
-		sclReader = new SclReader(this);
-		mtxReader = new MtxReader(this);
+		varReader = new VarReader(this);
 		exprReader = new ExprReader(this);
+		inpReader = new InputReader(this, br);
+		controlsReader = new ControlsReader(this);
 		// Connect all the parsers
 		cmdReader.connect(this);
-		sclReader.connect(this);
-		mtxReader.connect(this);
+		varReader.connect(this);
 		exprReader.connect(this);
+		inpReader.connect(this);
+		controlsReader.connect(this);
 	}
 	
 	/**
@@ -38,20 +43,26 @@ public class Parser extends ParserType {
 		tr.readLine(line);
 		tr.nextToken();
 		// Look for a command
-		if (tr.tk == Tk.CMD) {
-			String cmd = tr.tokenStr();
-			tr.nextToken();
-			if (tr.tk == Tk.LPAREN) {
-				tr.nextToken();
-				switch (cmd) {
-				case "prn":
-					String varName = tr.tokenStr();
-					print(varName);
-					break;
-				default:
-					ep.customError("No commands have been programmed yet");
-					break;
-				}
+		if (tr.tk == Tk.NULL_CMD) {
+			tr.prevToken();
+			cmdReader.nullCmd();
+		}
+		// Look for a control statement
+		else if (tr.tk == Tk.IF || tr.tk == Tk.WHILE || tr.tk == Tk.FOR) {
+			Tk token = tr.tk;
+			tr.restartLine();
+			switch(token) {
+			case IF:
+				controlsReader.if_stmt();
+				break;
+			case FOR:
+				controlsReader.for_stmt();
+				break;
+			case WHILE:
+				controlsReader.while_stmt();
+				break;
+			default:
+				break;
 			}
 		}
 		// If an expression has a scl or mtx name
@@ -61,15 +72,15 @@ public class Parser extends ParserType {
 			// Next token
 			tr.nextToken();
 			// If name is followed by assignment, send to appropriate assignment
-			if (tr.tk == Tk.ASSIGNMENT) {
+			if (tr.tk == Tk.ASSIGNMENT_OP) {
 				tr.nextToken();
 				if (type == Tk.SCL_NAME) {
 					tr.restartLine();
-					sclReader.SCLASSIGN();
+					varReader.sclAssign();
 				}
 				else {
 					tr.restartLine();
-					mtxReader.MTXASSIGN();
+					varReader.mtxAssign();
 				}
 			}
 			else if (tr.tk == Tk.EOL) {
@@ -80,7 +91,7 @@ public class Parser extends ParserType {
 			else if (Tk.isMathOp(tr.tk) || Tk.isParen(tr.tk)){
 				// If it's an expression print out the value of the expression
 				tr.restartLine();
-				print(exprReader.UNKNOWNEXPR());
+				print(exprReader.unknownExpr());
 			}
 			else {
 				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());
@@ -89,13 +100,9 @@ public class Parser extends ParserType {
 		// If the expression starts with a number, evaluate it
 		else if (tr.tk == Tk.NUM_LIT | tr.tk == Tk.SUB_OP || tr.tk == Tk.LPAREN) {
 			tr.prevToken();
-			Object res = exprReader.UNKNOWNEXPR();
-			if (res instanceof Scl) {
-				print((Scl) res);
-			}
-			else {
-				print((Mtx) res);
-			}
+			// Find the result and print it
+			Object res = exprReader.unknownExpr();
+			print(res);
 		}
 		// Otherwise, print an error
 		else {

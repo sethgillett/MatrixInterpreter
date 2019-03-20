@@ -90,6 +90,26 @@ public class Scl {
 		return new Scl(Math.pow(a.val, b.val), Math.max(a.decimalPlaces, b.decimalPlaces));
 	}
 	
+	public static Boolean great_or_equal(Scl a, Scl b) {
+		return a.val >= b.val;
+	}
+	
+	public static Boolean less_or_equal(Scl a, Scl b) {
+		return a.val <= b.val;
+	}
+	
+	public static Boolean greater(Scl a, Scl b) {
+		return a.val > b.val;
+	}
+	
+	public static Boolean lesser(Scl a, Scl b) {
+		return a.val < b.val;
+	}
+	
+	public static Boolean equal(Scl a, Scl b) {
+		return a.val == b.val;
+	}
+	
 	/**
 	 * Parses the value as a double and preserves the number of decimal places
 	 * @param val The string of the number

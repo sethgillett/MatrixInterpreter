@@ -1,6 +1,5 @@
 package tokens;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class TokenReader {
 	/**
@@ -29,20 +28,9 @@ public class TokenReader {
 	ArrayList<ReadToken> tkHst;
 	
 	/**
-	 * The array of token matchers that can possibly be matched
+	 * Instantiates a new token reader
 	 */
-	private TokenMatcher[] tokens;
-	
-	/**
-	 * Constructs a token reader from the provided tokens
-	 * @param tokens The provided list of tokens
-	 */
-	public TokenReader(TokenMatcher...tokens) {
-		// Sort tokens by priority - lower numbers checked first
-		Arrays.sort(tokens);
-		// Stores list of tokens
-		this.tokens = tokens;
-		// Creates token history arraylist
+	public TokenReader() {
 		this.tkHst = new ArrayList<>();
 	}
 	
@@ -62,6 +50,12 @@ public class TokenReader {
 	 * Attempts to find the next token closest to the current line index
 	 */
 	public void nextToken() {
+		if (this.tk != null && this.tk == Tk.EOL) {
+			// Clears the current line from memory
+			this.currentLine = null;
+			// Returns immediately
+			return;
+		}
 		// Token hasn't already been read
 		if (tkHstIdx == tkHst.size()) {
 			// Match to provided regex
@@ -107,26 +101,25 @@ public class TokenReader {
 	private void matchNextToken() {
 		if (lineIdx == currentLine.length()) {
 			// Add EOL token to history
-			tkHst.add(new ReadToken(-1, Tk.EOL, "EOL"));
+			tkHst.add(new ReadToken(-1, Tk.EOL));
 			// Return
 			return;
 		}
 		
 		boolean found = false;
-		for (TokenMatcher pattern : tokens) {
+		for (Tk token : Tk.values()) {
 			
 			// Finds the next occurrence of a token
-			pattern.read(currentLine);
-			int idx = pattern.nextOccurrence(lineIdx);
+			int[] idx = token.find(currentLine, lineIdx);
 			
 			// Only accepts the match if it was found at the current line index
-			if (idx != -1 && idx == lineIdx) {
+			if (idx != null && idx[0] == lineIdx) {
 				// Get the token string
-				String tokenStr = currentLine.substring(idx, pattern.occurrenceEnd());
+				String tokenStr = currentLine.substring(idx[0], idx[1]);
 				// Add token to history
-				tkHst.add(new ReadToken(idx, pattern.token, tokenStr));
+				tkHst.add(new ReadToken(idx[0], token, tokenStr));
 				// Moves the line index forward
-				lineIdx = pattern.occurrenceEnd();
+				lineIdx = idx[1];
 				// Mark that we found a token
 				found = true;
 				// Return
@@ -140,7 +133,7 @@ public class TokenReader {
 			// Prints a pointer to the unrecognized token
 			System.out.printf("%" + (lineIdx+5) + "s", "^");
 			System.out.println(" unrecognized token");
-			tkHst.add(new ReadToken(lineIdx, Tk.ERROR, "ERROR"));
+			tkHst.add(new ReadToken(lineIdx, Tk.ERROR));
 			return;
 		}
 	}
@@ -150,7 +143,7 @@ public class TokenReader {
 	 * @return The string of the current token
 	 */
 	public String tokenStr() {
-		return tkHst.get(tkHstIdx - 1).tokenStr;
+		return tkHst.get(tkHstIdx - 1).tokenStr();
 	}
 	
 	/**

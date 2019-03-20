@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import parser.primary.ParserType;
 import tokens.Tk;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
@@ -14,33 +15,44 @@ public class ExprReader extends ParserType {
 		super(s);
 	}
 	
-	public Mtx MTXEXPR() {
-		Object result = EXPR();
+	public Mtx mtxExpr() {
+		Object result = expr();
 		try {
 			return (Mtx) result;
 		}
 		catch (ClassCastException e) {
-			ep.customError("Expression resulted in scalar, not matrix");
+			ep.customError("Expression didn't result in matrix");
 			return null;
 		}
 	}
 	
-	public Scl SCLEXPR() {
-		Object result = EXPR();
+	public Scl sclExpr() {
+		Object result = expr();
 		try {
 			return (Scl) result;
 		}
 		catch (ClassCastException e) {
-			ep.customError("Expression resulted in matrix, not scalar");
+			ep.customError("Expression didn't result in scalar");
 			return null;
 		}
 	}
 	
-	public Object UNKNOWNEXPR() {
-		return EXPR();
+	public Boolean boolExpr() {
+		Object result = expr();
+		try {
+			return (Boolean) result;
+		}
+		catch(ClassCastException e) {
+			ep.customError("Expression didn't result in true/false");
+			return null;
+		}
 	}
 	
-	private Object EXPR() {
+	public Object unknownExpr() {
+		return expr();
+	}
+	
+	private Object expr() {
 		// If any part fails return null
 		// Read the expression
 		ArrayList<Object> infix = readExpr();
@@ -69,7 +81,7 @@ public class ExprReader extends ParserType {
 	 * @param first The first scalar of the expression
 	 * @return The expression in infix form
 	 */
-	public ArrayList<Object> readExpr() {
+	private ArrayList<Object> readExpr() {
 		// The infix form of the expression
 		ArrayList<Object> infix = new ArrayList<>();
 		// Used to make sure all parantheses match
@@ -96,6 +108,10 @@ public class ExprReader extends ParserType {
 					infix.add(Tk.SUB_OP);
 				}
 			}
+			// If token is an "=" it is an equality operator, NOT assignment operator
+			else if (tr.tk == Tk.ASSIGNMENT_OP) {
+				infix.add(Tk.EQUAL_OP);
+			}
 			// Adds in and counts parantheses
 			else if (Tk.isParen(tr.tk)) {
 				// Add 1 if (
@@ -111,6 +127,10 @@ public class ExprReader extends ParserType {
 			}
 			// Adds in tokens that are math operators
 			else if (Tk.isMathOp(tr.tk)) {
+				infix.add(tr.tk);
+			}
+			// Adds in tokens that are boolean operators
+			else if (Tk.isBoolOp(tr.tk)) {
 				infix.add(tr.tk);
 			}
 			// Adds in numerical literals
@@ -134,9 +154,15 @@ public class ExprReader extends ParserType {
 					return null;
 				infix.add(mtx);
 			}
+			else if (tr.tk == Tk.VAR_CMD) {
+				tr.prevToken();
+				// Execute the command and add the result to the infix expression
+				Object result = cmdReader.varCmd();
+				infix.add(result);
+			}
 			// Otherwise error
 			else {
-				ep.expectedError("arithmetic symbol", tr.tokenStr());
+				ep.expectedError("arithmetic symbol or command", tr.tokenStr());
 				return null;
 			}
 			tr.nextToken();
@@ -158,13 +184,12 @@ public class ExprReader extends ParserType {
 			return null;
 		}
 	}
-	
 	/**
 	 * Converts an arithmetic expression from infix to postfix form
 	 * @param infix The expression in infix form
 	 * @return The expression in postfix form
 	 */
-	public ArrayList<Object> toPostfix(ArrayList<Object> infix) {
+	private ArrayList<Object> toPostfix(ArrayList<Object> infix) {
 		// Convert to postfix using a stack
 		Deque<Tk> exprStack = new LinkedList<>();
 		// Postfix arraylist
@@ -204,23 +229,18 @@ public class ExprReader extends ParserType {
 				// Otherwise pull all higher priority operators off the stack and push this one on
 				else {
 					while (!(exprStack.peek() == null) && 
-							Tk.isMathOp(exprStack.peek()) &&
+							(Tk.isMathOp(exprStack.peek()) || Tk.isBoolOp(exprStack.peek())) &&
 							(exprStack.peek().higherPrec(token))) {
 						postfix.add(exprStack.pop());
 					}
 					exprStack.push(token);
 				}
 			}
-//			System.out.println("EXPR stack: " + exprStack);
-//			System.out.println("Postfix array: " + postfix);
 		}
 		// Add all remaining operators to the postfix expression
 		while (!exprStack.isEmpty()) {
 			postfix.add(exprStack.pop());
 		}
-		
-//		System.out.println("EXPR stack: " + exprStack);
-//		System.out.println("Postfix array: " + postfix);
 		
 		// Return the postfix expression
 		return postfix;
@@ -231,7 +251,7 @@ public class ExprReader extends ParserType {
 	 * @param postfix The arithmetic expression in infix form
 	 * @return The resulting scalar
 	 */
-	public Object evaluateExpr(ArrayList<Object> postfix) {		
+	private Object evaluateExpr(ArrayList<Object> postfix) {		
 		// Perform operations described in postfix
 		Deque<Object> opStack = new LinkedList<>();
 		
@@ -297,6 +317,9 @@ public class ExprReader extends ParserType {
 					case MULT_OP:
 						res = Mtx.MULT((Mtx) a, (Mtx) b);
 						break;
+					case EQUAL_OP:
+						res = Mtx.EQUAL((Mtx) a, (Mtx) b);
+						break;
 					default:
 						ep.customError("Invalid operator between matrices: %s", token);
 						return null;
@@ -315,7 +338,7 @@ public class ExprReader extends ParserType {
 				}
 				else if (a instanceof Scl && b instanceof Scl) {
 					switch (token) {
-					
+					// Math operations
 					case EXP_OP:
 						res = Scl.exp((Scl) a, (Scl) b);
 						break;
@@ -331,10 +354,26 @@ public class ExprReader extends ParserType {
 					case SUB_OP:
 						res = Scl.sub((Scl) a, (Scl) b);
 						break;
+					// Boolean operations
+					case GREAT_OR_EQUAL:
+						res = Scl.great_or_equal((Scl) a, (Scl) b);
+						break;
+					case LESS_OR_EQUAL:
+						res = Scl.less_or_equal((Scl) a, (Scl) b);
+						break;
+					case GREATER_OP:
+						res = Scl.greater((Scl) a, (Scl) b);
+						break;
+					case LESSER_OP:
+						res = Scl.lesser((Scl) a, (Scl) b);
+						break;
+					case EQUAL_OP:
+						res = Scl.equal((Scl) a, (Scl) b);
+						break;
+					// Default
 					default:
-						ep.customError("Invalid token in arithmetic expression");
+						ep.customError("Invalid token in expression");
 						return null;
-						
 					}
 				}
 				else {

@@ -1,20 +1,30 @@
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-import parser.Parser;
+import parser.primary.Parser;
 
 public class Main {
 	
 	public static void main(String[] args) {
+		try {
+			REPL();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void REPL() throws IOException {
+		//Scanner s = new Scanner(System.in);
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		
-		Scanner s = new Scanner(System.in);
-		
-		Parser p = new Parser(s);
+		Parser p = new Parser(br);
 		
 		String input = "";
 		
 		while (true) {
 			System.out.print(">>> ");
-			input = s.nextLine();
+			input = br.readLine();
 			
 			if (input.matches("^(\\s*)$")) {
 				continue;
@@ -27,8 +37,6 @@ public class Main {
 			p.read(input);
 		}
 		
-		s.close();
-		
-		System.exit(0);
+		br.close();
 	}
 }

@@ -2,17 +2,23 @@
 <stmt> -> <cmd>(<args>)
 		| <var> = <expr>
 		| <var> = (<expr>)
-		| if (<bool_expr>) then
+		| 	if (<bool_expr>) then:
 				{<stmt>}
-			[else
-				{<stmt>}]
-<args> -> <expr>
-		-> <type>
+			else:
+				{<stmt>}
+		|	for <scl> in <range>:
+				{<stmt>}
+<range> -> <scl> => <scl> [by <scl>]
+<args> -> (<expr> | <type> | <var>){, <args>}
 <type> -> mat | scl
 <expr> -> <expr> (* | + | - | /) <expr>
 		| <cmd>(<expr>)
 		| <var>
 <var> -> <scl> | <matrix>
-<scl> -> \b[a-z][A-Za-z]*\b
-<mtx> -> \b[A-Z][A-Za-z]*\b
-<cmd> -> \b(new | del | prn | inp | rref | ref | inv)
+<scl> -> \b[a-z]+\b
+<mtx> -> \b[A-Z][a-z]*\b
+<var_cmd> -> (id | zero)
+<null_cmd> -> (prn | print | del)
+<bool_expr> -> <var> = <var> [(|| | &&) <bool_expr>]
+			 | <var> <[=] <var> [(|| | &&) <bool_expr>]
+			 | <var> >[=] <var> [(|| | &&) <bool_expr>]
