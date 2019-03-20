@@ -11,6 +11,7 @@ Right now scalar and matrix algebra is possible, and boolean expressions can be 
 >>> b = 2*3
 >>> c = a+b
 >>> prn(c)
+>>> !(a = 8*16)
 ```
 You can see the result of any of these operations by typing the name of the scalar.
 
