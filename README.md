@@ -3,7 +3,7 @@ A command line program that can perform matrix and scalar algebra and basic matr
 
 **Current State:**
 
-Right now scalar algebra is possible, and you can create matrices but not do anything with them.
+Right now scalar and matrix algebra is possible, and boolean expressions can be evaluated.
 
 **Example Code:**
 ```
