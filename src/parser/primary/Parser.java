@@ -88,21 +88,17 @@ public class Parser extends ParserType {
 				tr.prevToken();
 				print(tr.tokenStr());
 			}
-			else if (Tk.isMathOp(tr.tk) || Tk.isParen(tr.tk)){
-				// If it's an expression print out the value of the expression
-				tr.restartLine();
-				print(exprReader.unknownExpr());
-			}
 			else {
 				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());
 			}
 		}
-		// If the expression starts with a number, evaluate it
-		else if (tr.tk == Tk.NUM_LIT | tr.tk == Tk.SUB_OP || tr.tk == Tk.LPAREN) {
-			tr.prevToken();
-			// Find the result and print it
-			Object res = exprReader.unknownExpr();
-			print(res);
+		// The statement is an expression
+		else if (tr.tk == Tk.NOT_OP || tr.tk == Tk.ADD_OP
+				|| tr.tk == Tk.SUB_OP || tr.tk == Tk.NUM_LIT
+				|| tr.tk == Tk.LPAREN) {
+			// If it's an expression print out the value of the expression
+			tr.restartLine();
+			print(exprReader.unknownExpr());
 		}
 		// Otherwise, print an error
 		else {

@@ -14,7 +14,7 @@ public enum Tk implements Comparable<Tk> {
 	// PRIORITY 1: Symbols
 	TYPE(1, "\\b(?:mat|scl)\\b"), LPAREN(1, "\\("), RPAREN(1, "\\)"),
 	ASSIGNMENT_OP(1, "="), LBRACKET(1, "\\["), RBRACKET(1, "\\]"),
-	COMMA(1, "\\,"), ARROW(1, "\\-\\>"), NOT(1, "\\!"),
+	COMMA(1, "\\,"), ARROW(1, "\\-\\>"),
 	// PRIORITY 1: Keywords
 	IF(1, "\\b(?:if)\\b"), FOR(1, "\\b(?:for)\\b"), IN(1, "\\b(?:in)\\b"),
 	BY(1, "\\b(?:by)\\b"), WHILE(1, "\\b(?:while)\\b"),
@@ -28,7 +28,7 @@ public enum Tk implements Comparable<Tk> {
 	// PRIORITY 16: Boolean operators
 	LESS_OR_EQUAL(16,"\\<\\="), GREAT_OR_EQUAL(16,"\\>\\="),
 	GREATER_OP(17, "\\>"), LESSER_OP(17, "\\<"), EQUAL_OP(17, null),
-	AND(18, "\\&\\&"), OR(19, "\\|\\|"),
+	AND_OP(18, "\\&\\&"), OR_OP(19, "\\|\\|"), NOT_OP(20, "\\!"),
 	// PRIORITY 50+: User defined symbols
 	MTX_NAME(50, "\\b(?:[A-Z][a-z]*)\\b"),
 	SCL_NAME(50, "\\b(?:[a-z]+)\\b"),
@@ -88,7 +88,8 @@ public enum Tk implements Comparable<Tk> {
 	public static boolean isBoolOp(Tk tk) {
 		return (tk == Tk.EQUAL_OP || tk == Tk.GREAT_OR_EQUAL
 				|| tk == Tk.LESS_OR_EQUAL || tk == Tk.LESSER_OP
-				|| tk == Tk.GREATER_OP || tk == Tk.AND || tk == Tk.OR);
+				|| tk == Tk.GREATER_OP || tk == Tk.AND_OP
+				|| tk == Tk.OR_OP || tk == Tk.NOT_OP);
 	}
 	/**
 	 * Is this token a ( or a )
@@ -112,33 +113,33 @@ public enum Tk implements Comparable<Tk> {
 	public String toString() {
 		switch(this) {
 		case ADD_OP:
-			return "+";
+			return "+ operator";
 		case ASSIGNMENT_OP:
-			return "=";
+			return "= (assignment) operator";
 		case NULL_CMD:
 			return "command without return value";
 		case VAR_CMD:
 			return "command with return value";
 		case COMMA:
-			return ",";
+			return "comma";
 		case DIV_OP:
-			return "/";
+			return "/ operator";
 		case EOL:
 			return "EOL";
 		case ERROR:
 			return "ERROR";
 		case EXP_OP:
-			return "^";
+			return "^ operator";
 		case LBRACKET:
-			return "[";
+			return "left bracket";
 		case LPAREN:
-			return "(";
+			return "left parantheses";
 		case MTX_NAME:
-			return "mtx_name";
+			return "matrix name";
 		case MULT_OP:
-			return "*";
+			return "* operator";
 		case NEG_OP:
-			return "-";
+			return "- (negation) operator";
 		case NUM_LIT:
 			return "number";
 		case RBRACKET:
@@ -146,41 +147,41 @@ public enum Tk implements Comparable<Tk> {
 		case RPAREN:
 			return ")";
 		case SCL_NAME:
-			return "scl_name";
+			return "scalar name";
 		case SUB_OP:
-			return "-";
+			return "- (subtraction) operator";
 		case TYPE:
 			return "mtx or scl";
-		case AND:
-			return "&&";
+		case AND_OP:
+			return "&& operator";
 		case BY:
-			return "by";
+			return "'by' command";
 		case EQUAL_OP:
-			return "=";
+			return "= operator";
 		case FOR:
-			return "for";
+			return "'for' command";
 		case GREATER_OP:
-			return ">";
+			return "> operator";
 		case GREAT_OR_EQUAL:
-			return ">=";
+			return ">= operator";
 		case IF:
-			return "if";
+			return "'if' command";
 		case IN:
-			return "in";
+			return "'in' command";
 		case LESSER_OP:
-			return "<";
+			return "< operator";
 		case LESS_OR_EQUAL:
-			return "<=";
+			return "<= operator";
 		case MTX_CMD:
 			return "mtx_name.cmd(...)";
-		case OR:
-			return "||";
+		case OR_OP:
+			return "|| opeartor";
 		case WHILE:
-			return "while";
+			return "'while' command";
 		case ARROW:
-			return "->";
-		case NOT:
-			return "!";
+			return "-> operator";
+		case NOT_OP:
+			return "! operator";
 		default:
 			return null;
 		}

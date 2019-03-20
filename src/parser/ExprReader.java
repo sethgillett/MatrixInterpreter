@@ -372,7 +372,30 @@ public class ExprReader extends ParserType {
 						break;
 					// Default
 					default:
-						ep.customError("Invalid token in expression");
+						ep.customError("Invalid token %s in expression", token);
+						return null;
+					}
+				}
+				else if (a instanceof Boolean && b instanceof Boolean) {
+					switch(token) {
+					case AND_OP:
+						res = (Boolean) a && (Boolean) b;
+						break;
+					case OR_OP:
+						res = (Boolean) a || (Boolean) b;
+						break;
+					default:
+						ep.customError("Invalid token %s between true/false expressions", token);
+						return null;
+					}
+				}
+				else if (a == null && b instanceof Boolean) {
+					switch(token) {
+					case NOT_OP:
+						res = !(Boolean) b;
+						break;
+					default:
+						ep.customError("Invalid token %s for single true/false", token);
 						return null;
 					}
 				}
