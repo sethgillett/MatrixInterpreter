@@ -16,8 +16,13 @@ public class IdMtx extends Mtx {
 		}
 	}
 	@Override
-	public boolean set(int row, int col, Scl s) {
-		return false;
+	public Mtx set(int row, int col, Scl s) {
+		if (boundsCheck(row,col)) {
+			return new FullMtx(rCount, cCount).set(row, col, s);
+		}
+		else {
+			return null;
+		}
 	}
 }
 

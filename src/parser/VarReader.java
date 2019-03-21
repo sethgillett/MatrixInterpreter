@@ -14,19 +14,24 @@ public class VarReader extends ParserType {
 	
 	/**
 	 * Creates a new scalar and assigns a value to it
+	 * @return Whether the run was successful
 	 */
-	public void sclAssign() {
+	public boolean sclAssign() {
 		tr.nextToken();
 		String sclName = tr.tokenStr();
 		tr.nextToken();
-		Scl var = exprReader.sclExpr();
+		Scl var = exprReader.sclExpr(null);
+		if (var == null)
+			return false;
 		setScl(sclName, var);
+		return true;
 	}
 	
 	/**
 	 * Creates a new matrix and assigns a value to it
+	 * @return Whether the run was successful
 	 */
-	public void mtxAssign() {
+	public boolean mtxAssign() {
 		// A
 		tr.nextToken();
 		String mtxName = tr.tokenStr();
@@ -36,13 +41,16 @@ public class VarReader extends ParserType {
 		tr.nextToken();
 		Mtx var;
 		if (tr.tk == Tk.EOL) {
-			var = inpReader.readMtxInputTerminal();
+			var = inpReader.readMtxInput(true);
 		}
 		else {
 			tr.prevToken();
-			var = exprReader.mtxExpr();
+			var = exprReader.mtxExpr(null);
 		}
+		if (var == null)
+			return false;
 		setMtx(mtxName, var);
+		return true;
 	}
 	
 }

@@ -5,7 +5,7 @@ import vars.scl.Scl;
 public abstract class Mtx {
 	public int rCount, cCount;
 	public abstract Scl get(int row, int col);
-	public abstract boolean set(int row, int col, Scl s);
+	public abstract Mtx set(int row, int col, Scl s);
 	
 	/**
 	 * Abstract constructor instantiates without creating an actual array
@@ -15,6 +15,15 @@ public abstract class Mtx {
 	public Mtx(int rCount, int cCount) {
 		this.rCount = rCount;
 		this.cCount = cCount;
+	}
+	/**
+	 * Checks whether the given row and column are within the matrix bounds
+	 * @param row The row
+	 * @param col The column
+	 * @return True or false
+	 */
+	protected boolean boundsCheck(int row, int col) {
+		return (row >= 0 && row < rCount && col >= 0 && col < cCount);
 	}
 	/**
 	 * Returns the identity matrix with specified dimensions

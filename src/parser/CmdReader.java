@@ -35,35 +35,46 @@ public class CmdReader extends ParserType {
 		}
 		return null;
 	}
-	
-	public void nullCmd() {
+	/**
+	 * Performs a command with no return type
+	 * @return Whether the run was successful
+	 */
+	public boolean nullCmd() {
 		tr.nextToken();
 		String tokenLit = tr.tokenStr();
 		switch (tokenLit) {
 		case "del":
-			del();
-			break;
+			return del();
 		case "prn":
 		case "print":
-			prn();
-			break;
+			return prn();
+		default:
+			ep.customError("Command %s does not exist", tokenLit);
+			return false;
 		}
 	}
-	
-	public void del() {
+	/**
+	 * Attempts to delete a variable from the registries
+	 * @return Whether the run was successful
+	 */
+	public boolean del() {
 		String varName = inpReader.<String>readParam(() -> {return inpReader.readStrParam();});
 		if (varName == null)
-			return;
+			return false;
 		else if (hasScl(varName))
-			delScl(varName);
+			return delScl(varName);
 		else if (hasMtx(varName))
-			delMtx(varName);
+			return delMtx(varName);
 		else
 			ep.customError("%s can't be deleted because it doesn't exist or isn't a scl or mtx", varName);
+		return false;
 	}
-	
-	public void prn() {
-		print(exprReader.unknownExpr());
+	/**
+	 * Attempts to print the result of an expression
+	 * @return Whether the run was successful
+	 */
+	public boolean prn() {
+		return print(exprReader.expr(null));
 	}
 	
 }

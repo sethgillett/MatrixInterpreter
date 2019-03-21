@@ -127,6 +127,15 @@ public class Scl {
 	}
 	
 	/**
+	 * Copies a scalar from another scalar
+	 * @param other The other scalar
+	 */
+	public Scl(Scl other) {
+		this.val = other.val;
+		this.decimalPlaces = other.decimalPlaces;
+	}
+	
+	/**
 	 * Creates a new scalar from a double and # of decimal places, will automatically extend or reduce decimals as needed
 	 * @param val The double value
 	 * @param decimalPlaces The number of decimal places to preserve
@@ -137,7 +146,7 @@ public class Scl {
 			this.decimalPlaces = 0;
 		}
 		else {
-			this.decimalPlaces = Math.max(decimalPlaces, 1);
+			this.decimalPlaces = Math.max(decimalPlaces, 2);
 		}
 	}
 	

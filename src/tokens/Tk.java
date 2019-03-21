@@ -14,7 +14,7 @@ public enum Tk implements Comparable<Tk> {
 	// PRIORITY 1: Symbols
 	TYPE(1, "\\b(?:mat|scl)\\b"), LPAREN(1, "\\("), RPAREN(1, "\\)"),
 	ASSIGNMENT_OP(1, "="), LBRACKET(1, "\\["), RBRACKET(1, "\\]"),
-	COMMA(1, "\\,"), ARROW(1, "\\-\\>"),
+	COMMA(1, "\\,"), ARROW(1, "\\-\\>"), COLON(1, "\\:"),
 	// PRIORITY 1: Keywords
 	IF(1, "\\b(?:if)\\b"), FOR(1, "\\b(?:for)\\b"), IN(1, "\\b(?:in)\\b"),
 	BY(1, "\\b(?:by)\\b"), WHILE(1, "\\b(?:while)\\b"),
@@ -182,6 +182,8 @@ public enum Tk implements Comparable<Tk> {
 			return "-> operator";
 		case NOT_OP:
 			return "! operator";
+		case COLON:
+			return ": operator";
 		default:
 			return null;
 		}

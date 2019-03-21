@@ -17,23 +17,14 @@ public class ErrorPrinter {
 	}
 	
 	/**
-	 * Error in the format of "Expected [expected], got [found]"
-	 * @param expected The expected token
-	 * @param found The token that was found
-	 */
-	public void expectedError(String expected, String found) {
-		// Prints pointer to the token that caused the error
-		tr.tokenPtr();
-		// Prints what token was expected and what token was gotten
-		System.out.printf("ERROR\n\nExpected '%s', got '%s'\n", expected, found);
-	}
-	
-	/**
 	 * Error in the format of "Expected [expected], got [last token]"
 	 * @param expected The expected token
 	 */
 	public void expectedError(String expected) {
-		expectedError(expected, tr.tokenStr());
+		// Prints pointer to the token that caused the error
+		tr.tokenPtr();
+		// Prints what token was expected and what token was gotten
+		System.out.printf("ERROR\n\nExpected '%s', got '%s'\n", expected, tr.tokenStr());
 	}
 	
 	/**
@@ -45,7 +36,7 @@ public class ErrorPrinter {
 		for (Tk exp : expected) {
 			errorStr += " or " + exp;
 		}
-		expectedError(errorStr, tr.tokenStr());
+		expectedError(errorStr);
 	}
 	
 	/**

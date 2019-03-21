@@ -29,12 +29,12 @@ public class ParserType {
 	/**
 	 * Variable registry for scalars
 	 */
-	private HashMap<String, Scl> sclReg;
+	protected HashMap<String, Scl> sclReg;
 	
 	/**
 	 * Variable registry for matrices
 	 */
-	private HashMap<String, Mtx> mtxReg;
+	protected HashMap<String, Mtx> mtxReg;
 	/**
 	 * Deals with all direct commands
 	 */
@@ -55,9 +55,25 @@ public class ParserType {
 	 * Deals with control statements (if, while, for)
 	 */
 	protected ControlsReader controlsReader;
+	/**
+	 * The primary parser for all parsers
+	 */
+	protected Parser primaryReader;
 	
 	/**
-	 * For all other parsers
+	 * For all parsers that want a reference to the primary parser
+	 * @param s The primary parser
+	 */
+	protected ParserType(Parser s) {
+		this.tr = s.tr;
+		this.ep = s.ep;
+		this.sclReg = s.sclReg;
+		this.mtxReg = s.mtxReg;
+		this.primaryReader = s;
+	}
+	
+	/**
+	 * For all parsers that don't need a reference to the primary parser
 	 * @param s The primary parser
 	 */
 	protected ParserType(ParserType s) {
@@ -176,54 +192,65 @@ public class ParserType {
 	/**
 	 * Deletes a scalar or throws an error if it doesn't exist
 	 * @param name The name of the scalar
+	 * @return 
 	 */
-	public void delScl(String name) {
+	public boolean delScl(String name) {
 		if (hasScl(name)) {
 			this.sclReg.remove(name);
+			return true;
 		}
 		else {
 			ep.customError("Scalar %s doesn't exist and can't be deleted", name);
+			return false;
 		}
 	}
 	
 	/**
 	 * Deletes a matrix or throws an error if it doesn't exist
 	 * @param name The name of the matrix
+	 * @return Whether the run was successful
 	 */
-	public void delMtx(String name) {
+	public boolean delMtx(String name) {
 		if (hasMtx(name)) {
 			this.mtxReg.remove(name);
+			return true;
 		}
 		else {
 			ep.customError("Matrix %s doesn't exist and can't be deleted", name);
+			return false;
 		}
 	}
 	
 	/**
 	 * Prints out the supplied variable <b><i>if</i></b> it is found in any variable registry
 	 * @param varName The name of the variable to print
+	 * @return Whether the run was successful
 	 */
-	public void print(String varName) {
+	public boolean print(String varName) {
 		if (sclReg.containsKey(varName)) {
 			Scl s = sclReg.get(varName);
 			if (s == null) {
 				ep.customError("Scl '%s' has no value assigned", varName);
+				return false;
 			}
 			else {
-				print(sclReg.get(varName));
+				return print(sclReg.get(varName));
 			}
 		}
 		else if (mtxReg.containsKey(varName)) {
 			Mtx m = mtxReg.get(varName);
 			if (m == null) {
 				ep.customError("Mtx '%s' has no value assigned", varName);
+				return false;
 			}
 			else {
 				print(mtxReg.get(varName));
+				return true;
 			}
 		}
 		else {
 			ep.customError("'%s' does not exist", varName);
+			return false;
 		}
 	}
 	
@@ -231,16 +258,32 @@ public class ParserType {
 	/**
 	 * An overrided version of print that <b>directly</b> takes in a scalar or matrix
 	 * @param var The scalar or matrix to print
+	 * @return 
 	 */
-	protected void print(Object var) {
-		if (var != null && (var instanceof Mtx || var instanceof Scl || var instanceof Boolean)) {
+	protected boolean print(Object var) {
+		if (var instanceof Scl) {
 			System.out.println(var);
+			return true;
+		}
+		else if (var instanceof Boolean) {
+			System.out.println((Boolean) var? "True":"False");
+			return true;
+		}
+		else if (var instanceof Mtx) {
+			System.out.println("Mtx =");
+			System.out.println(var);
+			return true;
+		}
+		else if (var instanceof String) {
+			return print((String) var);
 		}
 		else if (var == null) {
 //			ep.internalError("Var cannot be printed because it is null");
+			return false;
 		}
 		else {
 			ep.internalError("Var '%s' cannot be printed because it is not of the correct type", var);
+			return false;
 		}
 	}
 }

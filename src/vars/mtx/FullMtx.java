@@ -17,39 +17,32 @@ public class FullMtx extends Mtx {
 		super(rCount, cCount);
 		this.rows = new Scl[rCount][cCount];
 	}
+	/**
+	 * Instantiates a new full matrix as a copy of an existing matrix
+	 * @param other The other matrix
+	 */
+	public FullMtx(Mtx other) {
+		super(other.rCount, other.cCount);
+		this.rows = new Scl[rCount][cCount];
+		for (int r=0; r<rCount; r++) {
+			for (int c=0; c<cCount; c++) {
+				this.set(r, c, other.get(r, c));
+			}
+		}
+	}
 	@Override
 	public Scl get(int row, int col) {
-		if (row >= 0 && row < rCount && col >= 0 && col < cCount) {
+		if (boundsCheck(row,col)) {
 			return rows[row][col];
 		}
 		return null;
 	}
 	@Override
-	public boolean set(int row, int col, Scl s) {
-		if (row >= 0 && row < rCount && col >= 0 && col < cCount) {
+	public Mtx set(int row, int col, Scl s) {
+		if (boundsCheck(row,col)) {
 			this.rows[row][col] = s;
-			return true;
+			return this;
 		}
-		return false;
-	}
-	/**
-	 * Returns the identity matrix with provided dimensions
-	 * @param rows The # of rows
-	 * @param cols The # of cols
-	 * @return The identity matrix
-	 */
-	public static FullMtx fullIdentity(int rows, int cols) {
-		Scl [][] idRows = new Scl[rows][cols];
-		for (int r=0; r<rows; r++) {
-			for (int c=0; c<cols; c++) {
-				if (r == c) {
-					idRows[r][c] = Scl.ONE;
-				}
-				else {
-					idRows[r][c] = Scl.ZERO;
-				}
-			}
-		}
-		return new FullMtx(idRows);
+		return null;
 	}
 }

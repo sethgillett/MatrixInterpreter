@@ -1,10 +1,9 @@
 package parser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
+import parser.primary.Parser;
 import parser.primary.ParserType;
 import tokens.Tk;
 import vars.mtx.FullMtx;
@@ -17,14 +16,9 @@ import vars.scl.Scl;
  *
  */
 public class InputReader extends ParserType {
-	/**
-	 * The primary input reader
-	 */
-	BufferedReader reader;
 
-	public InputReader(ParserType primary, BufferedReader reader) {
+	public InputReader(Parser primary) {
 		super(primary);
-		this.reader = reader;
 	}
 	
 	/**
@@ -167,21 +161,27 @@ public class InputReader extends ParserType {
 	
 	/**
 	 * Reads in a matrix via the terminal
+	 * @param printBrackets True if reading input from the terminal
 	 * @return The matrix read in
 	 */
-	public Mtx readMtxInputTerminal() {
+	public Mtx readMtxInput(boolean printBrackets) {
 		ArrayList<ArrayList<Scl>> mtx = new ArrayList<>();
 		String lineStr;
 		Integer lineLen = null;
 		do {
-			System.out.print("[");
-			lineStr = scanNewLine();
+			// Will only print brackets if reading input from terminal
+			if (printBrackets)
+				System.out.print("[");
+			lineStr = primaryReader.readNewLine();
 			tr.readLine(lineStr);
 			ArrayList<Scl> line = new ArrayList<>();
 			while (true) {
 				tr.nextToken();
 				if (tr.tk == Tk.EOL) {
 					break;
+				}
+				else if (tr.tk == Tk.COMMA) {
+					continue;
 				}
 				else if (tr.tk == Tk.NUM_LIT) {
 					line.add(new Scl(tr.tokenStr()));
@@ -243,18 +243,5 @@ public class InputReader extends ParserType {
 		}
 		
 		return new FullMtx(mtxArray);
-	}
-	
-	/**
-	 * Scans a new line with the primary scanner
-	 * @return The new line
-	 */
-	public String scanNewLine() {
-		try {
-			return reader.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
 	}
 }

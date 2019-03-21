@@ -68,6 +68,16 @@ public class TokenReader {
 		// Advances past whitespace
 		advanceWhitespace();
 	}
+	/**
+	 * Peeks the next token without moving the reader forward
+	 * @return The next token
+	 */
+	public Tk peekNextToken() {
+		nextToken();
+		Tk next = tk;
+		prevToken();
+		return next;
+	}
 	
 	/**
 	 * Moves the current token BACK

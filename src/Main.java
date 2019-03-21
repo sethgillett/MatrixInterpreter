@@ -26,11 +26,7 @@ public class Main {
 			System.out.print(">>> ");
 			input = br.readLine();
 			
-			if (input.matches("^(\\s*)$")) {
-				continue;
-			}
-			
-			if (input.matches("^\\s*(end|exit|quit)\\s*$")) {
+			if (input.matches("^\\s*(exit|quit)\\s*$")) {
 				break;
 			}
 			

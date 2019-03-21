@@ -1,8 +1,17 @@
 package tokens;
 
 public class ReadToken {
+	/**
+	 * Index in the line the token was found
+	 */
 	public int idx;
+	/**
+	 * The token found
+	 */
 	public Tk token;
+	/**
+	 * The string of the token (can be null)
+	 */
 	private String _tokenStr;
 	
 	public ReadToken(int idx, Tk token) {

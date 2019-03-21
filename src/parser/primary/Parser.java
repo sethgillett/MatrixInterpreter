@@ -1,5 +1,6 @@
 package parser.primary;
 import java.io.BufferedReader;
+import java.io.IOException;
 
 import parser.CmdReader;
 import parser.ControlsReader;
@@ -15,6 +16,10 @@ import tokens.Tk;
  */
 public class Parser extends ParserType {	
 	/**
+	 * The primary input reader
+	 */
+	private BufferedReader reader;
+	/**
 	 * Instantiates the token reader, error printer, and all other classes
 	 * @param s The primary scanner
 	 */
@@ -25,7 +30,7 @@ public class Parser extends ParserType {
 		cmdReader = new CmdReader(this);
 		varReader = new VarReader(this);
 		exprReader = new ExprReader(this);
-		inpReader = new InputReader(this, br);
+		inpReader = new InputReader(this);
 		controlsReader = new ControlsReader(this);
 		// Connect all the parsers
 		cmdReader.connect(this);
@@ -33,36 +38,38 @@ public class Parser extends ParserType {
 		exprReader.connect(this);
 		inpReader.connect(this);
 		controlsReader.connect(this);
+		// Set reference to primary reader
+		this.reader = br;
 	}
 	
 	/**
 	 * Reads in a new line
 	 * @param line The new line read in
+	 * @return Whether the run was successful
 	 */
-	public void read(String line) {
+	public boolean read(String line) {
 		tr.readLine(line);
 		tr.nextToken();
+		// Blank line - does nothing
+		if (tr.tk == Tk.EOL) {
+			return true;
+		}
 		// Look for a command
 		if (tr.tk == Tk.NULL_CMD) {
 			tr.prevToken();
-			cmdReader.nullCmd();
+			return cmdReader.nullCmd();
 		}
 		// Look for a control statement
 		else if (tr.tk == Tk.IF || tr.tk == Tk.WHILE || tr.tk == Tk.FOR) {
-			Tk token = tr.tk;
-			tr.restartLine();
-			switch(token) {
+			switch(tr.tk) {
 			case IF:
-				controlsReader.if_stmt();
-				break;
+				return controlsReader.if_stmt();
 			case FOR:
-				controlsReader.for_stmt();
-				break;
+				return controlsReader.for_stmt();
 			case WHILE:
-				controlsReader.while_stmt();
-				break;
+				return controlsReader.while_stmt();
 			default:
-				break;
+				return false;
 			}
 		}
 		// If an expression has a scl or mtx name
@@ -76,20 +83,21 @@ public class Parser extends ParserType {
 				tr.nextToken();
 				if (type == Tk.SCL_NAME) {
 					tr.restartLine();
-					varReader.sclAssign();
+					return varReader.sclAssign();
 				}
 				else {
 					tr.restartLine();
-					varReader.mtxAssign();
+					return varReader.mtxAssign();
 				}
 			}
 			else if (tr.tk == Tk.EOL) {
 				// If there is no next token, print out the value of that scalar
 				tr.prevToken();
-				print(tr.tokenStr());
+				return print(tr.tokenStr());
 			}
 			else {
-				ep.expectedError("assignment or arithmetical expression",tr.tokenStr());
+				ep.expectedError("assignment or arithmetical expression");
+				return false;
 			}
 		}
 		// The statement is an expression
@@ -98,11 +106,21 @@ public class Parser extends ParserType {
 				|| tr.tk == Tk.LPAREN) {
 			// If it's an expression print out the value of the expression
 			tr.restartLine();
-			print(exprReader.unknownExpr());
+			return print(exprReader.expr(null));
 		}
 		// Otherwise, print an error
 		else {
-			ep.expectedError("arithmetic expression, command, or assignment", tr.tokenStr());
+			ep.expectedError("arithmetic expression, command, or assignment");
+			return false;
+		}
+	}
+	
+	public String readNewLine() {
+		try {
+			return reader.readLine();
+		} catch (IOException e) {
+			ep.internalError("Reading of new line failed");
+			return null;
 		}
 	}
 	

@@ -8,7 +8,7 @@
 				{<stmt>}
 		|	for <scl> in <range>:
 				{<stmt>}
-<range> -> <scl> => <scl> [by <scl>]
+<range> -> <scl> -> <scl> [by <scl>]
 <args> -> (<expr> | <type> | <var>){, <args>}
 <type> -> mat | scl
 <expr> -> <expr> (* | + | - | /) <expr>
