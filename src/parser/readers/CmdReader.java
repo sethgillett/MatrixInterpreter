@@ -1,15 +1,9 @@
-package parser;
+package parser.readers;
 
-import parser.primary.Parser;
 import parser.primary.ParserType;
 import vars.mtx.Mtx;
 
 public class CmdReader extends ParserType {
-
-	public CmdReader(Parser primary) {
-		super(primary);
-	}
-	
 	/**
 	 * Evaluates and returns the result of a command
 	 * @return Scalar or matrix

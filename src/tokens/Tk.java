@@ -17,7 +17,7 @@ public enum Tk implements Comparable<Tk> {
 	COMMA(1, "\\,"), ARROW(1, "\\-\\>"), COLON(1, "\\:"),
 	// PRIORITY 1: Keywords
 	IF(1, "\\b(?:if)\\b"), FOR(1, "\\b(?:for)\\b"), IN(1, "\\b(?:in)\\b"),
-	BY(1, "\\b(?:by)\\b"), WHILE(1, "\\b(?:while)\\b"),
+	BY(1, "\\b(?:by)\\b"), WHILE(1, "\\b(?:while)\\b"), DEF(1, "\\b(?:def)\\b"),
 	// PRIORITY 2: Language defined commands
 	NULL_CMD(2, "\\b(?:del|prn|print)(?=\\(.*?\\))\\b"),
 	VAR_CMD(2, "\\b(?:id|zero)(?=\\(.*?\\))\\b"),
@@ -30,9 +30,10 @@ public enum Tk implements Comparable<Tk> {
 	GREATER_OP(17, "\\>"), LESSER_OP(17, "\\<"), EQUAL_OP(17, null),
 	AND_OP(18, "\\&\\&"), OR_OP(19, "\\|\\|"), NOT_OP(20, "\\!"),
 	// PRIORITY 50+: User defined symbols
-	MTX_NAME(50, "\\b(?:[A-Z][a-z]*)\\b"),
-	SCL_NAME(50, "\\b(?:[a-z]+)\\b"),
-	NUM_LIT(50, "(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?");
+	FUNC_NAME(50, "\\b(?:[A-Za-z_]+)(?=\\(.*\\))"),
+	MTX_NAME(50, "(?:[A-Z][a-z]*\\b)(?!\\()"),
+	SCL_NAME(50, "(?:[a-z]+\\b)(?!\\()"),
+	NUM_LIT(51, "(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?");
 	/**
 	 * The order of priority for tokens
 	 */
@@ -90,6 +91,17 @@ public enum Tk implements Comparable<Tk> {
 				|| tk == Tk.LESS_OR_EQUAL || tk == Tk.LESSER_OP
 				|| tk == Tk.GREATER_OP || tk == Tk.AND_OP
 				|| tk == Tk.OR_OP || tk == Tk.NOT_OP);
+	}
+	
+	public static boolean isExprTk(Tk tk) {
+		return (isMathOp(tk) || isBoolOp(tk) || isParen(tk)
+				|| tk == Tk.NUM_LIT || tk == Tk.VAR_CMD
+				|| tk == Tk.SCL_NAME || tk == Tk.MTX_NAME);
+	}
+	
+	public static boolean isControlTk(Tk tk) {
+		return (tk == Tk.IF || tk == Tk.WHILE
+				|| tk == Tk.FOR || tk == Tk.DEF);
 	}
 	/**
 	 * Is this token a ( or a )
@@ -184,6 +196,10 @@ public enum Tk implements Comparable<Tk> {
 			return "! operator";
 		case COLON:
 			return ": operator";
+		case DEF:
+			return "'def' command";
+		case FUNC_NAME:
+			return "function name";
 		default:
 			return null;
 		}

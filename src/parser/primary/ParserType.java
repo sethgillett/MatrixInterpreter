@@ -3,11 +3,14 @@ package parser.primary;
 import java.util.HashMap;
 
 import errors.ErrorPrinter;
-import parser.CmdReader;
-import parser.ControlsReader;
-import parser.ExprReader;
-import parser.InputReader;
-import parser.VarReader;
+import io.Input;
+import io.Output;
+import parser.functions.Function;
+import parser.readers.CmdReader;
+import parser.readers.ControlsReader;
+import parser.readers.ExprReader;
+import parser.readers.InputReader;
+import parser.readers.VarReader;
 import tokens.TokenReader;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
@@ -17,105 +20,64 @@ import vars.scl.Scl;
  * @author Seth Gillett
  *
  */
-public class ParserType {
+public abstract class ParserType {
 	/**
 	 * The parser's token reader
 	 */
-	protected TokenReader tr;
+	protected static TokenReader tr = new TokenReader();
 	/**
 	 * Used to print error messages
 	 */
-	protected ErrorPrinter ep;
+	protected static ErrorPrinter ep = new ErrorPrinter(tr);
 	/**
 	 * Variable registry for scalars
 	 */
-	protected HashMap<String, Scl> sclReg;
+	protected static HashMap<String, Scl> sclReg = new HashMap<>();
 	
 	/**
 	 * Variable registry for matrices
 	 */
-	protected HashMap<String, Mtx> mtxReg;
+	protected static HashMap<String, Mtx> mtxReg = new HashMap<>();
+	/**
+	 * Function registry
+	 */
+	protected static HashMap<String, Function> funcReg = new HashMap<>();
 	/**
 	 * Deals with all direct commands
 	 */
-	protected CmdReader cmdReader;
+	protected static CmdReader cmdReader;
 	/**
 	 * Deals with assignments to matrices and scalars
 	 */
-	protected VarReader varReader;
+	protected static VarReader varReader;
 	/**
 	 * Reads expressions
 	 */
-	protected ExprReader exprReader;
+	protected static ExprReader exprReader;
 	/**
 	 * Reads function input
 	 */
-	protected InputReader inpReader;
+	protected static InputReader inpReader;
 	/**
 	 * Deals with control statements (if, while, for)
 	 */
-	protected ControlsReader controlsReader;
+	protected static ControlsReader controlsReader;
 	/**
-	 * The primary parser for all parsers
+	 * The input reader
 	 */
-	protected Parser primaryReader;
-	
+	protected static Input input;
 	/**
-	 * For all parsers that want a reference to the primary parser
-	 * @param s The primary parser
+	 * The primary parser
 	 */
-	protected ParserType(Parser s) {
-		this.tr = s.tr;
-		this.ep = s.ep;
-		this.sclReg = s.sclReg;
-		this.mtxReg = s.mtxReg;
-		this.primaryReader = s;
-	}
-	
-	/**
-	 * For all parsers that don't need a reference to the primary parser
-	 * @param s The primary parser
-	 */
-	protected ParserType(ParserType s) {
-		this.tr = s.tr;
-		this.ep = s.ep;
-		this.sclReg = s.sclReg;
-		this.mtxReg = s.mtxReg;
-	}
-	
-	/**
-	 * Connects each parser type to all the others
-	 * @param s The primary parser
-	 */
-	public void connect(ParserType s) {
-		this.cmdReader = s.cmdReader;
-		this.varReader = s.varReader;
-		this.exprReader = s.exprReader;
-		this.inpReader = s.inpReader;
-		this.controlsReader = s.controlsReader;
-	}
-	
-	/**
-	 * For primary parser only
-	 * @param s The primary scanner
-	 */
-	public ParserType() {
-		// Initialize token reader
-		this.tr = new TokenReader();
-		// Initialize variable registries
-		this.sclReg = new HashMap<>();
-		this.mtxReg = new HashMap<>();
-		// Initialize error printer
-		ep = new ErrorPrinter(tr);
-	}
+	protected static Parser primary;
 	
 	/**
 	 * Gets a scalar or returns null and prints an error if it doesn't exist or has no value
 	 * @param name The name of the scalar
 	 * @return The scalar or null
 	 */
-	public Scl getScl(String name) {
-		if (sclReg.containsKey(name)) {
+	public static Scl getScl(String name) {
+		if (hasScl(name)) {
 			Scl scl = sclReg.get(name);
 			if (scl == null) {
 				ep.customError("'%s' has no value", name);
@@ -136,8 +98,8 @@ public class ParserType {
 	 * @param name The name of the matrix
 	 * @return The matrix or null
 	 */
-	public Mtx getMtx(String name) {
-		if (mtxReg.containsKey(name)) {
+	public static Mtx getMtx(String name) {
+		if (hasMtx(name)) {
 			Mtx mtx = mtxReg.get(name);
 			if (mtx == null) {
 				ep.customError("'%s' has no value", name);
@@ -154,11 +116,33 @@ public class ParserType {
 	}
 	
 	/**
+	 * Gets a function by name
+	 * @param name The name of the function
+	 * @return The function
+	 */
+	public static Function getFunc(String name) {
+		if (hasFunc(name)) {
+			Function func = funcReg.get(name);
+			if (func == null) {
+				ep.internalError("Function %s not registered", name);
+				return null;
+			}
+			else {
+				return func;
+			}
+		}
+		else {
+			ep.customError("Function %s does not exist", name);
+			return null;
+		}
+	}
+	
+	/**
 	 * Adds a scalar to the scalar registry
 	 * @param name The name of the scalar
 	 * @param scl The scalar
 	 */
-	public void setScl(String name, Scl scl) {
+	public static void setScl(String name, Scl scl) {
 		sclReg.put(name, scl);
 	}
 	
@@ -167,8 +151,17 @@ public class ParserType {
 	 * @param name The name of the matrix
 	 * @param mtx The matrix
 	 */
-	public void setMtx(String name, Mtx mtx) {
+	public static void setMtx(String name, Mtx mtx) {
 		mtxReg.put(name, mtx);
+	}
+	
+	/**
+	 * Adds a function to the function registry
+	 * @param name The name of the function
+	 * @param func The function
+	 */
+	public static void setFunc(String name, Function func) {
+		funcReg.put(name, func);
 	}
 	
 	/**
@@ -176,7 +169,7 @@ public class ParserType {
 	 * @param name The name of the scalar
 	 * @return True or false
 	 */
-	public boolean hasScl(String name) {
+	public static boolean hasScl(String name) {
 		return sclReg.containsKey(name);
 	}
 	
@@ -185,8 +178,17 @@ public class ParserType {
 	 * @param name The name of the matrix
 	 * @return True or false
 	 */
-	public boolean hasMtx(String name) {
+	public static boolean hasMtx(String name) {
 		return mtxReg.containsKey(name);
+	}
+	
+	/**
+	 * Returns true if the specified function exists
+	 * @param name The name of the function
+	 * @return True or false
+	 */
+	public static boolean hasFunc(String name) {
+		return funcReg.containsKey(name);
 	}
 	
 	/**
@@ -194,9 +196,9 @@ public class ParserType {
 	 * @param name The name of the scalar
 	 * @return 
 	 */
-	public boolean delScl(String name) {
+	public static boolean delScl(String name) {
 		if (hasScl(name)) {
-			this.sclReg.remove(name);
+			sclReg.remove(name);
 			return true;
 		}
 		else {
@@ -210,9 +212,9 @@ public class ParserType {
 	 * @param name The name of the matrix
 	 * @return Whether the run was successful
 	 */
-	public boolean delMtx(String name) {
+	public static boolean delMtx(String name) {
 		if (hasMtx(name)) {
-			this.mtxReg.remove(name);
+			mtxReg.remove(name);
 			return true;
 		}
 		else {
@@ -226,7 +228,7 @@ public class ParserType {
 	 * @param varName The name of the variable to print
 	 * @return Whether the run was successful
 	 */
-	public boolean print(String varName) {
+	public static boolean print(String varName) {
 		if (sclReg.containsKey(varName)) {
 			Scl s = sclReg.get(varName);
 			if (s == null) {
@@ -260,18 +262,18 @@ public class ParserType {
 	 * @param var The scalar or matrix to print
 	 * @return 
 	 */
-	protected boolean print(Object var) {
+	protected static boolean print(Object var) {
 		if (var instanceof Scl) {
-			System.out.println(var);
+			Output.println(var);
 			return true;
 		}
 		else if (var instanceof Boolean) {
-			System.out.println((Boolean) var? "True":"False");
+			Output.println((Boolean) var? "True":"False");
 			return true;
 		}
 		else if (var instanceof Mtx) {
-			System.out.println("Mtx =");
-			System.out.println(var);
+			Output.println("Mtx =");
+			Output.println(var);
 			return true;
 		}
 		else if (var instanceof String) {

@@ -1,5 +1,6 @@
 <pgrm> -> {<stmt>}
 <stmt> -> <cmd>(<args>)
+		| <expr>
 		| <var> = <expr>
 		| <var> = (<expr>)
 		| 	if (<bool_expr>) then:

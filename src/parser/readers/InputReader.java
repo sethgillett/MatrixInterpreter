@@ -1,9 +1,9 @@
-package parser;
+package parser.readers;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-import parser.primary.Parser;
+import io.Output;
 import parser.primary.ParserType;
 import tokens.Tk;
 import vars.mtx.FullMtx;
@@ -16,11 +16,6 @@ import vars.scl.Scl;
  *
  */
 public class InputReader extends ParserType {
-
-	public InputReader(Parser primary) {
-		super(primary);
-	}
-	
 	/**
 	 * Reads in a <i>postitive</i> parameter and returns its value as an int
 	 * @return The int value of the parameter <i>or -1</i>
@@ -171,8 +166,8 @@ public class InputReader extends ParserType {
 		do {
 			// Will only print brackets if reading input from terminal
 			if (printBrackets)
-				System.out.print("[");
-			lineStr = primaryReader.readNewLine();
+				Output.print("[");
+			lineStr = input.readLine();
 			tr.readLine(lineStr);
 			ArrayList<Scl> line = new ArrayList<>();
 			while (true) {

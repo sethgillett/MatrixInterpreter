@@ -26,12 +26,12 @@ public class FileReader {
 			}
 			
 			// Line of whitespace
-			if (input.matches("^(\\s*)$")) {
+			else if (input.matches("^(\\s*)$")) {
 				continue;
 			}
 			
 			// Line with any exit command
-			if (input.matches("^\\s*(end|exit|quit)\\s*$")) {
+			else if (input.matches("^\\s*(end|exit|quit)\\s*$")) {
 				break;
 			}
 			

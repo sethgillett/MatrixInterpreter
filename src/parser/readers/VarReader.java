@@ -1,17 +1,11 @@
-package parser;
+package parser.readers;
 
-import parser.primary.Parser;
 import parser.primary.ParserType;
 import tokens.Tk;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
 
 public class VarReader extends ParserType {
-
-	public VarReader(Parser primary) {
-		super(primary);
-	}
-	
 	/**
 	 * Creates a new scalar and assigns a value to it
 	 * @return Whether the run was successful

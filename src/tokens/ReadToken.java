@@ -14,6 +14,14 @@ public class ReadToken {
 	 */
 	private String _tokenStr;
 	
+	public ReadToken(Tk token) {
+		this(-1, token);
+	}
+	
+	public ReadToken(Tk token, String _tokenStr) {
+		this(-1, token, _tokenStr);
+	}
+	
 	public ReadToken(int idx, Tk token) {
 		this.idx = idx;
 		this.token = token;
@@ -43,6 +51,7 @@ public class ReadToken {
 	public static boolean tokenStrNeeded(Tk token) {
 		return (token == Tk.ERROR || token == Tk.MTX_NAME ||
 				token == Tk.SCL_NAME || token == Tk.NUM_LIT ||
-				token == Tk.NULL_CMD || token == Tk.VAR_CMD);
+				token == Tk.NULL_CMD || token == Tk.VAR_CMD ||
+				token == Tk.FUNC_NAME);
 	}
 }

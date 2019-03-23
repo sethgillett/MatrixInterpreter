@@ -1,4 +1,4 @@
-package parser;
+package parser.readers;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -10,10 +10,6 @@ import vars.mtx.Mtx;
 import vars.scl.Scl;
 
 public class ExprReader extends ParserType {
-
-	public ExprReader(ParserType s) {
-		super(s);
-	}
 	
 	public Mtx mtxExpr(ArrayList<Object> postfix) {
 		Object result = expr(postfix);
@@ -154,7 +150,7 @@ public class ExprReader extends ParserType {
 			}
 			// Adds in any scalar variables' NAMES and implicity adds * if necesssary
 			else if (tr.tk == Tk.SCL_NAME) {
-				Scl num = this.getScl(tr.tokenStr());
+				Scl num = getScl(tr.tokenStr());
 				// If a scalar doesn't exist return null
 				if (num == null)
 					return null;
@@ -170,7 +166,7 @@ public class ExprReader extends ParserType {
 			}
 			// Adds in any matrix variables
 			else if (tr.tk == Tk.MTX_NAME) {
-				Mtx mtx = this.getMtx(tr.tokenStr());
+				Mtx mtx = getMtx(tr.tokenStr());
 				// If a matrix doesn't exist return null
 				if (mtx == null)
 					return null;

@@ -1,19 +1,15 @@
-package parser;
+package parser.readers;
 
 import java.util.ArrayList;
 
-import parser.primary.Parser;
 import parser.primary.ParserType;
 import tokens.Tk;
 import vars.scl.Scl;
 
 public class ControlsReader extends ParserType {
-
-	public ControlsReader(Parser primary) {
-		super(primary);
-	}
 	
 	public boolean if_stmt() {
+		// IF token flagged
 		Boolean result = exprReader.boolExpr(null);
 		if (result == null)
 			return false;
@@ -22,15 +18,15 @@ public class ControlsReader extends ParserType {
 			tr.nextToken();
 			if (tr.tk == Tk.EOL) {
 				ArrayList<String> stmts = new ArrayList<>();
-				String newLine = primaryReader.readNewLine();
+				String newLine = input.readLine();
 				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
 					// Only executes the line if the if statement was true
 					if (result)
 						stmts.add(newLine);
-					newLine = primaryReader.readNewLine();
+					newLine = input.readLine();
 				}
 				for (String stmt : stmts) {
-					if (primaryReader.read(stmt) == false) {
+					if (primary.read(stmt) == false) {
 						return false;
 					}
 				}
@@ -47,6 +43,7 @@ public class ControlsReader extends ParserType {
 	}
 	
 	public boolean while_stmt() {
+		// WHILE token flagged
 		ArrayList<Object> whileExpr = exprReader.getExpr();
 		Boolean result = exprReader.boolExpr(whileExpr);
 		if (result == null)
@@ -54,28 +51,25 @@ public class ControlsReader extends ParserType {
 		tr.nextToken();
 		if (tr.tk == Tk.COLON) {
 			tr.nextToken();
-			if (tr.tk == Tk.EOL) {
+			if (ep.checkToken(Tk.EOL)) {
 				ArrayList<String> stmts = new ArrayList<>();
-				String newLine = primaryReader.readNewLine();
+				String newLine = input.readLine();
 				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
 					// Only executes the line if the if statement was true
 					if (result) {
 						stmts.add(newLine);
 					}
-					newLine = primaryReader.readNewLine();
+					newLine = input.readLine();
 				}
 				while (result) {
 					for (String stmt : stmts) {
-						if (primaryReader.read(stmt) == false) {
+						if (primary.read(stmt) == false) {
 							return false;
 						}
 					}
 					result = exprReader.boolExpr(whileExpr);
 				}
 				return true;
-			}
-			else {
-				ep.expectedError(Tk.EOL);
 			}
 		}
 		else {
@@ -85,11 +79,12 @@ public class ControlsReader extends ParserType {
 	}
 	
 	public boolean for_stmt() {
+		// FOR token flagged
 		tr.nextToken();
-		if (tr.tk == Tk.SCL_NAME) {
+		if (ep.checkToken(Tk.SCL_NAME)) {
 			String iterName = tr.tokenStr();
 			tr.nextToken();
-			if (tr.tk == Tk.IN) {
+			if (ep.checkToken(Tk.IN)) {
 				Scl start;
 				start = exprReader.sclExpr(null);
 				if (start == null) {
@@ -97,7 +92,7 @@ public class ControlsReader extends ParserType {
 					return false;
 				}
 				tr.nextToken();
-				if (tr.tk == Tk.ARROW) {
+				if (ep.checkToken(Tk.ARROW)) {
 					Scl end;
 					end = exprReader.sclExpr(null);
 					if (end == null) {
@@ -105,42 +100,44 @@ public class ControlsReader extends ParserType {
 						return false;
 					}
 					tr.nextToken();
-					if (tr.tk == Tk.COLON) {
+					if (ep.checkToken(Tk.COLON)) {
 						ArrayList<String> stmts = new ArrayList<>();
-						String newLine = primaryReader.readNewLine();
+						String newLine = input.readLine();
 						while (!newLine.matches("\\s*\\b(?:end)\\b")) {
 							stmts.add(newLine);
-							newLine = primaryReader.readNewLine();
+							newLine = input.readLine();
 						}
 						Scl iterator = new Scl(start);
-						this.setScl(iterName, iterator);
+						setScl(iterName, iterator);
 						while (Scl.lesser(iterator, end)) {
 							for (String stmt : stmts) {
-								if (primaryReader.read(stmt) == false) {
+								if (primary.read(stmt) == false) {
 									return false;
 								}
 							}
 							iterator = Scl.add(iterator, Scl.ONE);
-							this.setScl(iterName, iterator);
+							setScl(iterName, iterator);
 						}
 						return true;
 					}
-					else {
-						ep.expectedError(Tk.COLON);
-					}
-				}
-				else {
-					ep.expectedError(Tk.ARROW);
 				}
 			}
-			else {
-				ep.expectedError(Tk.IN);
-			}
-		}
-		else {
-			ep.expectedError(Tk.SCL_NAME);
 		}
 		return false;
 	}
+	
+//	public boolean function_stmt() {
+//		// DEF token flagged
+//		tr.nextToken();
+//		if (ep.checkToken(Tk.FUNC_NAME)) {
+//			tr.nextToken();
+//			if (ep.checkToken(Tk.LPAREN)) {
+//				//TODO: FINISH!!!
+//			}
+//		}
+//		else {
+//			ep.expectedError(Tk.FUNC_NAME);
+//		}
+//	}
 	
 }

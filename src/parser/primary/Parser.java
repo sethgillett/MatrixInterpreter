@@ -1,12 +1,11 @@
 package parser.primary;
-import java.io.BufferedReader;
-import java.io.IOException;
 
-import parser.CmdReader;
-import parser.ControlsReader;
-import parser.ExprReader;
-import parser.InputReader;
-import parser.VarReader;
+import io.Input;
+import parser.readers.CmdReader;
+import parser.readers.ControlsReader;
+import parser.readers.ExprReader;
+import parser.readers.InputReader;
+import parser.readers.VarReader;
 import tokens.Tk;
 
 /**
@@ -16,30 +15,18 @@ import tokens.Tk;
  */
 public class Parser extends ParserType {	
 	/**
-	 * The primary input reader
-	 */
-	private BufferedReader reader;
-	/**
 	 * Instantiates the token reader, error printer, and all other classes
 	 * @param s The primary scanner
 	 */
-	public Parser(BufferedReader br) {
+	public Parser(Input input) {
 		// Initializes token reader, registries, and error printer
 		super();
 		// Initialize sub parsers
-		cmdReader = new CmdReader(this);
-		varReader = new VarReader(this);
-		exprReader = new ExprReader(this);
-		inpReader = new InputReader(this);
-		controlsReader = new ControlsReader(this);
-		// Connect all the parsers
-		cmdReader.connect(this);
-		varReader.connect(this);
-		exprReader.connect(this);
-		inpReader.connect(this);
-		controlsReader.connect(this);
-		// Set reference to primary reader
-		this.reader = br;
+		cmdReader = new CmdReader();
+		varReader = new VarReader();
+		exprReader = new ExprReader();
+		inpReader = new InputReader();
+		controlsReader = new ControlsReader();
 	}
 	
 	/**
@@ -60,7 +47,7 @@ public class Parser extends ParserType {
 			return cmdReader.nullCmd();
 		}
 		// Look for a control statement
-		else if (tr.tk == Tk.IF || tr.tk == Tk.WHILE || tr.tk == Tk.FOR) {
+		else if (Tk.isControlTk(tr.tk)) {
 			switch(tr.tk) {
 			case IF:
 				return controlsReader.if_stmt();
@@ -68,6 +55,8 @@ public class Parser extends ParserType {
 				return controlsReader.for_stmt();
 			case WHILE:
 				return controlsReader.while_stmt();
+//			case DEF:
+//				return controlsReader.function_stmt();
 			default:
 				return false;
 			}
@@ -90,6 +79,11 @@ public class Parser extends ParserType {
 					return varReader.mtxAssign();
 				}
 			}
+			else if (Tk.isExprTk(tr.tk)) {
+				// If it's an expression print out the value of the expression
+				tr.restartLine();
+				return print(exprReader.expr(null));
+			}
 			else if (tr.tk == Tk.EOL) {
 				// If there is no next token, print out the value of that scalar
 				tr.prevToken();
@@ -101,9 +95,7 @@ public class Parser extends ParserType {
 			}
 		}
 		// The statement is an expression
-		else if (tr.tk == Tk.NOT_OP || tr.tk == Tk.ADD_OP
-				|| tr.tk == Tk.SUB_OP || tr.tk == Tk.NUM_LIT
-				|| tr.tk == Tk.LPAREN) {
+		else if (Tk.isExprTk(tr.tk)) {
 			// If it's an expression print out the value of the expression
 			tr.restartLine();
 			return print(exprReader.expr(null));
@@ -112,15 +104,6 @@ public class Parser extends ParserType {
 		else {
 			ep.expectedError("arithmetic expression, command, or assignment");
 			return false;
-		}
-	}
-	
-	public String readNewLine() {
-		try {
-			return reader.readLine();
-		} catch (IOException e) {
-			ep.internalError("Reading of new line failed");
-			return null;
 		}
 	}
 	

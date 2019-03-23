@@ -1,4 +1,5 @@
 package errors;
+import io.Output;
 import tokens.Tk;
 import tokens.TokenReader;
 
@@ -24,7 +25,7 @@ public class ErrorPrinter {
 		// Prints pointer to the token that caused the error
 		tr.tokenPtr();
 		// Prints what token was expected and what token was gotten
-		System.out.printf("ERROR\n\nExpected '%s', got '%s'\n", expected, tr.tokenStr());
+		Output.printf("ERROR\n\nExpected %s, got %s\n", expected, tr.tokenStr());
 	}
 	
 	/**
@@ -38,6 +39,18 @@ public class ErrorPrinter {
 		}
 		expectedError(errorStr);
 	}
+	/**
+	 * Checks for a token and reports an error if it's not found
+	 * @param expected The expected token
+	 * @return True if found, false otherwise
+	 */
+	public boolean checkToken(Tk expected) {
+		if (tr.tk != expected) {
+			expectedError(expected);
+			return false;
+		}
+		return true;
+	}
 	
 	/**
 	 * An error with a custom message
@@ -46,7 +59,7 @@ public class ErrorPrinter {
 	 */
 	public void customError(String msg, Object...args) {
 		// Prints the error message and any arguments
-		System.out.printf("ERROR: " + msg + "\n", args);
+		Output.printf("ERROR: " + msg + "\n", args);
 	}
 	
 	/**
@@ -55,6 +68,6 @@ public class ErrorPrinter {
 	 * @param args Any additional arguments
 	 */
 	public void internalError(String msg, Object...args) {
-		System.out.printf("INTERNAL ERROR: " + msg + "\n", args);
+		Output.printf("INTERNAL ERROR: " + msg + "\n", args);
 	}
 }

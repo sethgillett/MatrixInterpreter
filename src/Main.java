@@ -1,38 +1,58 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.function.Consumer;
 
+import io.Input;
+import io.Output;
 import parser.primary.Parser;
 
 public class Main {
 	
 	public static void main(String[] args) {
-		try {
-			REPL();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		REPL();
 	}
 	
-	public static void REPL() throws IOException {
-		//Scanner s = new Scanner(System.in);
+	private static Input terminalInput() {
+		// New input reader
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		
-		Parser p = new Parser(br);
-		
-		String input = "";
+		return new Input(
+				() -> {return br.readLine();},	// Method to read input
+				() -> {							// Method to close input stream
+					try {
+						br.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+	}
+	
+	private static Consumer<String> terminalOutput() {
+		// Outputs to the console
+		return (value -> System.out.print(value));
+	}
+	
+	public static void REPL() {
+		// Module for user output
+		Output.output = terminalOutput();
+		// Module for user input
+		Input input = terminalInput();
+		// Primary parser
+		Parser p = new Parser(input);
+		// String for reading input
+		String inputLine = "";
 		
 		while (true) {
-			System.out.print(">>> ");
-			input = br.readLine();
-			
-			if (input.matches("^\\s*(exit|quit)\\s*$")) {
+			Output.print(">>> ");
+			inputLine = input.readLine();
+			// Program exit condition
+			if (inputLine.matches("^\\s*\\b(exit|quit)\\b\\s*$")) {
 				break;
 			}
 			
-			p.read(input);
+			p.read(inputLine);
 		}
 		
-		br.close();
+		input.close();
 	}
 }

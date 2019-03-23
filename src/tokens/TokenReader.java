@@ -1,6 +1,8 @@
 package tokens;
 import java.util.ArrayList;
 
+import io.Output;
+
 public class TokenReader {
 	/**
 	 * The current token
@@ -140,10 +142,10 @@ public class TokenReader {
 			}
 		}
 		if (found == false) {
-			// Prints a pointer to the unrecognized token
-			System.out.printf("%" + (lineIdx+5) + "s", "^");
-			System.out.println(" unrecognized token");
-			tkHst.add(new ReadToken(lineIdx, Tk.ERROR));
+			// Attempts to read the error causing token
+			String errorToken = currentLine.substring(lineIdx, endOfErrorToken());
+			// Adds the error token to the history
+			tkHst.add(new ReadToken(lineIdx, Tk.ERROR, errorToken));
 			return;
 		}
 	}
@@ -161,7 +163,7 @@ public class TokenReader {
 	 */
 	public void tokenPtr() {
 		// Prints a pointer to the beginning index of the previous token
-		System.out.printf("%" + (tkHst.get(tkHstIdx - 1).idx + 5) + "s", "^");
+		Output.printf("%" + (tkHst.get(tkHstIdx - 1).idx + 5) + "s", "^");
 	}
 	
 	/**
@@ -171,6 +173,21 @@ public class TokenReader {
 		while (lineIdx < currentLine.length() && currentLine.charAt(lineIdx) == ' ') {
 			lineIdx++;
 		}
+	}
+	
+	/**
+	 * Attempts to find the end of an error causing token
+	 * @return The ending index of the error causing token
+	 */
+	private int endOfErrorToken() {
+		int errorEndIdx = lineIdx;
+		while (errorEndIdx < currentLine.length() && 
+				currentLine.charAt(errorEndIdx) != ' ' &&
+				currentLine.charAt(errorEndIdx) != '(' &&
+				currentLine.charAt(errorEndIdx) != ')') {
+			errorEndIdx ++;
+		}
+		return errorEndIdx;
 	}
 	
 }
