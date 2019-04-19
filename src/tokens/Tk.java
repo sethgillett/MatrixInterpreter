@@ -18,10 +18,7 @@ public enum Tk implements Comparable<Tk> {
 	// PRIORITY 1: Keywords
 	IF(1, "\\b(?:if)\\b"), FOR(1, "\\b(?:for)\\b"), IN(1, "\\b(?:in)\\b"),
 	BY(1, "\\b(?:by)\\b"), WHILE(1, "\\b(?:while)\\b"), DEF(1, "\\b(?:def)\\b"),
-	// PRIORITY 2: Language defined commands
-	NULL_CMD(2, "\\b(?:del|prn|print)(?=\\(.*?\\))\\b"),
-	VAR_CMD(2, "\\b(?:id|zero)(?=\\(.*?\\))\\b"),
-	MTX_CMD(2, "\\b(?:[A-Z][a-z]*)\\.(?:.+)(?=\\(.*?\\))\\b"),
+	RETURN(1, "\\b(?:return)\\b"),
 	// PRIORITY 10-15: Math operators
 	EXP_OP(10, "\\^"), MULT_OP(11, "\\*"), DIV_OP(12, "\\/"),
 	ADD_OP(13, "\\+"), SUB_OP(14, "\\-"), NEG_OP(15, null),
@@ -31,8 +28,7 @@ public enum Tk implements Comparable<Tk> {
 	AND_OP(18, "\\&\\&"), OR_OP(19, "\\|\\|"), NOT_OP(20, "\\!"),
 	// PRIORITY 50+: User defined symbols
 	FUNC_NAME(50, "\\b(?:[A-Za-z_]+)(?=\\(.*\\))"),
-	MTX_NAME(50, "(?:[A-Z][a-z]*\\b)(?!\\()"),
-	SCL_NAME(50, "(?:[a-z]+\\b)(?!\\()"),
+	VAR_NAME(50, "\\b(?:[A-Za-z_]+\\b)(?!\\()"),
 	NUM_LIT(51, "(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?");
 	/**
 	 * The order of priority for tokens
@@ -93,24 +89,21 @@ public enum Tk implements Comparable<Tk> {
 				|| tk == Tk.OR_OP || tk == Tk.NOT_OP);
 	}
 	
+	public static boolean isParen(Tk tk) {
+		return (tk == Tk.LPAREN || tk == Tk.RPAREN);
+	}
+	
 	public static boolean isExprTk(Tk tk) {
 		return (isMathOp(tk) || isBoolOp(tk) || isParen(tk)
-				|| tk == Tk.NUM_LIT || tk == Tk.VAR_CMD
-				|| tk == Tk.SCL_NAME || tk == Tk.MTX_NAME);
+				|| tk == Tk.NUM_LIT || tk == Tk.FUNC_NAME
+				|| tk == Tk.VAR_NAME);
 	}
 	
 	public static boolean isControlTk(Tk tk) {
 		return (tk == Tk.IF || tk == Tk.WHILE
 				|| tk == Tk.FOR || tk == Tk.DEF);
 	}
-	/**
-	 * Is this token a ( or a )
-	 * @param tk
-	 * @return True or false
-	 */
-	public static boolean isParen(Tk tk) {
-		return (tk == Tk.LPAREN || tk == Tk.RPAREN);
-	}
+
 	
 	/**
 	 * If this token is greater than other
@@ -128,10 +121,6 @@ public enum Tk implements Comparable<Tk> {
 			return "+ operator";
 		case ASSIGNMENT_OP:
 			return "= (assignment) operator";
-		case NULL_CMD:
-			return "command without return value";
-		case VAR_CMD:
-			return "command with return value";
 		case COMMA:
 			return "comma";
 		case DIV_OP:
@@ -146,8 +135,8 @@ public enum Tk implements Comparable<Tk> {
 			return "left bracket";
 		case LPAREN:
 			return "left parantheses";
-		case MTX_NAME:
-			return "matrix name";
+		case VAR_NAME:
+			return "variable name";
 		case MULT_OP:
 			return "* operator";
 		case NEG_OP:
@@ -158,8 +147,6 @@ public enum Tk implements Comparable<Tk> {
 			return "]";
 		case RPAREN:
 			return ")";
-		case SCL_NAME:
-			return "scalar name";
 		case SUB_OP:
 			return "- (subtraction) operator";
 		case TYPE:
@@ -184,8 +171,6 @@ public enum Tk implements Comparable<Tk> {
 			return "< operator";
 		case LESS_OR_EQUAL:
 			return "<= operator";
-		case MTX_CMD:
-			return "mtx_name.cmd(...)";
 		case OR_OP:
 			return "|| opeartor";
 		case WHILE:
@@ -200,6 +185,8 @@ public enum Tk implements Comparable<Tk> {
 			return "'def' command";
 		case FUNC_NAME:
 			return "function name";
+		case RETURN:
+			return "return";
 		default:
 			return null;
 		}

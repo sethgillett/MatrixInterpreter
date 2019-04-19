@@ -3,56 +3,44 @@ package parser.readers;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
 import parser.primary.ParserType;
 import tokens.Tk;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
+import vars.function.Function;
+import vars.Var;
+import vars.bool.Bool;
 
 public class ExprReader extends ParserType {
 	
-	public Mtx mtxExpr(ArrayList<Object> postfix) {
-		Object result = expr(postfix);
-		try {
-			return (Mtx) result;
+	public Bool boolExpr(List<Object> postfix) {
+		Var result = evalExpr(postfix);
+		if (result instanceof Bool) {
+			return (Bool) result;
 		}
-		catch (ClassCastException e) {
-			ep.customError("Expression didn't result in matrix");
+		else {
+			ParserType.ep.customError("Expression didn't result in bool");
 			return null;
 		}
 	}
 	
-	public Scl sclExpr(ArrayList<Object> postfix) {
-		Object result = expr(postfix);
-		try {
+	public Scl sclExpr(List<Object> postfix) {
+		Var result = evalExpr(postfix);
+		if (result instanceof Scl) {
 			return (Scl) result;
 		}
-		catch (ClassCastException e) {
-			ep.customError("Expression didn't result in scalar");
+		else {
+			ParserType.ep.customError("Expression didn't result in scalar");
 			return null;
 		}
 	}
 	
-	public Boolean boolExpr(ArrayList<Object> postfix) {
-		Object result = expr(postfix);
-		try {
-			return (Boolean) result;
-		}
-		catch(ClassCastException e) {
-			ep.customError("Expression didn't result in true/false");
-			return null;
-		}
-	}
-	
-	public Object expr(ArrayList<Object> postfix) {
+	public Var evalExpr(List<Object> postfix) {
 		if (postfix == null) {
-			// If any part fails return null
-			// Read the expression
-			ArrayList<Object> infix = readExpr();
-			// If the expression can't be read return null
-			if (infix == null) return null;
-			// Convert the expression from infix to postfix
-			postfix = toPostfix(infix);
+			ep.internalError("Null expression being evaluated");
+			return null;
 		}
 		try {
 			// Return the result
@@ -66,9 +54,9 @@ public class ExprReader extends ParserType {
 		}
 	}
 	
-	public ArrayList<Object> getExpr() {
+	public List<Object> getPostfixExpr() {
 		// Read the expression
-		ArrayList<Object> infix = readExpr();
+		List<Object> infix = readExpr();
 		// If the expression can't be read return null
 		if (infix == null) return null;
 		// Convert the expression from infix to postfix
@@ -80,16 +68,26 @@ public class ExprReader extends ParserType {
 	 * @param first The first scalar of the expression
 	 * @return The expression in infix form
 	 */
-	private ArrayList<Object> readExpr() {
+	private List<Object> readExpr() {
 		// The infix form of the expression
-		ArrayList<Object> infix = new ArrayList<>();
+		List<Object> infix = new ArrayList<>();
 		// Used to make sure all parantheses match
 		int parenCount = 0;
 		// Index in infix
 		int i = 0;
-		// Read the expression in infix form
+		
 		Tk nextTk = tr.peekNextToken();
-		while (nextTk != Tk.EOL && nextTk != Tk.COLON && nextTk != Tk.ARROW && nextTk != Tk.BY) {
+		/* 
+		 * The expression stops reading if:
+		 * - The end of line is reached
+		 * - A colon is encountered (if statements)
+		 * - An arrow is encountered (for loops)
+		 * - A by symbol is encountered (for loops)
+		 * - A comma is encountered (argument lists)
+		 */
+		while (nextTk != Tk.EOL && nextTk != Tk.COLON
+				&& nextTk != Tk.ARROW && nextTk != Tk.BY
+				&& nextTk != Tk.COMMA) {
 			tr.nextToken();
 			// If token is a "-" with nothing before, it is actually the negation operator
 			if (tr.tk == Tk.SUB_OP) {
@@ -138,25 +136,24 @@ public class ExprReader extends ParserType {
 				Scl num = new Scl(tr.tokenStr());
 				// Adds the numerical literal to expression
 				infix.add(num);
-				// Adds a * if followed by appropriate symbol
+				// Adds a * if followed by ( or a var
 				switch(tr.peekNextToken()) {
 				case LPAREN:
-				case SCL_NAME:
-				case MTX_NAME:
+				case VAR_NAME:
 					infix.add(Tk.MULT_OP);
 				default:
 					break;
 				}
 			}
-			// Adds in any scalar variables' NAMES and implicity adds * if necesssary
-			else if (tr.tk == Tk.SCL_NAME) {
-				Scl num = getScl(tr.tokenStr());
-				// If a scalar doesn't exist return null
-				if (num == null)
+			// Implicity adds * if necesssary after a var name
+			else if (tr.tk == Tk.VAR_NAME) {
+				// If it doesn't exist, return null and report an error (getVar will do this)
+				if (getVar(tr.tokenStr()) == null) {
 					return null;
-				// Adds the scalar name to the infix expression
+				}
+				// Adds the var's name to the infix expression
 				infix.add(tr.tokenStr());
-				// Adds * if followed by the appropriate symbol
+				// Adds * if followed by (
 				switch(tr.peekNextToken()) {
 				case LPAREN:
 					infix.add(Tk.MULT_OP);
@@ -164,18 +161,16 @@ public class ExprReader extends ParserType {
 					break;
 				}
 			}
-			// Adds in any matrix variables
-			else if (tr.tk == Tk.MTX_NAME) {
-				Mtx mtx = getMtx(tr.tokenStr());
-				// If a matrix doesn't exist return null
-				if (mtx == null)
-					return null;
-				infix.add(mtx);
-			}
-			else if (tr.tk == Tk.VAR_CMD) {
-				tr.prevToken();
+			else if (tr.tk == Tk.FUNC_NAME) {
+				String name = tr.tokenStr();
 				// Execute the command and add the result to the infix expression
-				Object result = cmdReader.varCmd();
+				Function func = getFunc(name);
+				// Obtain the result of the function call (including if there is no return value)
+				Var result = func.run(inpReader.readCallParams());
+				// Function failed
+				if (result == null)
+					return null;
+				// Adds the result to the infix expression
 				infix.add(result);
 			}
 			// Otherwise error
@@ -188,6 +183,14 @@ public class ExprReader extends ParserType {
 		}
 		// All parantheses matched
 		if (parenCount == 0) {
+			return infix;
+		}
+		// One unmatched right paranthesis at the END
+		else if (parenCount == -1 && infix.get(infix.size() - 1) == Tk.RPAREN) {
+			// Go back a token
+			tr.prevToken();
+			// Remove the extra paranthesis
+			infix.remove(infix.size() - 1);
 			return infix;
 		}
 		// Unmatched parantheses
@@ -206,7 +209,7 @@ public class ExprReader extends ParserType {
 	 * @param infix The expression in infix form
 	 * @return The expression in postfix form
 	 */
-	private ArrayList<Object> toPostfix(ArrayList<Object> infix) {
+	private List<Object> toPostfix(List<Object> infix) {
 		// Convert to postfix using a stack
 		Deque<Tk> exprStack = new LinkedList<>();
 		// Postfix arraylist
@@ -214,7 +217,7 @@ public class ExprReader extends ParserType {
 		
 		for (Object o : infix) {
 			// If the expression contains a scalar or matrix
-			if (o instanceof Scl || o instanceof Mtx || o instanceof String) {
+			if (o instanceof Scl || o instanceof Mtx || o instanceof String || o instanceof Bool) {
 				// Add it to the postfix expression
 				postfix.add(o);
 			}
@@ -268,22 +271,22 @@ public class ExprReader extends ParserType {
 	 * @param postfix The arithmetic expression in infix form
 	 * @return The resulting scalar
 	 */
-	private Object evaluateExpr(ArrayList<Object> postfix) {		
+	private Var evaluateExpr(List<Object> postfix) {		
 		// Perform operations described in postfix
 		Deque<Object> opStack = new LinkedList<>();
 		
 		for (Object o : postfix) {
-			if (o instanceof Scl || o instanceof Mtx || o instanceof String) {
+			if (o instanceof Var) {
+				// Push if it's a variable
 				opStack.push(o);
+			}
+			else if (o instanceof String) {
+				// Get the variable and push if it's a string
+				opStack.push(getVar((String) o));
 			}
 			else if (o instanceof Tk) {
 				Tk token = (Tk) o;
 				Object b = opStack.pop();
-				// b is a scalar's name
-				if (b instanceof String) {
-					// Get the scalar's value
-					b = getScl((String) b);
-				}
 				Object a = null;
 				// There might only be one operator for negate, plus, etc;
 				if (!opStack.isEmpty()) {
@@ -404,23 +407,23 @@ public class ExprReader extends ParserType {
 						return null;
 					}
 				}
-				else if (a instanceof Boolean && b instanceof Boolean) {
+				else if (a instanceof Bool && b instanceof Bool) {
 					switch(token) {
 					case AND_OP:
-						res = (Boolean) a && (Boolean) b;
+						res = ((Bool) a).val() && ((Bool) b).val();
 						break;
 					case OR_OP:
-						res = (Boolean) a || (Boolean) b;
+						res = ((Bool) a).val() || ((Bool) b).val();
 						break;
 					default:
 						ep.customError("Invalid token %s between true/false expressions", token);
 						return null;
 					}
 				}
-				else if (a == null && b instanceof Boolean) {
+				else if (a == null && b instanceof Bool) {
 					switch(token) {
 					case NOT_OP:
-						res = !(Boolean) b;
+						res = !((Bool) b).val();
 						break;
 					default:
 						ep.customError("Invalid token %s for single true/false", token);
@@ -437,7 +440,14 @@ public class ExprReader extends ParserType {
 		}
 		// The last scalar on the stack is the answer
 		if (opStack.size() == 1) {
-			return opStack.pop();
+			try {
+				Var result = (Var) opStack.peek();
+				return result;
+			}
+			catch (ClassCastException e) {
+				ep.internalError("Last operator on the stack '%s' was not a var", opStack.peek());
+				return null;
+			}
 		}
 		else {
 			ep.customError("Expression evaluation failed");

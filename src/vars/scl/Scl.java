@@ -1,11 +1,13 @@
 package vars.scl;
 
+import vars.Var;
+
 /**
  * Scalars of any type, abstract or literal
  * @author Seth Gillett
  *
  */
-public class Scl {
+public class Scl extends Var {
 	/**
 	 * The variable being stored
 	 */

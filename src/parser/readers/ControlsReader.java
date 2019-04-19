@@ -1,18 +1,31 @@
 package parser.readers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import parser.primary.ParserType;
 import tokens.Tk;
+import vars.Var;
+import vars.bool.Bool;
 import vars.scl.Scl;
 
 public class ControlsReader extends ParserType {
 	
-	public boolean if_stmt() {
+	/**
+	 * <p>if condition:
+	 * 	<li>stmt</li>
+	 * 	<li>stmt</li>
+	 * 	<li>stmt</li>
+	 * </p>
+	 * @return The var returned (if any)
+	 */
+	public Var ifStmt() {
 		// IF token flagged
-		Boolean result = exprReader.boolExpr(null);
-		if (result == null)
-			return false;
+		Bool ifCondition = exprReader.boolExpr(exprReader.getPostfixExpr());
+		if (ifCondition == null)
+			return null;
+		if (ifCondition == Bool.False)
+			return Bool.Null;
 		tr.nextToken();
 		if (tr.tk == Tk.COLON) {
 			tr.nextToken();
@@ -21,16 +34,26 @@ public class ControlsReader extends ParserType {
 				String newLine = input.readLine();
 				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
 					// Only executes the line if the if statement was true
-					if (result)
+					if (ifCondition.val())
 						stmts.add(newLine);
 					newLine = input.readLine();
 				}
 				for (String stmt : stmts) {
-					if (primary.read(stmt) == false) {
-						return false;
+					Var result = primary.read(stmt);
+					// ERROR
+					if (result == null) {
+						return null;
+					}
+					// no return value
+					else if (primary.read(stmt) == Var.Null) {
+						continue;
+					}
+					// return value
+					else {
+						return result;
 					}
 				}
-				return true;
+				return Bool.True;
 			}
 			else {
 				ep.expectedError(Tk.EOL);
@@ -39,65 +62,84 @@ public class ControlsReader extends ParserType {
 		else {
 			ep.customError("Expected : after if statement");
 		}
-		return false;
+		return null;
 	}
-	
-	public boolean while_stmt() {
+	/**
+	 * <p>while condition:
+	 * 	<li>stmt</li>
+	 * 	<li>stmt</li>
+	 * 	<li>stmt</li>
+	 * </p>
+	 * @return The var returned (if any)
+	 */
+	public Var whileStmt() {
 		// WHILE token flagged
-		ArrayList<Object> whileExpr = exprReader.getExpr();
-		Boolean result = exprReader.boolExpr(whileExpr);
-		if (result == null)
-			return false;
+		List<Object> whileExpr = exprReader.getPostfixExpr();
+		Bool whileCondition = exprReader.boolExpr(whileExpr);
+		if (whileCondition == null)
+			return null;
+		if (whileCondition == Bool.False)
+			return null;
 		tr.nextToken();
 		if (tr.tk == Tk.COLON) {
 			tr.nextToken();
 			if (ep.checkToken(Tk.EOL)) {
-				ArrayList<String> stmts = new ArrayList<>();
+				List<String> stmts = new ArrayList<>();
 				String newLine = input.readLine();
 				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
 					// Only executes the line if the if statement was true
-					if (result) {
+					if (whileCondition.val()) {
 						stmts.add(newLine);
 					}
 					newLine = input.readLine();
 				}
-				while (result) {
+				while (whileCondition.val()) {
 					for (String stmt : stmts) {
-						if (primary.read(stmt) == false) {
-							return false;
+						Var result = primary.read(stmt);
+						// ERROR
+						if (result == null) {
+							return null;
+						}
+						// no return value
+						else if (primary.read(stmt) == Var.Null) {
+							continue;
+						}
+						// return value
+						else {
+							return result;
 						}
 					}
-					result = exprReader.boolExpr(whileExpr);
+					whileCondition = exprReader.boolExpr(whileExpr);
 				}
-				return true;
+				return Bool.Null;
 			}
 		}
 		else {
 			ep.customError("Expected : after while statement");
 		}
-		return false;
+		return null;
 	}
 	
-	public boolean for_stmt() {
+	public Var forStmt() {
 		// FOR token flagged
 		tr.nextToken();
-		if (ep.checkToken(Tk.SCL_NAME)) {
+		if (ep.checkToken(Tk.VAR_NAME)) {
 			String iterName = tr.tokenStr();
 			tr.nextToken();
 			if (ep.checkToken(Tk.IN)) {
 				Scl start;
-				start = exprReader.sclExpr(null);
+				start = exprReader.sclExpr(exprReader.getPostfixExpr());
 				if (start == null) {
-					ep.expectedError(Tk.NUM_LIT, Tk.SCL_NAME);
-					return false;
+					ep.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
+					return null;
 				}
 				tr.nextToken();
 				if (ep.checkToken(Tk.ARROW)) {
 					Scl end;
 					end = exprReader.sclExpr(null);
 					if (end == null) {
-						ep.expectedError(Tk.NUM_LIT, Tk.SCL_NAME);
-						return false;
+						ep.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
+						return null;
 					}
 					tr.nextToken();
 					if (ep.checkToken(Tk.COLON)) {
@@ -108,22 +150,22 @@ public class ControlsReader extends ParserType {
 							newLine = input.readLine();
 						}
 						Scl iterator = new Scl(start);
-						setScl(iterName, iterator);
+						setVar(iterName, iterator);
 						while (Scl.lesser(iterator, end)) {
 							for (String stmt : stmts) {
-								if (primary.read(stmt) == false) {
-									return false;
+								if (primary.read(stmt) == null) {
+									return null;
 								}
 							}
 							iterator = Scl.add(iterator, Scl.ONE);
-							setScl(iterName, iterator);
+							setVar(iterName, iterator);
 						}
-						return true;
+						return Var.Null;
 					}
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 	
 //	public boolean function_stmt() {

@@ -49,9 +49,7 @@ public class ReadToken {
 	}
 	
 	public static boolean tokenStrNeeded(Tk token) {
-		return (token == Tk.ERROR || token == Tk.MTX_NAME ||
-				token == Tk.SCL_NAME || token == Tk.NUM_LIT ||
-				token == Tk.NULL_CMD || token == Tk.VAR_CMD ||
-				token == Tk.FUNC_NAME);
+		return (token == Tk.ERROR || token == Tk.VAR_NAME ||
+				token == Tk.NUM_LIT || token == Tk.FUNC_NAME);
 	}
 }

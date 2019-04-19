@@ -1,8 +1,9 @@
 package vars.mtx;
 
+import vars.Var;
 import vars.scl.Scl;
 
-public abstract class Mtx {
+public abstract class Mtx extends Var {
 	public int rCount, cCount;
 	public abstract Scl get(int row, int col);
 	public abstract Mtx set(int row, int col, Scl s);
@@ -212,6 +213,9 @@ public abstract class Mtx {
 			maxLast = Math.max(len, maxLast);
 		}
 		StringBuilder s = new StringBuilder();
+		
+		s.append("Mtx = \n");
+		
 		for (int r=0; r<rCount; r++) {
 			s.append("[");
 			for (int c=0; c<cCount; c++) {

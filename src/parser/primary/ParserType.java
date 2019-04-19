@@ -1,17 +1,16 @@
 package parser.primary;
 
-import java.util.HashMap;
-
 import errors.ErrorPrinter;
 import io.Input;
 import io.Output;
-import parser.functions.Function;
-import parser.readers.CmdReader;
 import parser.readers.ControlsReader;
 import parser.readers.ExprReader;
 import parser.readers.InputReader;
 import parser.readers.VarReader;
 import tokens.TokenReader;
+import vars.Var;
+import vars.bool.Bool;
+import vars.function.Function;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
 
@@ -28,24 +27,7 @@ public abstract class ParserType {
 	/**
 	 * Used to print error messages
 	 */
-	protected static ErrorPrinter ep = new ErrorPrinter(tr);
-	/**
-	 * Variable registry for scalars
-	 */
-	protected static HashMap<String, Scl> sclReg = new HashMap<>();
-	
-	/**
-	 * Variable registry for matrices
-	 */
-	protected static HashMap<String, Mtx> mtxReg = new HashMap<>();
-	/**
-	 * Function registry
-	 */
-	protected static HashMap<String, Function> funcReg = new HashMap<>();
-	/**
-	 * Deals with all direct commands
-	 */
-	protected static CmdReader cmdReader;
+	public static ErrorPrinter ep = new ErrorPrinter(tr);
 	/**
 	 * Deals with assignments to matrices and scalars
 	 */
@@ -70,157 +52,17 @@ public abstract class ParserType {
 	 * The primary parser
 	 */
 	protected static Parser primary;
-	
 	/**
-	 * Gets a scalar or returns null and prints an error if it doesn't exist or has no value
-	 * @param name The name of the scalar
-	 * @return The scalar or null
+	 * The function at the top of the callstack
 	 */
-	public static Scl getScl(String name) {
-		if (hasScl(name)) {
-			Scl scl = sclReg.get(name);
-			if (scl == null) {
-				ep.customError("'%s' has no value", name);
-				return null;
-			}
-			else {
-				return scl;
-			}
-		}
-		else {
-			ep.customError("'%s' does not exist", name);
-			return null;
-		}
-	}
+	private static Function currentActive;
 	
 	/**
-	 * Gets a matrix or returns null and throws an error if it doesn't exist or has no value
-	 * @param name The name of the matrix
-	 * @return The matrix or null
-	 */
-	public static Mtx getMtx(String name) {
-		if (hasMtx(name)) {
-			Mtx mtx = mtxReg.get(name);
-			if (mtx == null) {
-				ep.customError("'%s' has no value", name);
-				return null;
-			}
-			else {
-				return mtx;
-			}
-		}
-		else {
-			ep.customError("'%s' does not exist", name);
-			return null;
-		}
-	}
-	
-	/**
-	 * Gets a function by name
-	 * @param name The name of the function
-	 * @return The function
-	 */
-	public static Function getFunc(String name) {
-		if (hasFunc(name)) {
-			Function func = funcReg.get(name);
-			if (func == null) {
-				ep.internalError("Function %s not registered", name);
-				return null;
-			}
-			else {
-				return func;
-			}
-		}
-		else {
-			ep.customError("Function %s does not exist", name);
-			return null;
-		}
-	}
-	
-	/**
-	 * Adds a scalar to the scalar registry
-	 * @param name The name of the scalar
-	 * @param scl The scalar
-	 */
-	public static void setScl(String name, Scl scl) {
-		sclReg.put(name, scl);
-	}
-	
-	/**
-	 * Adds a matrix to the scalar registy
-	 * @param name The name of the matrix
-	 * @param mtx The matrix
-	 */
-	public static void setMtx(String name, Mtx mtx) {
-		mtxReg.put(name, mtx);
-	}
-	
-	/**
-	 * Adds a function to the function registry
-	 * @param name The name of the function
+	 * Sets the current active function to a new function
 	 * @param func The function
 	 */
-	public static void setFunc(String name, Function func) {
-		funcReg.put(name, func);
-	}
-	
-	/**
-	 * Returns true if the specified scalar exists
-	 * @param name The name of the scalar
-	 * @return True or false
-	 */
-	public static boolean hasScl(String name) {
-		return sclReg.containsKey(name);
-	}
-	
-	/**
-	 * Returns true if the specified matrix exists
-	 * @param name The name of the matrix
-	 * @return True or false
-	 */
-	public static boolean hasMtx(String name) {
-		return mtxReg.containsKey(name);
-	}
-	
-	/**
-	 * Returns true if the specified function exists
-	 * @param name The name of the function
-	 * @return True or false
-	 */
-	public static boolean hasFunc(String name) {
-		return funcReg.containsKey(name);
-	}
-	
-	/**
-	 * Deletes a scalar or throws an error if it doesn't exist
-	 * @param name The name of the scalar
-	 * @return 
-	 */
-	public static boolean delScl(String name) {
-		if (hasScl(name)) {
-			sclReg.remove(name);
-			return true;
-		}
-		else {
-			ep.customError("Scalar %s doesn't exist and can't be deleted", name);
-			return false;
-		}
-	}
-	
-	/**
-	 * Deletes a matrix or throws an error if it doesn't exist
-	 * @param name The name of the matrix
-	 * @return Whether the run was successful
-	 */
-	public static boolean delMtx(String name) {
-		if (hasMtx(name)) {
-			mtxReg.remove(name);
-			return true;
-		}
-		else {
-			ep.customError("Matrix %s doesn't exist and can't be deleted", name);
-			return false;
-		}
+	public static void setCurrentActive(Function func) {
+		currentActive = func;
 	}
 	
 	/**
@@ -229,63 +71,81 @@ public abstract class ParserType {
 	 * @return Whether the run was successful
 	 */
 	public static boolean print(String varName) {
-		if (sclReg.containsKey(varName)) {
-			Scl s = sclReg.get(varName);
-			if (s == null) {
-				ep.customError("Scl '%s' has no value assigned", varName);
-				return false;
-			}
-			else {
-				return print(sclReg.get(varName));
-			}
-		}
-		else if (mtxReg.containsKey(varName)) {
-			Mtx m = mtxReg.get(varName);
-			if (m == null) {
-				ep.customError("Mtx '%s' has no value assigned", varName);
-				return false;
-			}
-			else {
-				print(mtxReg.get(varName));
-				return true;
-			}
-		}
-		else {
-			ep.customError("'%s' does not exist", varName);
-			return false;
-		}
+		return currentActive.printVar(varName);
 	}
 	
 	
 	/**
-	 * An overrided version of print that <b>directly</b> takes in a scalar or matrix
+	 * An overrided version of print that <b>directly</b> takes in a scalar, matrix, function, or bool
 	 * @param var The scalar or matrix to print
 	 * @return 
 	 */
-	protected static boolean print(Object var) {
+	protected static boolean print(Var var) {
+		if (var != null) {
+			Output.println(var);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Attempts to get a var by name
+	 * @param name The name of the var
+	 * @return The var
+	 */
+	public Var getVar(String name) {
+		return currentActive.getLocalVar(name);
+	}
+	
+	public void setVar(String name, Var val) {
+		currentActive.setLocalVar(name, val);
+	}
+	
+	public boolean hasVar(String name) {
+		return currentActive.hasLocalVar(name);
+	}
+	
+	public Scl getScl(String name) {
+		Var var = getVar(name);
 		if (var instanceof Scl) {
-			Output.println(var);
-			return true;
-		}
-		else if (var instanceof Boolean) {
-			Output.println((Boolean) var? "True":"False");
-			return true;
-		}
-		else if (var instanceof Mtx) {
-			Output.println("Mtx =");
-			Output.println(var);
-			return true;
-		}
-		else if (var instanceof String) {
-			return print((String) var);
-		}
-		else if (var == null) {
-//			ep.internalError("Var cannot be printed because it is null");
-			return false;
+			return (Scl) var;
 		}
 		else {
-			ep.internalError("Var '%s' cannot be printed because it is not of the correct type", var);
-			return false;
+			ep.customError("Expected scalar, got %s", name);
+			return null;
+		}
+	}
+	
+	public Mtx getMtx(String name) {
+		Var var = getVar(name);
+		if (var instanceof Scl) {
+			return (Mtx) var;
+		}
+		else {
+			ep.customError("Expected matrix, got %s", name);
+			return null;
+		}
+	}
+	
+	public Bool getBool(String name) {
+		Var var = getVar(name);
+		if (var instanceof Bool) {
+			return (Bool) var;
+		}
+		else {
+			ep.customError("Expected bool, got %s", name);
+			return null;
+		}
+	}
+	
+	public Function getFunc(String name) {
+		Var var = getVar(name);
+		if (var instanceof Function) {
+			return (Function) var;
+		}
+		else {
+			ep.customError("Expected function, got %s", name);
+			return null;
 		}
 	}
 }

@@ -1,11 +1,14 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import io.Input;
 import io.Output;
 import parser.primary.Parser;
+import vars.function.Function;
 
 public class Main {
 	
@@ -41,6 +44,12 @@ public class Main {
 		Parser p = new Parser(input);
 		// String for reading input
 		String inputLine = "";
+		// List of lines in the function
+		List<String> lines = new ArrayList<String>();
+		// REPL will be implemented as a function with lines added dynamically
+		Function main = new Function(p, null, new ArrayList<String>(), lines);
+		// Start up the function with no arguments
+		main.start(new ArrayList<>());
 		
 		while (true) {
 			Output.print(">>> ");
@@ -50,7 +59,8 @@ public class Main {
 				break;
 			}
 			
-			p.read(inputLine);
+			lines.add(inputLine);
+			main.execNextLine();
 		}
 		
 		input.close();
