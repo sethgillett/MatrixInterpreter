@@ -13,7 +13,7 @@ public class FileReader {
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(i));
 		
-		Parser p = new Parser(null);
+		Parser p = new Parser();
 		
 		String input = "";
 		

@@ -1,6 +1,5 @@
 package parser.primary;
 
-import io.Input;
 import parser.readers.ControlsReader;
 import parser.readers.ExprReader;
 import parser.readers.InputReader;
@@ -17,9 +16,8 @@ import vars.bool.Bool;
 public class Parser extends ParserType {	
 	/**
 	 * Instantiates the token reader, error printer, and all other classes
-	 * @param s The primary scanner
 	 */
-	public Parser(Input input) {
+	public Parser() {
 		// Initializes token reader, registries, and error printer
 		super();
 		// Initialize sub parsers
@@ -68,7 +66,7 @@ public class Parser extends ParserType {
 			else if (Tk.isExprTk(tr.tk)) {
 				// If it's an expression print out the value of the expression
 				tr.restartLine();
-				print(exprReader.evalExpr(null));
+				print(exprReader.evalExpr(exprReader.getPostfixExpr()));
 				return Bool.Null;
 			}
 			else if (tr.tk == Tk.EOL) {

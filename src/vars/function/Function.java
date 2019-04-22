@@ -5,133 +5,62 @@ import java.util.List;
 import java.util.Map;
 
 import io.Output;
-import parser.primary.Parser;
 import parser.primary.ParserType;
 import vars.Var;
 
-public class Function extends Var {
+public abstract class Function extends Var {
 	/**
-	 * Lines of code in the function
+	 * The parameters passed into this function
 	 */
-	private List<String> lines;
+	protected List<Var> params;
 	/**
-	 * Names of parameters in the function
+	 * Whether start has been called or not
 	 */
-	private List<String> paramsList;
-	private Map<String, Var> varReg;
-	private Parser primary;
-	private Function parent;
 	private boolean started;
-	
-	private int lineNumber;
-	
-	private Var returnValue;
-	
 	/**
-	 * Initializes a function with an arraylist of lines of code and an arraylist of parameters
-	 * @param lines List of lines of code
-	 * @param parameters List of parameters
+	 * The function's registry for local variables
 	 */
-	public Function(Parser primary, Function parent, List<String> paramsList, List<String> lines) {
-		this.primary = primary;
+	private Map<String, Var> varReg;
+	/**
+	 * The function below this one in the call stack
+	 */
+	private Function parent;
+	/**
+	 * Initializes a function with a given parent function in the call stack
+	 * @param parent The parent function
+	 */
+	public Function(Function parent) {
 		this.parent = parent;
-		this.paramsList = paramsList;
-		this.lines = lines;
 		this.started = false;
+		this.varReg = new HashMap<>();
 	}
-
 	/**
-	 * Starts the function by passing in the list of parameter values
-	 * @param params The values of the parameters the function takes in (in order)
-	 * @return Whether the run was successful
-	 */
-	public void start(List<Var> params) {
-		lineNumber = 0;
-		varReg = new HashMap<String, Var>();
-		
-		for (int i=0; i<paramsList.size(); i++) {
-			String name = paramsList.get(i);
-			Var val = Var.Null;
-			if (i < params.size()) {
-				val = params.get(i);
-			}
-			setLocalVar(name, val);
-		}
-		// Sets this function as the current active function
-		ParserType.setCurrentActive(this);
-		// Marks that the function has started
-		started = true;
-	}
-	
-	/**
-	 * Attempts to start and then execute every line in a function
-	 * @param params The values (in order) of the function's parameters
+	 * Attempts to run the function
 	 * @return Returns java's null if failed or a var (including var's null) if successful
 	 */
-	public Var run(List<Var> params) {
-		this.start(params);
-		for (int i=0; i<lines.size(); i++) {
-			if (this.execNextLine()) {
-				continue;
-			}
-			else {
-				return null;
-			}
-		}
-		this.close();
-		
-		if (this.returnValue == null) {
-			return Var.Null;
-		}
-		else {
-			return this.returnValue;
-		}
-	}
-	
+	public abstract Var run();
 	/**
-	 * Determines whether there is another line to execute
-	 * @return True or false
+	 * Makes the function active and passes in startup parameters
+	 * @param params The function's parameters
 	 */
-	public boolean hasNextLine() {
-		return (lineNumber < lines.size());
+	public void start(List<Var> params) {
+		// Stores the list of parameters
+		this.params = params;
+		// Sets this function as the current active function
+		ParserType.setCurrentActive(this);
+		// Marks that start has been called
+		this.started = true;
 	}
-	
 	/**
-	 * Attempts to execute the next line in the function (specified by lineNumber)
-	 * @return Whether the run was successful
+	 * Throws an error if the function hasn't been started yet
 	 */
-	public boolean execNextLine() {
-		if (!started) {
-			ParserType.ep.internalError("Function not started before executing a line");
+	public boolean checkStarted() {
+		if (!this.started) {
+			throwError("Function cannot be run because it hasn't been started yet");
 			return false;
 		}
-		
-		if (lineNumber == lines.size()) {
-			return false;
-		}
-		
-		primary.read(lines.get(lineNumber));
-		lineNumber ++;
-		
 		return true;
 	}
-	
-	/**
-	 * Sets ParserType's current active function to this function's parent
-	 */
-	public void close() {
-		ParserType.setCurrentActive(this.parent);
-	}
-	
-	/**
-	 * Adds a var to the local var reg
-	 * @param name The name of the var
-	 * @param val The var
-	 */
-	public void setLocalVar(String name, Var val) {
-		varReg.put(name, val);
-	}
-	
 	/**
 	 * Checks to see whether this function or its parents have a var by that name
 	 * @param name The name of the var
@@ -141,7 +70,6 @@ public class Function extends Var {
 		return (varReg.containsKey(name) || 
 				(parent != null && parent.hasLocalVar(name)));
 	}
-	
 	/**
 	 * Checks all registries for a variable, reports an error if it's not found
 	 * @param name The name of the variable
@@ -178,7 +106,14 @@ public class Function extends Var {
 		}
 		
 	}
-	
+	/**
+	 * Adds a var to the local var reg
+	 * @param name The name of the var
+	 * @param val The var
+	 */
+	public void setLocalVar(String name, Var val) {
+		varReg.put(name, val);
+	}
 	/**
 	 * Attempts to print a var
 	 * @param name The name of the var
@@ -194,4 +129,11 @@ public class Function extends Var {
 			return false;
 		}
 	}
+	/**
+	 * Sets ParserType's current active function to this function's parent
+	 */
+	public void close() {
+		ParserType.setCurrentActive(this.parent);
+	}
+	
 }

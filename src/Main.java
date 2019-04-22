@@ -1,14 +1,13 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 import io.Input;
 import io.Output;
 import parser.primary.Parser;
-import vars.function.Function;
+import parser.primary.ParserType;
+import vars.function.DynamicFunction;
 
 public class Main {
 	
@@ -39,30 +38,28 @@ public class Main {
 		// Module for user output
 		Output.output = terminalOutput();
 		// Module for user input
-		Input input = terminalInput();
+		ParserType.input = terminalInput();
 		// Primary parser
-		Parser p = new Parser(input);
+		Parser p = new Parser();
 		// String for reading input
 		String inputLine = "";
-		// List of lines in the function
-		List<String> lines = new ArrayList<String>();
 		// REPL will be implemented as a function with lines added dynamically
-		Function main = new Function(p, null, new ArrayList<String>(), lines);
+		DynamicFunction main = new DynamicFunction(p, null);
 		// Start up the function with no arguments
-		main.start(new ArrayList<>());
+		main.start(null);
 		
 		while (true) {
 			Output.print(">>> ");
-			inputLine = input.readLine();
+			inputLine = ParserType.input.readLine();
 			// Program exit condition
 			if (inputLine.matches("^\\s*\\b(exit|quit)\\b\\s*$")) {
 				break;
 			}
 			
-			lines.add(inputLine);
-			main.execNextLine();
+			main.read(inputLine);
+			main.run();
 		}
 		
-		input.close();
+		ParserType.input.close();
 	}
 }

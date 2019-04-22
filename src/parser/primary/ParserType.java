@@ -47,7 +47,7 @@ public abstract class ParserType {
 	/**
 	 * The input reader
 	 */
-	protected static Input input;
+	public static Input input;
 	/**
 	 * The primary parser
 	 */
@@ -93,19 +93,19 @@ public abstract class ParserType {
 	 * @param name The name of the var
 	 * @return The var
 	 */
-	public Var getVar(String name) {
+	public static Var getVar(String name) {
 		return currentActive.getLocalVar(name);
 	}
 	
-	public void setVar(String name, Var val) {
+	public static void setVar(String name, Var val) {
 		currentActive.setLocalVar(name, val);
 	}
 	
-	public boolean hasVar(String name) {
+	public static boolean hasVar(String name) {
 		return currentActive.hasLocalVar(name);
 	}
 	
-	public Scl getScl(String name) {
+	public static Scl getScl(String name) {
 		Var var = getVar(name);
 		if (var instanceof Scl) {
 			return (Scl) var;
@@ -116,7 +116,7 @@ public abstract class ParserType {
 		}
 	}
 	
-	public Mtx getMtx(String name) {
+	public static Mtx getMtx(String name) {
 		Var var = getVar(name);
 		if (var instanceof Scl) {
 			return (Mtx) var;
@@ -127,7 +127,7 @@ public abstract class ParserType {
 		}
 	}
 	
-	public Bool getBool(String name) {
+	public static Bool getBool(String name) {
 		Var var = getVar(name);
 		if (var instanceof Bool) {
 			return (Bool) var;
@@ -138,7 +138,7 @@ public abstract class ParserType {
 		}
 	}
 	
-	public Function getFunc(String name) {
+	public static Function getFunc(String name) {
 		Var var = getVar(name);
 		if (var instanceof Function) {
 			return (Function) var;

@@ -1,6 +1,7 @@
 package vars.mtx;
 
 import vars.Var;
+import vars.bool.Bool;
 import vars.scl.Scl;
 
 public abstract class Mtx extends Var {
@@ -66,8 +67,10 @@ public abstract class Mtx extends Var {
 	 * @return Result
 	 */
 	public static Mtx MULT(Mtx a, Mtx b) {
-		if (a.cCount != b.rCount)
+		if (a.cCount != b.rCount) {
+			throwError("Cannot multiply matrices; column count and row count do not match");
 			return null;
+		}
 		if (a instanceof IdMtx)
 			return b;
 		if (b instanceof IdMtx)
@@ -116,6 +119,7 @@ public abstract class Mtx extends Var {
 			return res;
 		}
 		else {
+			throwError("Cannot add matrices; dimensions do not match");
 			return null;
 		}
 	}
@@ -144,6 +148,7 @@ public abstract class Mtx extends Var {
 			return res;
 		}
 		else {
+			throwError("Cannot subtract matrices; dimensions do not match");
 			return null;
 		}
 	}
@@ -172,26 +177,27 @@ public abstract class Mtx extends Var {
 	 * @param b The second matrix
 	 * @return True or false
 	 */
-	public static Boolean EQUAL(Mtx a, Mtx b) {
+	public static Bool EQUAL(Mtx a, Mtx b) {
 		if (a.rCount == b.rCount && a.cCount != b.cCount) {
 			if (a instanceof IdMtx && b instanceof IdMtx) {
-				return true;
+				return Bool.True;
 			}
 			else if (a instanceof ZeroMtx && b instanceof ZeroMtx) {
-				return true;
+				return Bool.True;
 			}
 			else {
 				for (int r=0; r<a.rCount; r++) {
 					for (int c=0; c<a.cCount; c++) {
 						if (a.get(r,c) != b.get(r, c)) {
-							return false;
+							return Bool.False;
 						}
 					}
 				}
-				return true;
+				return Bool.True;
 			}
 		}
 		else {
+			throwError("Cannot check matrix equality; dimensions do not match");
 			return null;
 		}
 	}

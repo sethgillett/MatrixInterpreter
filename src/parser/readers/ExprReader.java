@@ -145,12 +145,12 @@ public class ExprReader extends ParserType {
 					break;
 				}
 			}
+			// Adds in boolean literals
+			else if (tr.tk == Tk.TRUE || tr.tk == Tk.FALSE) {
+				infix.add(tr.tk == Tk.TRUE? Bool.True : Bool.False);
+			}
 			// Implicity adds * if necesssary after a var name
 			else if (tr.tk == Tk.VAR_NAME) {
-				// If it doesn't exist, return null and report an error (getVar will do this)
-				if (getVar(tr.tokenStr()) == null) {
-					return null;
-				}
 				// Adds the var's name to the infix expression
 				infix.add(tr.tokenStr());
 				// Adds * if followed by (
@@ -162,11 +162,14 @@ public class ExprReader extends ParserType {
 				}
 			}
 			else if (tr.tk == Tk.FUNC_NAME) {
+				// TODO: SHOULD FUNCTION BE EVALUATED HERE?? (or in evaluate expr)
 				String name = tr.tokenStr();
 				// Execute the command and add the result to the infix expression
 				Function func = getFunc(name);
+				// Start the function with params
+				func.start(inpReader.readCallParams());
 				// Obtain the result of the function call (including if there is no return value)
-				Var result = func.run(inpReader.readCallParams());
+				Var result = func.run();
 				// Function failed
 				if (result == null)
 					return null;
@@ -281,8 +284,13 @@ public class ExprReader extends ParserType {
 				opStack.push(o);
 			}
 			else if (o instanceof String) {
-				// Get the variable and push if it's a string
-				opStack.push(getVar((String) o));
+				// Get the var
+				Var var = getVar((String) o);
+				// If it doesn't exist, return null
+				if (var == null)
+					return null;
+				// Push the variable to opstack if it exists
+				opStack.push(var);
 			}
 			else if (o instanceof Tk) {
 				Tk token = (Tk) o;
@@ -291,11 +299,6 @@ public class ExprReader extends ParserType {
 				// There might only be one operator for negate, plus, etc;
 				if (!opStack.isEmpty()) {
 					a = opStack.pop();
-					// a is a scalar's name
-					if (a instanceof String) {
-						// Get the scalar's value
-						a = getScl((String) a);
-					}
 				}
 				
 				Object res;

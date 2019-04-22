@@ -12,7 +12,7 @@ public enum Tk implements Comparable<Tk> {
 	// PRIORITY 0: System
 	ERROR(0, null), EOL(0, null),
 	// PRIORITY 1: Symbols
-	TYPE(1, "\\b(?:mat|scl)\\b"), LPAREN(1, "\\("), RPAREN(1, "\\)"),
+	LPAREN(1, "\\("), RPAREN(1, "\\)"),
 	ASSIGNMENT_OP(1, "="), LBRACKET(1, "\\["), RBRACKET(1, "\\]"),
 	COMMA(1, "\\,"), ARROW(1, "\\-\\>"), COLON(1, "\\:"),
 	// PRIORITY 1: Keywords
@@ -26,6 +26,8 @@ public enum Tk implements Comparable<Tk> {
 	LESS_OR_EQUAL(16,"\\<\\="), GREAT_OR_EQUAL(16,"\\>\\="),
 	GREATER_OP(17, "\\>"), LESSER_OP(17, "\\<"), EQUAL_OP(17, null),
 	AND_OP(18, "\\&\\&"), OR_OP(19, "\\|\\|"), NOT_OP(20, "\\!"),
+	// PRIORITY 30+: Literals
+	TRUE(30,"\\b(?:True)\\b"), FALSE(30, "\\b(?:False)\\b"),
 	// PRIORITY 50+: User defined symbols
 	FUNC_NAME(50, "\\b(?:[A-Za-z_]+)(?=\\(.*\\))"),
 	VAR_NAME(50, "\\b(?:[A-Za-z_]+\\b)(?!\\()"),
@@ -149,8 +151,6 @@ public enum Tk implements Comparable<Tk> {
 			return ")";
 		case SUB_OP:
 			return "- (subtraction) operator";
-		case TYPE:
-			return "mtx or scl";
 		case AND_OP:
 			return "&& operator";
 		case BY:
