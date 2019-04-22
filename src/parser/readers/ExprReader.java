@@ -6,10 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import parser.primary.ParserType;
+import tokens.FuncToken;
 import tokens.Tk;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
-import vars.function.Function;
 import vars.Var;
 import vars.bool.Bool;
 
@@ -162,19 +162,12 @@ public class ExprReader extends ParserType {
 				}
 			}
 			else if (tr.tk == Tk.FUNC_NAME) {
-				// TODO: SHOULD FUNCTION BE EVALUATED HERE?? (or in evaluate expr)
+				// Get the function's name
 				String name = tr.tokenStr();
-				// Execute the command and add the result to the infix expression
-				Function func = getFunc(name);
-				// Start the function with params
-				func.start(inpReader.readCallParams());
-				// Obtain the result of the function call (including if there is no return value)
-				Var result = func.run();
-				// Function failed
-				if (result == null)
-					return null;
-				// Adds the result to the infix expression
-				infix.add(result);
+				// Get the params to be passed in
+				List<Var> params = inpReader.readCallParams();
+				// Add the function in a token that can later be evaluated
+				infix.add(new FuncToken(name, params));
 			}
 			// Otherwise error
 			else {
@@ -219,8 +212,9 @@ public class ExprReader extends ParserType {
 		ArrayList<Object> postfix = new ArrayList<>();
 		
 		for (Object o : infix) {
-			// If the expression contains a scalar or matrix
-			if (o instanceof Scl || o instanceof Mtx || o instanceof String || o instanceof Bool) {
+			// If the expression contains a value to be operated on
+			if (o instanceof Scl || o instanceof Mtx || o instanceof String
+					|| o instanceof Bool || o instanceof FuncToken) {
 				// Add it to the postfix expression
 				postfix.add(o);
 			}
@@ -291,6 +285,15 @@ public class ExprReader extends ParserType {
 					return null;
 				// Push the variable to opstack if it exists
 				opStack.push(var);
+			}
+			else if (o instanceof FuncToken) {
+				// Evaluate the function
+				Var result = ((FuncToken) o).run();
+				// If the function call failed return null
+				if (result == null)
+					return null;
+				// Otherwise push the result to opstack
+				opStack.push(result);
 			}
 			else if (o instanceof Tk) {
 				Tk token = (Tk) o;
