@@ -40,11 +40,11 @@ public class Main {
 		// Module for user input
 		ParserType.input = terminalInput();
 		// Primary parser
-		Parser p = new Parser();
+		ParserType.primary = new Parser();
 		// String for reading input
 		String inputLine = "";
 		// REPL will be implemented as a function with lines added dynamically
-		DynamicFunction main = new DynamicFunction(p);
+		DynamicFunction main = new DynamicFunction(ParserType.primary);
 		// Start up the function with no arguments
 		main.start(null);
 		

@@ -136,5 +136,4 @@ public abstract class Function extends Var {
 	public void close() {
 		ParserType.setCurrentActive(this.parent);
 	}
-	
 }

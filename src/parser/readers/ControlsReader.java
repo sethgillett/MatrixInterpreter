@@ -186,6 +186,7 @@ public class ControlsReader extends ParserType {
 				}
 				Function func = new MIFunction(primary, paramNames, lines);
 				setVar(funcName, func);
+				return true;
 			}
 		}
 		return false;

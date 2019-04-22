@@ -24,6 +24,13 @@ public class FuncToken {
 	public Var run() {
 		Function func = ParserType.getFunc(name);
 		func.start(params);
-		return func.run();
+		Var result = func.run();
+		func.close();
+		return result;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s%s", name, params).replace("[", "(").replace("]", ")");
 	}
 }

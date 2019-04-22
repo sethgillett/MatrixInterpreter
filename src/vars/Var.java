@@ -17,4 +17,9 @@ public abstract class Var {
 	}
 }
 
-class NULL extends Var {}
+class NULL extends Var {
+	@Override
+	public String toString() {
+		return "Null";
+	}
+}

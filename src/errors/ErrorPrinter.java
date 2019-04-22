@@ -16,18 +16,6 @@ public class ErrorPrinter {
 	public ErrorPrinter(TokenReader tr) {
 		this.tr = tr;
 	}
-	
-	/**
-	 * Error in the format of "Expected [expected], got [last token]"
-	 * @param expected The expected token
-	 */
-	public void expectedError(String expected) {
-		// Prints pointer to the token that caused the error
-		tr.tokenPtr();
-		// Prints what token was expected and what token was gotten
-		Output.printf("\nERROR: Expected %s, got %s\n", expected, tr.tokenStr());
-	}
-	
 	/**
 	 * Error in the format of "Expected [expected_1] or [expected_2] or...or [expected_n], got [last token]"
 	 * @param expected The expected token
@@ -51,13 +39,24 @@ public class ErrorPrinter {
 		}
 		return true;
 	}
-	
+	/**
+	 * Error in the format of "Expected [expected], got [last token]"
+	 * @param expected The expected token
+	 */
+	public void expectedError(String expected) {
+		new Exception().printStackTrace();
+		// Prints pointer to the token that caused the error
+		tr.tokenPtr();
+		// Prints what token was expected and what token was gotten
+		Output.printf("\nERROR: Expected %s, got %s\n", expected, tr.tokenStr());
+	}
 	/**
 	 * An error with a custom message
 	 * @param msg The message to be printed
 	 * @param args Any arguments to go with the message
 	 */
 	public void customError(String msg, Object...args) {
+		new Exception().printStackTrace();
 		// Prints the error message and any arguments
 		Output.printf("ERROR: " + msg + "\n", args);
 	}
@@ -68,6 +67,8 @@ public class ErrorPrinter {
 	 * @param args Any additional arguments
 	 */
 	public void internalError(String msg, Object...args) {
+		new Exception().printStackTrace();
+		// Prints the error message and any arguments
 		Output.printf("INTERNAL ERROR: " + msg + "\n", args);
 	}
 }

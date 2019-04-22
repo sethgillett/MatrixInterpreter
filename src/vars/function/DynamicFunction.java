@@ -38,4 +38,8 @@ public class DynamicFunction extends Function {
 		return primary.read(currentLine);
 	}
 
+	@Override
+	public String toString() {
+		return "Dynamic Function: " + this.currentLine;
+	}
 }

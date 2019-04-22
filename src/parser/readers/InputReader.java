@@ -164,8 +164,10 @@ public class InputReader extends ParserType {
 		tr.nextToken();
 		if (ep.checkToken(Tk.LPAREN)) {
 			do {
-				if (tr.peekNextToken() == Tk.RPAREN)
+				tr.nextToken();
+				if (tr.tk == Tk.RPAREN)
 					break;
+				tr.prevToken(); // Start the expression reader on the token before the expression
 				Var var = exprReader.evalExpr(exprReader.getPostfixExpr());
 				params.add(var);
 				tr.nextToken();
@@ -187,7 +189,8 @@ public class InputReader extends ParserType {
 		tr.nextToken();
 		if (ep.checkToken(Tk.LPAREN)) {
 			do {
-				if (tr.peekNextToken() == Tk.RPAREN)
+				tr.nextToken();
+				if (tr.tk == Tk.RPAREN)
 					break;
 				String name = tr.tokenStr();
 				paramNames.add(name);

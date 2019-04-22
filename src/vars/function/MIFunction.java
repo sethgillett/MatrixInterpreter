@@ -1,5 +1,6 @@
 package vars.function;
 
+import java.util.Arrays;
 import java.util.List;
 
 import parser.ParserType;
@@ -18,8 +19,6 @@ public class MIFunction extends Function {
 	private Parser primary;
 	
 	private int lineNumber;
-	
-	private Var returnValue;
 	
 	/**
 	 * Initializes a function with an arraylist of lines of code and an arraylist of parameters
@@ -57,21 +56,17 @@ public class MIFunction extends Function {
 			return null;
 
 		for (int i=0; i<lines.length; i++) {
-			if (this.execNextLine()) {
-				continue;
-			}
-			else {
+			Var result = this.execNextLine();
+			if (result == null)
 				return null;
-			}
+			else if (result == Var.Null)
+				continue;
+			else
+				return result;
 		}
 		this.close();
 		
-		if (this.returnValue == null) {
-			return Var.Null;
-		}
-		else {
-			return this.returnValue;
-		}
+		return Var.Null;
 	}
 	/**
 	 * Determines whether there is another line to execute
@@ -85,15 +80,17 @@ public class MIFunction extends Function {
 	 * Attempts to execute the next line in the function (specified by lineNumber)
 	 * @return Whether the run was successful
 	 */
-	private boolean execNextLine() {
+	private Var execNextLine() {
 		if (lineNumber == lines.length) {
 			ParserType.ep.internalError("No further lines to execute");
-			return false;
+			return null;
 		}
 		
-		primary.read(lines[lineNumber]);
-		lineNumber ++;
-		
-		return true;
+		return primary.read(lines[lineNumber++]);
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("MIFunction: %s(%s)", "function", Arrays.toString(paramNames));
 	}
 }

@@ -52,7 +52,7 @@ public abstract class ParserType {
 	/**
 	 * The primary parser
 	 */
-	protected static Parser primary;
+	public static Parser primary;
 	/**
 	 * The function at the top of the callstack
 	 */
@@ -155,5 +155,10 @@ public abstract class ParserType {
 			ep.customError("Expected function, got %s", name);
 			return null;
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "Current Tk: " + tr.tk;
 	}
 }

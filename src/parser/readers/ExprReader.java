@@ -42,16 +42,8 @@ public class ExprReader extends ParserType {
 			ep.internalError("Null expression being evaluated");
 			return null;
 		}
-		try {
-			// Return the result
-			return this.evaluateExpr(postfix);
-		}
-		// If it fails to parse, throw an error
-		catch (Exception e) {
-			//e.printStackTrace();
-			ep.customError("Invalid arithmetic expression");
-			return null;
-		}
+		// Return the result
+		return this.evaluateExpr(postfix);
 	}
 	
 	public List<Object> getPostfixExpr() {
@@ -437,7 +429,8 @@ public class ExprReader extends ParserType {
 					}
 				}
 				else {
-					ep.customError("Invalid token in arithmetic expression: %s", token);
+					ep.customError("Invalid token %s for %s and %s", token, 
+							(a==null)? Var.Null : a, (b==null)? Var.Null : b);
 					return null;
 				}
 				
