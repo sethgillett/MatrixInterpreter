@@ -2,8 +2,8 @@ package vars.function;
 
 import java.util.List;
 
+import parser.ParserType;
 import parser.primary.Parser;
-import parser.primary.ParserType;
 import vars.Var;
 
 public class MIFunction extends Function {
@@ -14,7 +14,7 @@ public class MIFunction extends Function {
 	/**
 	 * Names of parameters in the function
 	 */
-	private String[] paramsList;
+	private String[] paramNames;
 	private Parser primary;
 	
 	private int lineNumber;
@@ -26,11 +26,11 @@ public class MIFunction extends Function {
 	 * @param lines List of lines of code
 	 * @param parameters List of parameters
 	 */
-	public MIFunction(Parser primary, Function parent, List<String> paramsList, List<String> lines) {
-		super(parent);
+	public MIFunction(Parser primary, List<String> paramNames, List<String> lines) {
+		super();
 		this.primary = primary;
-		this.paramsList = new String[paramsList.size()];
-		this.paramsList = paramsList.toArray(this.paramsList);
+		this.paramNames = new String[paramNames.size()];
+		this.paramNames = paramNames.toArray(this.paramNames);
 		this.lines = new String[lines.size()];
 		this.lines = lines.toArray(this.lines);
 	}
@@ -41,8 +41,8 @@ public class MIFunction extends Function {
 		// Start at this line in the function
 		lineNumber = 0;
 		
-		for (int i=0; i<paramsList.length; i++) {
-			String name = paramsList[i];
+		for (int i=0; i<paramNames.length; i++) {
+			String name = paramNames[i];
 			Var val = Var.Null;
 			if (i < params.size()) {
 				val = params.get(i);

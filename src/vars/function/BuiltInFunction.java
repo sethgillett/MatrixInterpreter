@@ -14,8 +14,8 @@ public class BuiltInFunction extends Function {
 	 * @param parent The parent function
 	 * @param method The java method to execute
 	 */
-	public BuiltInFunction(Function parent, java.util.function.Function<List<Var>, Var> method) {
-		super(parent);
+	public BuiltInFunction(java.util.function.Function<List<Var>, Var> method) {
+		super();
 		this.method = method;
 	}
 

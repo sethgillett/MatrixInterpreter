@@ -2,7 +2,7 @@ package tokens;
 
 import java.util.List;
 
-import parser.primary.ParserType;
+import parser.ParserType;
 import vars.Var;
 import vars.function.Function;
 

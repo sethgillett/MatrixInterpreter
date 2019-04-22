@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.Output;
-import parser.primary.ParserType;
+import parser.ParserType;
 import tokens.Tk;
 import vars.Var;
 import vars.mtx.FullMtx;
@@ -154,13 +154,18 @@ public class InputReader extends ParserType {
 //		}
 //		return null;
 //	}
-	
+	/**
+	 * Reads parameters given to a function in a function call
+	 * @return A list of the parameters
+	 */
 	public List<Var> readCallParams() {
 		List<Var> params = new ArrayList<Var>();
 		// Always ends the token before the next section
 		tr.nextToken();
 		if (ep.checkToken(Tk.LPAREN)) {
 			do {
+				if (tr.peekNextToken() == Tk.RPAREN)
+					break;
 				Var var = exprReader.evalExpr(exprReader.getPostfixExpr());
 				params.add(var);
 				tr.nextToken();
@@ -168,6 +173,29 @@ public class InputReader extends ParserType {
 			
 			if (ep.checkToken(Tk.RPAREN)) {
 				return params;
+			}
+		}
+		return null;
+	}
+	/**
+	 * Reads a list of parameter names when defining a function
+	 * @return The list of parameter names
+	 */
+	public List<String> readDefinedParams() {
+		List<String> paramNames = new ArrayList<String>();
+		// Always ends the token before the next section
+		tr.nextToken();
+		if (ep.checkToken(Tk.LPAREN)) {
+			do {
+				if (tr.peekNextToken() == Tk.RPAREN)
+					break;
+				String name = tr.tokenStr();
+				paramNames.add(name);
+				tr.nextToken();
+			} while (tr.tk == Tk.COMMA);
+			
+			if (ep.checkToken(Tk.RPAREN)) {
+				return paramNames;
 			}
 		}
 		return null;

@@ -25,7 +25,7 @@ public class ErrorPrinter {
 		// Prints pointer to the token that caused the error
 		tr.tokenPtr();
 		// Prints what token was expected and what token was gotten
-		Output.printf("ERROR\n\nExpected %s, got %s\n", expected, tr.tokenStr());
+		Output.printf("\nERROR: Expected %s, got %s\n", expected, tr.tokenStr());
 	}
 	
 	/**
@@ -40,9 +40,9 @@ public class ErrorPrinter {
 		expectedError(errorStr);
 	}
 	/**
-	 * Checks for a token and reports an error if it's not found
+	 * Checks the current token and reports an error if it doesn't match the expected token
 	 * @param expected The expected token
-	 * @return True if found, false otherwise
+	 * @return Whether they match
 	 */
 	public boolean checkToken(Tk expected) {
 		if (tr.tk != expected) {

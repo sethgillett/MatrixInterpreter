@@ -13,8 +13,8 @@ public class DynamicFunction extends Function {
 	private String currentLine;
 	private Parser primary;
 	
-	public DynamicFunction(Parser primary, Function parent) {
-		super(parent);
+	public DynamicFunction(Parser primary) {
+		super();
 		this.primary = primary;
 	}
 	/**

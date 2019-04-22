@@ -3,10 +3,12 @@ package parser.readers;
 import java.util.ArrayList;
 import java.util.List;
 
-import parser.primary.ParserType;
+import parser.ParserType;
 import tokens.Tk;
 import vars.Var;
 import vars.bool.Bool;
+import vars.function.Function;
+import vars.function.MIFunction;
 import vars.scl.Scl;
 
 public class ControlsReader extends ParserType {
@@ -143,7 +145,7 @@ public class ControlsReader extends ParserType {
 					}
 					tr.nextToken();
 					if (ep.checkToken(Tk.COLON)) {
-						ArrayList<String> stmts = new ArrayList<>();
+						List<String> stmts = new ArrayList<>();
 						String newLine = input.readLine();
 						while (!newLine.matches("\\s*\\b(?:end)\\b")) {
 							stmts.add(newLine);
@@ -168,18 +170,24 @@ public class ControlsReader extends ParserType {
 		return null;
 	}
 	
-//	public boolean function_stmt() {
-//		// DEF token flagged
-//		tr.nextToken();
-//		if (ep.checkToken(Tk.FUNC_NAME)) {
-//			tr.nextToken();
-//			if (ep.checkToken(Tk.LPAREN)) {
-//				//TODO: FINISH!!!
-//			}
-//		}
-//		else {
-//			ep.expectedError(Tk.FUNC_NAME);
-//		}
-//	}
-	
+	public boolean funcStmt() {
+		// DEF token flagged
+		tr.nextToken();
+		if (ep.checkToken(Tk.FUNC_NAME)) {
+			String funcName = tr.tokenStr();
+			List<String> paramNames = inpReader.readDefinedParams();
+			tr.nextToken();
+			if (ep.checkToken(Tk.COLON)) {
+				List<String> lines = new ArrayList<>();
+				String newLine = input.readLine();
+				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
+					lines.add(newLine);
+					newLine = input.readLine();
+				}
+				Function func = new MIFunction(primary, paramNames, lines);
+				setVar(funcName, func);
+			}
+		}
+		return false;
+	}
 }

@@ -1,5 +1,6 @@
 package parser.primary;
 
+import parser.ParserType;
 import parser.readers.ControlsReader;
 import parser.readers.ExprReader;
 import parser.readers.InputReader;
@@ -44,12 +45,12 @@ public class Parser extends ParserType {
 			switch(tr.tk) {
 			case IF:
 				return controlsReader.ifStmt();
-//			case FOR:
-//				return controlsReader.for_stmt();
-//			case WHILE:
-//				return controlsReader.while_stmt();
-//			case DEF:
-//				return controlsReader.function_stmt();
+			case FOR:
+				return controlsReader.forStmt();
+			case WHILE:
+				return controlsReader.whileStmt();
+			case DEF:
+				return controlsReader.funcStmt()? Var.Null : null;
 			default:
 				return null;
 			}

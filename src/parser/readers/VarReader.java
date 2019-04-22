@@ -1,6 +1,6 @@
 package parser.readers;
 
-import parser.primary.ParserType;
+import parser.ParserType;
 import tokens.Tk;
 import vars.Var;
 

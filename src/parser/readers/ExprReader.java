@@ -5,7 +5,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import parser.primary.ParserType;
+import parser.ParserType;
 import tokens.FuncToken;
 import tokens.Tk;
 import vars.mtx.Mtx;

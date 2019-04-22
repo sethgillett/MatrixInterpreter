@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.Output;
-import parser.primary.ParserType;
+import parser.ParserType;
 import vars.Var;
 
 public abstract class Function extends Var {
@@ -29,8 +29,7 @@ public abstract class Function extends Var {
 	 * Initializes a function with a given parent function in the call stack
 	 * @param parent The parent function
 	 */
-	public Function(Function parent) {
-		this.parent = parent;
+	public Function() {
 		this.started = false;
 		this.varReg = new HashMap<>();
 	}
@@ -44,6 +43,8 @@ public abstract class Function extends Var {
 	 * @param params The function's parameters
 	 */
 	public void start(List<Var> params) {
+		// The function above this one in the call stack
+		this.parent = ParserType.getCurrentActive();
 		// Stores the list of parameters
 		this.params = params;
 		// Sets this function as the current active function

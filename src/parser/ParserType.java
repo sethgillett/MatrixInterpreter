@@ -1,8 +1,9 @@
-package parser.primary;
+package parser;
 
 import errors.ErrorPrinter;
 import io.Input;
 import io.Output;
+import parser.primary.Parser;
 import parser.readers.ControlsReader;
 import parser.readers.ExprReader;
 import parser.readers.InputReader;
@@ -63,6 +64,13 @@ public abstract class ParserType {
 	 */
 	public static void setCurrentActive(Function func) {
 		currentActive = func;
+	}
+	
+	/**
+	 * Gets the function at the top of the call stack
+	 */
+	public static Function getCurrentActive() {
+		return currentActive;
 	}
 	
 	/**

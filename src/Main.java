@@ -5,8 +5,8 @@ import java.util.function.Consumer;
 
 import io.Input;
 import io.Output;
+import parser.ParserType;
 import parser.primary.Parser;
-import parser.primary.ParserType;
 import vars.function.DynamicFunction;
 
 public class Main {
@@ -44,7 +44,7 @@ public class Main {
 		// String for reading input
 		String inputLine = "";
 		// REPL will be implemented as a function with lines added dynamically
-		DynamicFunction main = new DynamicFunction(p, null);
+		DynamicFunction main = new DynamicFunction(p);
 		// Start up the function with no arguments
 		main.start(null);
 		

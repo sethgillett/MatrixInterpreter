@@ -1,6 +1,6 @@
 package vars;
 
-import parser.primary.ParserType;
+import parser.ParserType;
 
 public abstract class Var {
 	/**
