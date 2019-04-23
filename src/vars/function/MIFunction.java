@@ -3,6 +3,7 @@ package vars.function;
 import java.util.Arrays;
 import java.util.List;
 
+import io.Input;
 import parser.ParserType;
 import parser.primary.Parser;
 import vars.Var;
@@ -19,6 +20,10 @@ public class MIFunction extends Function {
 	private Parser primary;
 	
 	private int lineNumber;
+	/**
+	 * The input that was present before this function was started
+	 */
+	private Input parentInput;
 	
 	/**
 	 * Initializes a function with an arraylist of lines of code and an arraylist of parameters
@@ -37,6 +42,12 @@ public class MIFunction extends Function {
 	@Override
 	public void start(List<Var> params) {
 		super.start(params);
+		ParserType.input = new Input(
+				// Returns next line in function or null if it doesn't exist
+				() -> {return (lineNumber < lines.length)? lines[lineNumber++] : null;},
+				// Sets input back to the parent input
+				() -> {ParserType.input = parentInput;}
+				);
 		// Start at this line in the function
 		lineNumber = 0;
 		
@@ -48,6 +59,14 @@ public class MIFunction extends Function {
 			}
 			setLocalVar(name, val);
 		}
+	}
+	
+	@Override
+	public void close() {
+		// Sets the current active function to the parent
+		super.close();
+		// Closes input off this function
+		ParserType.input.close();
 	}
 	
 	@Override

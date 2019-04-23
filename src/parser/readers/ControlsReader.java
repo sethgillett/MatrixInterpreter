@@ -34,11 +34,21 @@ public class ControlsReader extends ParserType {
 			if (tr.tk == Tk.EOL) {
 				ArrayList<String> stmts = new ArrayList<>();
 				String newLine = input.readLine();
-				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
+				// If newLine can't be read
+				if (newLine == null) {
+					ep.customError("No additional lines found after if statement");
+					return null;
+				}
+				while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b")) {
 					// Only executes the line if the if statement was true
 					if (ifCondition.val())
 						stmts.add(newLine);
 					newLine = input.readLine();
+				}
+				// If no end statement has been found
+				if (newLine == null) {
+					ep.customError("No end statement found after if statement");
+					return null;
 				}
 				for (String stmt : stmts) {
 					Var result = primary.read(stmt);
@@ -87,13 +97,24 @@ public class ControlsReader extends ParserType {
 			tr.nextToken();
 			if (ep.checkToken(Tk.EOL)) {
 				List<String> stmts = new ArrayList<>();
+				// Reads a line from current active input
 				String newLine = input.readLine();
-				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
+				// If newLine can't be read
+				if (newLine == null) {
+					ep.customError("No additional lines found after while statement");
+					return null;
+				}
+				while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b")) {
 					// Only executes the line if the if statement was true
 					if (whileCondition.val()) {
 						stmts.add(newLine);
 					}
 					newLine = input.readLine();
+				}
+				// If no end statement has been found
+				if (newLine == null) {
+					ep.customError("No end statement found after while statement");
+					return null;
 				}
 				while (whileCondition.val()) {
 					for (String stmt : stmts) {
@@ -147,9 +168,19 @@ public class ControlsReader extends ParserType {
 					if (ep.checkToken(Tk.COLON)) {
 						List<String> stmts = new ArrayList<>();
 						String newLine = input.readLine();
-						while (!newLine.matches("\\s*\\b(?:end)\\b")) {
+						// If newLine can't be read
+						if (newLine == null) {
+							ep.customError("No end statement found after for statement");
+							return null;
+						}
+						while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b")) {
 							stmts.add(newLine);
 							newLine = input.readLine();
+						}
+						// If no end statement has been found
+						if (newLine == null) {
+							ep.customError("No end statement found after for statement");
+							return null;
 						}
 						Scl iterator = new Scl(start);
 						setVar(iterName, iterator);
@@ -178,9 +209,10 @@ public class ControlsReader extends ParserType {
 			List<String> paramNames = inpReader.readDefinedParams();
 			tr.nextToken();
 			if (ep.checkToken(Tk.COLON)) {
-				int colonCount = 1;
 				List<String> lines = new ArrayList<>();
 				String newLine = input.readLine();
+				// Count of colon's (+) and :'s (-)
+				int colonCount = 1;
 				// Once colonCount == 0, 
 				while (colonCount > 0) {
 					// Make sure # :'s matches # end's
