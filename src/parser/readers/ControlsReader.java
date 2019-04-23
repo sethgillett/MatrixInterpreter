@@ -178,9 +178,19 @@ public class ControlsReader extends ParserType {
 			List<String> paramNames = inpReader.readDefinedParams();
 			tr.nextToken();
 			if (ep.checkToken(Tk.COLON)) {
+				int colonCount = 1;
 				List<String> lines = new ArrayList<>();
 				String newLine = input.readLine();
-				while (!newLine.matches("\\s*\\b(?:end)\\b")) {
+				// Once colonCount == 0, 
+				while (colonCount > 0) {
+					// Make sure # :'s matches # end's
+					// Colon to be matched
+					if (newLine.matches(".*:\\s*$"))
+						colonCount += 1;
+					// end matches colon
+					if (newLine.matches("\\s*\\b(?:end)\\b"))
+						colonCount -= 1;
+					
 					lines.add(newLine);
 					newLine = input.readLine();
 				}

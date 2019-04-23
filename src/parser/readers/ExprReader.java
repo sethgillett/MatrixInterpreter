@@ -5,7 +5,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import io.Output;
 import parser.ParserType;
 import tokens.FuncToken;
 import tokens.Tk;
