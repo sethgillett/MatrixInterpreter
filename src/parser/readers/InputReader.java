@@ -228,22 +228,25 @@ public class InputReader extends ParserType {
 				else if (tr.tk == Tk.COMMA) {
 					continue;
 				}
-				else if (tr.tk == Tk.NUM_LIT) {
-					line.add(new Scl(tr.tokenStr()));
-				}
-				else if (tr.tk == Tk.VAR_NAME) {
-					Scl s = getScl(tr.tokenStr());
-					if (s == null) {
-						// No error message needed since getScl will already print one
-						return null;
-					}
-					else {
-						line.add(s);
-					}
-				}
+//				else if (tr.tk == Tk.NUM_LIT) {
+//					line.add(new Scl(tr.tokenStr()));
+//				}
+//				else if (tr.tk == Tk.VAR_NAME) {
+//					Scl s = getScl(tr.tokenStr());
+//					if (s == null) {
+//						// No error message needed since getScl will already print one
+//						return null;
+//					}
+//					else {
+//						line.add(s);
+//					}
+//				}
 				else {
-					ep.expectedError(Tk.VAR_NAME, Tk.NUM_LIT);
-					return null;
+					tr.prevToken();
+					Scl s = exprReader.sclExpr(exprReader.getPostfixExpr());
+					if (s == null)
+						return null;
+					line.add(s);
 				}
 			}
 			

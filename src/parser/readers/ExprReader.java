@@ -65,8 +65,6 @@ public class ExprReader extends ParserType {
 		List<Object> infix = new ArrayList<>();
 		// Used to make sure all parantheses match
 		int parenCount = 0;
-		// Index in infix
-		int i = 0;
 		
 		Tk nextTk = tr.peekNextToken();
 		/* 
@@ -81,25 +79,8 @@ public class ExprReader extends ParserType {
 				&& nextTk != Tk.ARROW && nextTk != Tk.BY
 				&& nextTk != Tk.COMMA) {
 			tr.nextToken();
-			// If token is a "-" with nothing before, it is actually the negation operator
-			if (tr.tk == Tk.SUB_OP) {
-				// If the token has no elements prior
-				if (i == 0) {
-					// The sub_op is the neg_op
-					infix.add(Tk.NEG_OP);
-				}
-				// If the token has an element prior AND that element is a token
-				else if (i > 0 && infix.get(i-1) instanceof Tk) {
-					// The sub_op is actually the neg_op
-					infix.add(Tk.NEG_OP);
-				}
-				else {
-					// Otherwise, it's just the subtraction operator
-					infix.add(Tk.SUB_OP);
-				}
-			}
 			// If token is an "=" it is an equality operator, NOT assignment operator
-			else if (tr.tk == Tk.ASSIGNMENT_OP) {
+			if (tr.tk == Tk.ASSIGNMENT_OP) {
 				infix.add(Tk.EQUAL_OP);
 			}
 			// Adds in and counts parantheses
@@ -167,7 +148,6 @@ public class ExprReader extends ParserType {
 				return null;
 			}
 			nextTk = tr.peekNextToken();
-			i += 1;
 		}
 		// All parantheses matched
 		if (parenCount == 0) {
@@ -235,11 +215,11 @@ public class ExprReader extends ParserType {
 						exprStack.pop();
 					}
 				}
-				// Otherwise pull all higher priority operators off the stack and push this one on
+				// Otherwise pull all higher or equal priority operators off the stack and push this one on
 				else {
 					while (!(exprStack.peek() == null) && 
 							(Tk.isMathOp(exprStack.peek()) || Tk.isBoolOp(exprStack.peek())) &&
-							(exprStack.peek().higherPrec(token))) {
+							(exprStack.peek().prec(token) >= 0)) {
 						postfix.add(exprStack.pop());
 					}
 					exprStack.push(token);
@@ -306,7 +286,7 @@ public class ExprReader extends ParserType {
 					case ADD_OP:
 						res = b;
 						break;
-					case NEG_OP:
+					case SUB_OP:
 						res = Scl.neg((Scl) b);
 						break;
 					default:

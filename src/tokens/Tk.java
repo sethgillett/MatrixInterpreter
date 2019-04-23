@@ -21,7 +21,7 @@ public enum Tk implements Comparable<Tk> {
 	RETURN(1, "\\b(?:return)\\b"),
 	// PRIORITY 10-15: Math operators
 	EXP_OP(10, "\\^"), MULT_OP(11, "\\*"), DIV_OP(12, "\\/"),
-	ADD_OP(13, "\\+"), SUB_OP(14, "\\-"), NEG_OP(15, null),
+	ADD_OP(13, "\\+"), SUB_OP(14, "\\-"),
 	// PRIORITY 16: Boolean operators
 	LESS_OR_EQUAL(16,"\\<\\="), GREAT_OR_EQUAL(16,"\\>\\="),
 	GREATER_OP(17, "\\>"), LESSER_OP(17, "\\<"), EQUAL_OP(17, null),
@@ -29,8 +29,8 @@ public enum Tk implements Comparable<Tk> {
 	// PRIORITY 30+: Literals
 	TRUE(30,"\\b(?:True)\\b"), FALSE(30, "\\b(?:False)\\b"),
 	// PRIORITY 50+: User defined symbols
-	FUNC_NAME(50, "\\b(?:[A-Za-z_]+)(?=\\(.*\\))"),
-	VAR_NAME(50, "\\b(?:[A-Za-z_]+\\b)(?!\\()"),
+	FUNC_NAME(50, "\\b(?:[A-Za-z_]\\w*)(?=\\(.*\\))"),
+	VAR_NAME(50, "\\b(?:[A-Za-z_]\\w*\\b)(?!\\()"),
 	NUM_LIT(51, "(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?");
 	/**
 	 * The order of priority for tokens
@@ -108,12 +108,12 @@ public enum Tk implements Comparable<Tk> {
 
 	
 	/**
-	 * If this token is greater than other
+	 * This operator's precedence - the other's
 	 * @param other The other math token
-	 * @return True if this is greater, false otherwise
+	 * @return > 0 if greater = 0 if equal, < 0 if lesser
 	 */
-	public boolean higherPrec(Tk other) {
-		return (this.priority < other.priority);
+	public int prec(Tk other) {
+		return (this.priority - other.priority);
 	}
 	
 	@Override
@@ -141,8 +141,6 @@ public enum Tk implements Comparable<Tk> {
 			return "variable name";
 		case MULT_OP:
 			return "* operator";
-		case NEG_OP:
-			return "- (negation) operator";
 		case NUM_LIT:
 			return "number";
 		case RBRACKET:
@@ -150,7 +148,7 @@ public enum Tk implements Comparable<Tk> {
 		case RPAREN:
 			return ")";
 		case SUB_OP:
-			return "- (subtraction) operator";
+			return "- operator";
 		case AND_OP:
 			return "&& operator";
 		case BY:
