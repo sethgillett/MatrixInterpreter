@@ -142,7 +142,7 @@ public abstract class Mtx extends Var {
 			Mtx res = new FullMtx(a.rCount, a.cCount);
 			for (int r=0; r<a.rCount; r++) {
 				for (int c=0; c<a.cCount; c++) {
-					res.set(r, c, Scl.add(a.get(r, c), b.get(r, c)));
+					res.set(r, c, Scl.sub(a.get(r, c), b.get(r, c)));
 				}
 			}
 			return res;
