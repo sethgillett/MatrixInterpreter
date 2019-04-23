@@ -91,6 +91,10 @@ public enum Tk implements Comparable<Tk> {
 				|| tk == Tk.OR_OP || tk == Tk.NOT_OP);
 	}
 	
+	public static boolean isOp(Tk tk) {
+		return (isMathOp(tk) || isBoolOp(tk));
+	}
+	
 	public static boolean isParen(Tk tk) {
 		return (tk == Tk.LPAREN || tk == Tk.RPAREN);
 	}
@@ -113,7 +117,7 @@ public enum Tk implements Comparable<Tk> {
 	 * @return > 0 if greater = 0 if equal, < 0 if lesser
 	 */
 	public int prec(Tk other) {
-		return (this.priority - other.priority);
+		return -(this.priority - other.priority);
 	}
 	
 	@Override

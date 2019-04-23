@@ -5,6 +5,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.Output;
 import parser.ParserType;
 import tokens.FuncToken;
 import tokens.Tk;
@@ -181,7 +182,7 @@ public class ExprReader extends ParserType {
 		// Convert to postfix using a stack
 		Deque<Tk> exprStack = new LinkedList<>();
 		// Postfix arraylist
-		ArrayList<Object> postfix = new ArrayList<>();
+		List<Object> postfix = new ArrayList<>();
 		
 		for (Object o : infix) {
 			// If the expression contains a value to be operated on
@@ -215,14 +216,25 @@ public class ExprReader extends ParserType {
 						exprStack.pop();
 					}
 				}
-				// Otherwise pull all higher or equal priority operators off the stack and push this one on
 				else {
-					while (!(exprStack.peek() == null) && 
-							(Tk.isMathOp(exprStack.peek()) || Tk.isBoolOp(exprStack.peek())) &&
-							(exprStack.peek().prec(token) >= 0)) {
-						postfix.add(exprStack.pop());
+					// There's another operator on the stack
+					if (exprStack.peek() != null && Tk.isOp(exprStack.peek())) {
+						// If token is greater in precedence than the operator on the stack
+						if (token.prec(exprStack.peek()) > 0) {
+							exprStack.push(token);
+						}
+						// Otherwise, pull all higher or equal priority operators off the stack and push this one on
+						else {
+							while (exprStack.peek() != null && token.prec(exprStack.peek()) <= 0) {
+								postfix.add(exprStack.pop());
+							}
+							exprStack.push(token);
+						}
 					}
-					exprStack.push(token);
+					// There's no operators on the stack
+					else {
+						exprStack.push(token);
+					}
 				}
 			}
 		}
