@@ -19,6 +19,9 @@ local.properties
 # PyDev specific (Python IDE for Eclipse)
 *.pydevproject
 
+# Ignore VSCode configuration files
+.vscode/
+
 # CDT-specific (C/C++ Development Tooling)
 .cproject
 
