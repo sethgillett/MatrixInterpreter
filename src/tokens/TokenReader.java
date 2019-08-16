@@ -3,58 +3,45 @@ import java.util.ArrayList;
 
 import io.Output;
 
-public class TokenReader {
+public abstract class TokenReader {
 	/**
 	 * The current token
 	 */
-	public Tk tk;
-	
+	public static Tk tk;
 	/**
 	 * Where in the list of tokens are we
 	 */
-	private int tkHstIdx;
-	
+	private static int tkHstIdx;
 	/**
 	 * The current line the parser is interpreting
 	 */
-	private String currentLine;
-	
+	private static String currentLine;
 	/**
 	 * The current index in the line being parsed
 	 */
-	private int lineIdx;
-	
+	private static int lineIdx;
 	/**
 	 * The history of tokens that have been read
 	 */
-	ArrayList<ReadToken> tkHst;
-	
-	/**
-	 * Instantiates a new token reader
-	 */
-	public TokenReader() {
-		this.tkHst = new ArrayList<>();
-	}
-	
+	static ArrayList<ReadToken> tkHst = new ArrayList<>();
 	/**
 	 * Reads in a new line from the parser
 	 * @param input The input line
 	 */
 	public void readLine(String input) {
-		this.currentLine = input;
-		this.lineIdx = 0;
-		this.tkHstIdx = 0;
-		this.tk = null;
-		this.tkHst.clear();
+		currentLine = input;
+		lineIdx = 0;
+		tkHstIdx = 0;
+		tk = null;
+		tkHst.clear();
 	}
-	
 	/**
 	 * Attempts to find the next token closest to the current line index
 	 */
 	public void nextToken() {
-		if (this.tk != null && this.tk == Tk.EOL) {
+		if (tk != null && tk == Tk.EOL) {
 			// Clears the current line from memory
-			this.currentLine = null;
+			currentLine = null;
 			// Returns immediately
 			return;
 		}
@@ -79,8 +66,7 @@ public class TokenReader {
 		Tk next = tk;
 		prevToken();
 		return next;
-	}
-	
+  }
 	/**
 	 * Moves the current token BACK
 	 */
@@ -98,7 +84,6 @@ public class TokenReader {
 			tkHstIdx = 0;
 		}
 	}
-	
 	/**
 	 * Restarts the reader at the beginning of the line
 	 */
@@ -106,7 +91,6 @@ public class TokenReader {
 		tk = null;
 		tkHstIdx = 0;
 	}
-	
 	/**
 	 * Attempts to match the next token closest to the current line index
 	 */
@@ -149,7 +133,6 @@ public class TokenReader {
 			return;
 		}
 	}
-	
 	/**
 	 * Returns the string of the current token
 	 * @return The string of the current token
@@ -157,15 +140,6 @@ public class TokenReader {
 	public String tokenStr() {
 		return tkHst.get(tkHstIdx - 1).tokenStr();
 	}
-	
-	/**
-	 * Prints a pointer to the last token
-	 */
-	public void tokenPtr() {
-		// Prints a pointer to the beginning index of the previous token
-		Output.printf("%" + (tkHst.get(tkHstIdx - 1).idx + 5) + "s", "^");
-	}
-	
 	/**
 	 * Advances past whitespace in the current line
 	 */
@@ -174,7 +148,6 @@ public class TokenReader {
 			lineIdx++;
 		}
 	}
-	
 	/**
 	 * Attempts to find the end of an error causing token
 	 * @return The ending index of the error causing token
@@ -189,5 +162,4 @@ public class TokenReader {
 		}
 		return errorEndIdx;
 	}
-	
 }

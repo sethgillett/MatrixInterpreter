@@ -1,6 +1,6 @@
 package vars;
 
-import parser.ParserType;
+import io.Output;
 
 public abstract class Var {
 	/**
@@ -13,7 +13,7 @@ public abstract class Var {
 	 * @param args Additional args
 	 */
 	public static void throwError(String msg, Object...args) {
-		ParserType.ep.customError(msg, args);
+		Output.customError(msg, args);
 	}
 }
 

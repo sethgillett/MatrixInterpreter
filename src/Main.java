@@ -1,8 +1,3 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.function.Consumer;
-
 import io.Input;
 import io.Output;
 import parser.ParserType;
@@ -22,7 +17,7 @@ public class Main {
 		
 		while (true) {
 			Output.print(">>> ");
-			inputLine = ParserType.input.readLine();
+			inputLine = Input.readLine();
 			// Program exit condition
 			if (inputLine.matches("^\\s*\\b(exit|quit)\\b\\s*$")) {
 				break;
@@ -31,6 +26,6 @@ public class Main {
 			ParserType.primary.read(inputLine);
 		}
 		
-		ParserType.input.close();
+		Input.close();
 	}
 }

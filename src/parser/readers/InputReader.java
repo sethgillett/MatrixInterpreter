@@ -163,7 +163,7 @@ public class InputReader extends ParserType {
 		List<Var> params = new ArrayList<Var>();
 		// Always ends the token before the next section
 		tr.nextToken();
-		if (ep.checkToken(Tk.LPAREN)) {
+		if (ep.hardCheck(Tk.LPAREN)) {
 			do {
 				tr.nextToken();
 				if (tr.tk == Tk.RPAREN)
@@ -174,7 +174,7 @@ public class InputReader extends ParserType {
 				tr.nextToken();
 			} while (tr.tk == Tk.COMMA);
 			
-			if (ep.checkToken(Tk.RPAREN)) {
+			if (ep.hardCheck(Tk.RPAREN)) {
 				return params;
 			}
 		}
@@ -188,7 +188,7 @@ public class InputReader extends ParserType {
 		List<String> paramNames = new ArrayList<String>();
 		// Always ends the token before the next section
 		tr.nextToken();
-		if (ep.checkToken(Tk.LPAREN)) {
+		if (ep.hardCheck(Tk.LPAREN)) {
 			do {
 				tr.nextToken();
 				if (tr.tk == Tk.RPAREN)
@@ -198,7 +198,7 @@ public class InputReader extends ParserType {
 				tr.nextToken();
 			} while (tr.tk == Tk.COMMA);
 			
-			if (ep.checkToken(Tk.RPAREN)) {
+			if (ep.hardCheck(Tk.RPAREN)) {
 				return paramNames;
 			}
 		}
@@ -255,7 +255,7 @@ public class InputReader extends ParserType {
 				if (lineLen != null && line.size() != lineLen) {
 					int dif = line.size() - lineLen;
 					// Matrix row has [number] too [few | many] parameters
-					ep.customError("Matrix row has %d too %s parameters", Math.abs(dif), dif<0? "few":"many");
+					Output.customError("Matrix row has %d too %s parameters", Math.abs(dif), dif<0? "few":"many");
 					return null;
 				}
 				else {
@@ -283,7 +283,7 @@ public class InputReader extends ParserType {
 					mtxArray[r][c] = cell;
 				}
 				catch (ArrayIndexOutOfBoundsException e) {
-					ep.customError("Matrix is not rectangular");
+					Output.customError("Matrix is not rectangular");
 					return null;
 				}
 				c++;
