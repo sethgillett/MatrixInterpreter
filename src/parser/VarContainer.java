@@ -20,6 +20,8 @@ public class VarContainer {
   public boolean printVar(String name) {
     if (vars.containsKey(name))
       Output.println(vars.get(name));
+    else
+      Output.customError("Var %s cannot be printed because it doesn't exist", name);
     return vars.containsKey(name);
   }
 

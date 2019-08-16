@@ -1,7 +1,6 @@
 import io.Input;
 import io.Output;
-import parser.ParserType;
-import parser.primary.Parser;
+import parser.Parser;
 
 public class Main {
 	
@@ -10,8 +9,6 @@ public class Main {
 	}
 	
 	public static void REPL() {
-		// Primary parser
-		ParserType.primary = new Parser();
 		// String for reading input
 		String inputLine = "";
 		
@@ -23,7 +20,7 @@ public class Main {
 				break;
 			}
 			
-			ParserType.primary.read(inputLine);
+			Parser.read(inputLine);
 		}
 		
 		Input.close();
