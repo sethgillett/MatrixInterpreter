@@ -91,7 +91,7 @@ public abstract class Parser {
 			else if (Tk.isExprTk(TokenReader.tk)) {
 				// If it's an expression print out the value of the expression
 				TokenReader.restartLine();
-				Output.print(ExprReader.expr());
+				Output.println(ExprReader.expr());
 				return Bool.Null;
 			}
 			else if (TokenReader.tk == Tk.EOL) {
