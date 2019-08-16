@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import parser.ParserType;
-import tokens.FuncToken;
 import tokens.Tk;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
@@ -134,14 +133,6 @@ public class ExprReader extends ParserType {
 					break;
 				}
 			}
-			else if (tr.tk == Tk.FUNC_NAME) {
-				// Get the function's name
-				String name = tr.tokenStr();
-				// Get the params to be passed in
-				List<Var> params = inpReader.readCallParams();
-				// Add the function in a token that can later be evaluated
-				infix.add(new FuncToken(name, params));
-			}
 			// Otherwise error
 			else {
 				ep.expectedError("arithmetic symbol or command");
@@ -186,7 +177,7 @@ public class ExprReader extends ParserType {
 		for (Object o : infix) {
 			// If the expression contains a value to be operated on
 			if (o instanceof Scl || o instanceof Mtx || o instanceof String
-					|| o instanceof Bool || o instanceof FuncToken) {
+					|| o instanceof Bool) {
 				// Add it to the postfix expression
 				postfix.add(o);
 			}
@@ -268,15 +259,6 @@ public class ExprReader extends ParserType {
 					return null;
 				// Push the variable to opstack if it exists
 				opStack.push(var);
-			}
-			else if (o instanceof FuncToken) {
-				// Evaluate the function
-				Var result = ((FuncToken) o).run();
-				// If the function call failed return null
-				if (result == null)
-					return null;
-				// Otherwise push the result to opstack
-				opStack.push(result);
 			}
 			else if (o instanceof Tk) {
 				Tk token = (Tk) o;
