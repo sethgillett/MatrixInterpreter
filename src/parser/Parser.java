@@ -1,18 +1,16 @@
-package parser.primary;
-
-import java.util.List<Object>;
-import java.util.ArrayList<Object>;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 
 import io.Input;
 import io.Output;
 import parser.VarContainer;
-import parser.readers.ExprReader;
-import parser.readers.InputReader;
-import parser.readers.VarReader;
 import tokens.Tk;
 import tokens.TokenReader;
 import vars.Var;
 import vars.bool.Bool;
+import vars.mtx.FullMtx;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
 
@@ -23,40 +21,20 @@ import vars.scl.Scl;
  */
 public class Parser {
   /**
-  * The parser's token reader
-  */
-  protected static TokenReader tr = new TokenReader();
-  /**
-    * Deals with assignments to matrices and scalars
-    */
-  protected static VarReader varReader;
-  /**
-    * Reads expressions
-    */
-  protected static ExprReader exprReader;
-  /**
-    * Reads function Input
-    */
-  protected static InputReader inpReader;
-  /**
-    * Deals with control statements (if, while, for)
-    */
-  protected static ControlsReader controlsReader;
-  /**
     * The primary parser
     */
   public static Parser primary;
   /**
     * The variable container in lieu of function scoping
     */
-  private static VarContainer currentActive = new VarContainer();
+  private static VarContainer vars = new VarContainer();
   /**
     * Prints out the supplied variable <b><i>if</i></b> it is found in any variable registry
     * @param varName The name of the variable to print
     * @return Whether the run was successful
     */
   public static boolean print(String varName) {
-    return currentActive.printVar(varName);
+    return vars.printVar(varName);
   }
   /**
     * An overrided version of print that <b>directly</b> takes in a scalar, matrix, function, or bool
@@ -76,15 +54,15 @@ public class Parser {
     * @return The var
     */
   public static Var getVar(String name) {
-    return currentActive.getLocalVar(name);
+    return vars.getLocalVar(name);
   }
   
   public static void setVar(String name, Var val) {
-    currentActive.setLocalVar(name, val);
+    vars.setLocalVar(name, val);
   }
   
   public static boolean hasVar(String name) {
-    return currentActive.hasLocalVar(name);
+    return vars.hasLocalVar(name);
   }
   
   public static Scl getScl(String name) {
@@ -119,87 +97,69 @@ public class Parser {
       return null;
     }
   }
-  
-  @Override
-  public String toString() {
-    return "Current Tk: " + tr.tk;
-  }
-	/**
-	 * Instantiates the token reader, error printer, and all other classes
-	 */
-	public Parser() {
-		// Initializes token reader, registries, and error printer
-		super();
-		// Initialize sub parsers
-		varReader = new VarReader();
-		exprReader = new ExprReader();
-		inpReader = new InputReader();
-		controlsReader = new ControlsReader();
-	}
-	
 	/**
 	 * Reads in a new line
 	 * @param line The new line read in
 	 * @return Whether the run was successful <b>or a returned variable</b>
 	 */
-	public Var read(String line) {
-		tr.readLine(line);
-		tr.nextToken();
+	public static Var read(String line) {
+		TokenReader.readLine(line);
+		TokenReader.nextToken();
 		// Blank line - does nothing
-		if (tr.tk == Tk.EOL) {
+		if (TokenReader.tk == Tk.EOL) {
 			return Bool.True;
 		}
 		// Look for a control statement
-		else if (Tk.isControlTk(tr.tk)) {
-			switch(tr.tk) {
+		else if (Tk.isControlTk(TokenReader.tk)) {
+			switch(TokenReader.tk) {
 			case IF:
-				return controlsReader.ifStmt();
+				return ControlsReader.ifStmt();
 			case FOR:
-				return controlsReader.forStmt();
+				return ControlsReader.forStmt();
 			case WHILE:
-				return controlsReader.whileStmt();
+				return ControlsReader.whileStmt();
 			default:
 				return null;
 			}
 		}
 		// If an expression has a scl or mtx name
-		else if (tr.tk == Tk.VAR_NAME) {
+		else if (TokenReader.tk == Tk.VAR_NAME) {
 			// Next token
-			tr.nextToken();
+			TokenReader.nextToken();
 			// If name is followed by assignment, send to appropriate assignment
-			if (tr.tk == Tk.ASSIGNMENT_OP) {
-				tr.restartLine();
-				return varReader.varAssign()? Var.Null : null;
+			if (TokenReader.tk == Tk.ASSIGNMENT_OP) {
+				TokenReader.restartLine();
+				return VarReader.varAssign()? Var.Null : null;
 			}
-			else if (Tk.isExprTk(tr.tk)) {
+			else if (Tk.isExprTk(TokenReader.tk)) {
 				// If it's an expression print out the value of the expression
-				tr.restartLine();
-				print(exprReader.evalExpr(exprReader.getPostfixExpr()));
+				TokenReader.restartLine();
+				print(ExprReader.evalExpr(ExprReader.getPostfixExpr()));
 				return Bool.Null;
 			}
-			else if (tr.tk == Tk.EOL) {
+			else if (TokenReader.tk == Tk.EOL) {
 				// If there is no next token, print out the value of that scalar
-				tr.prevToken();
-				return print(tr.tokenStr())? Bool.Null : null;
+				TokenReader.prevToken();
+				return print(TokenReader.tokenStr())? Bool.Null : null;
 			}
 			else {
-				Output.expectedError("assignment or arithmetical expression", tr.tk);
+				Output.expectedError("assignment or arithmetical expression", TokenReader.tk);
 				return Bool.False;
 			}
 		}
 		// The statement is an expression
-		else if (Tk.isExprTk(tr.tk)) {
+		else if (Tk.isExprTk(TokenReader.tk)) {
 			// If it's an expression print out the value of the expression
-			tr.restartLine();
-			return print(exprReader.evalExpr(exprReader.getPostfixExpr()))? Var.Null : null;
+			TokenReader.restartLine();
+			return print(ExprReader.evalExpr(ExprReader.getPostfixExpr()))? Var.Null : null;
 		}
 		// The statement is a return statement
-		else if (tr.tk == Tk.RETURN) {
-			return exprReader.evalExpr(exprReader.getPostfixExpr());
+		else if (TokenReader.tk == Tk.RETURN) {
+			return ExprReader.evalExpr(ExprReader.getPostfixExpr());
 		}
 		// Otherwise, print an error
 		else {
-			Output.expectedError("arithmetic expression, command, or assignment", tr.tk);
+			Output.expectedError("arithmetic expression, command, or assignment", TokenReader.tk);
 			return Bool.False;
 		}
 	}
@@ -215,17 +175,17 @@ abstract class ControlsReader {
 	 * </p>
 	 * @return The var returned (if any)
 	 */
-	public Var ifStmt() {
+	public static Var ifStmt() {
 		// IF token flagged
-		Bool ifCondition = exprReader.boolExpr(exprReader.getPostfixExpr());
+		Bool ifCondition = ExprReader.boolExpr(ExprReader.getPostfixExpr());
 		if (ifCondition == null)
 			return null;
 		if (ifCondition == Bool.False)
 			return Bool.Null;
-		tr.nextToken();
-		if (tr.tk == Tk.COLON) {
-			tr.nextToken();
-			if (tr.tk == Tk.EOL) {
+		TokenReader.nextToken();
+		if (TokenReader.tk == Tk.COLON) {
+			TokenReader.nextToken();
+			if (TokenReader.tk == Tk.EOL) {
 				ArrayList<String> stmts = new ArrayList<>();
 				String newLine = Input.readLine();
 				// If newLine can't be read
@@ -262,7 +222,7 @@ abstract class ControlsReader {
 				return Bool.True;
 			}
 			else {
-				ep.expectedError(Tk.EOL);
+				Output.expectedError(Tk.EOL);
 			}
 		}
 		else {
@@ -278,18 +238,18 @@ abstract class ControlsReader {
 	 * </p>
 	 * @return The var returned (if any)
 	 */
-	public Var whileStmt() {
+	public static Var whileStmt() {
 		// WHILE token flagged
-		List<Object> whileExpr = exprReader.getPostfixExpr();
-		Bool whileCondition = exprReader.boolExpr(whileExpr);
+		List<Object> whileExpr = ExprReader.getPostfixExpr();
+		Bool whileCondition = ExprReader.boolExpr(whileExpr);
 		if (whileCondition == null)
 			return null;
 		if (whileCondition == Bool.False)
 			return null;
-		tr.nextToken();
-		if (tr.tk == Tk.COLON) {
-			tr.nextToken();
-			if (ep.hardCheck(Tk.EOL)) {
+		TokenReader.nextToken();
+		if (TokenReader.tk == Tk.COLON) {
+			TokenReader.nextToken();
+			if (Output.hardCheck(Tk.EOL)) {
 				List<String> stmts = new ArrayList<>();
 				// Reads a line from current active Input
 				String newLine = Input.readLine();
@@ -326,7 +286,7 @@ abstract class ControlsReader {
 							return result;
 						}
 					}
-					whileCondition = exprReader.boolExpr(whileExpr);
+					whileCondition = ExprReader.boolExpr(whileExpr);
 				}
 				return Bool.Null;
 			}
@@ -337,29 +297,29 @@ abstract class ControlsReader {
 		return null;
 	}
 	
-	public Var forStmt() {
+	public static Var forStmt() {
 		// FOR token flagged
-		tr.nextToken();
-		if (ep.hardCheck(Tk.VAR_NAME)) {
-			String iterName = tr.tokenStr();
-			tr.nextToken();
-			if (ep.hardCheck(Tk.IN)) {
+		TokenReader.nextToken();
+		if (Output.hardCheck(Tk.VAR_NAME)) {
+			String iterName = TokenReader.tokenStr();
+			TokenReader.nextToken();
+			if (Output.hardCheck(Tk.IN)) {
 				Scl start;
-				start = exprReader.sclExpr(exprReader.getPostfixExpr());
+				start = ExprReader.sclExpr(ExprReader.getPostfixExpr());
 				if (start == null) {
-					ep.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
+					Output.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
 					return null;
 				}
-				tr.nextToken();
-				if (ep.hardCheck(Tk.ARROW)) {
+				TokenReader.nextToken();
+				if (Output.hardCheck(Tk.ARROW)) {
 					Scl end;
-					end = exprReader.sclExpr(null);
+					end = ExprReader.sclExpr(null);
 					if (end == null) {
-						ep.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
+						Output.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
 						return null;
 					}
-					tr.nextToken();
-					if (ep.hardCheck(Tk.COLON)) {
+					TokenReader.nextToken();
+					if (Output.hardCheck(Tk.COLON)) {
 						List<String> stmts = new ArrayList<>();
 						String newLine = Input.readLine();
 						// If newLine can't be read
@@ -398,38 +358,16 @@ abstract class ControlsReader {
 
 abstract class ExprReader {
 	
-	public Bool boolExpr(List<Object> postfix) {
-		Var result = evalExpr(postfix);
-		if (result instanceof Bool) {
-			return (Bool) result;
-		}
-		else {
-			Output.customError("Expression didn't result in bool");
-			return null;
-		}
-	}
-	
-	public Scl sclExpr(List<Object> postfix) {
-		Var result = evalExpr(postfix);
-		if (result instanceof Scl) {
-			return (Scl) result;
-		}
-		else {
-			Output.customError("Expression didn't result in scalar");
-			return null;
-		}
-	}
-	
-	public Var evalExpr(List<Object> postfix) {
+	public static Var evalExpr(List<Object> postfix) {
 		if (postfix == null) {
-			ep.internalError("Null expression being evaluated");
+			Output.internalError("Null expression being evaluated");
 			return null;
 		}
 		// Return the result
-		return this.evaluateExpr(postfix);
+		return evaluateExpr(postfix);
 	}
 	
-	public List<Object> getPostfixExpr() {
+	public static List<Object> getPostfixExpr() {
 		// Read the expression
 		List<Object> infix = readExpr();
 		// If the expression can't be read return null
@@ -443,13 +381,13 @@ abstract class ExprReader {
 	 * @param first The first scalar of the expression
 	 * @return The expression in infix form
 	 */
-	private List<Object> readExpr() {
+	private static List<Object> readExpr() {
 		// The infix form of the expression
 		List<Object> infix = new ArrayList<Object>();
 		// Used to make sure all parantheses match
 		int parenCount = 0;
 		
-		Tk nextTk = tr.peekNextToken();
+		Tk nextTk = TokenReader.peekNextToken();
 		/* 
 		 * The expression stops reading if:
 		 * - The end of line is reached
@@ -461,15 +399,15 @@ abstract class ExprReader {
 		while (nextTk != Tk.EOL && nextTk != Tk.COLON
 				&& nextTk != Tk.ARROW && nextTk != Tk.BY
 				&& nextTk != Tk.COMMA) {
-			tr.nextToken();
+			TokenReader.nextToken();
 			// If token is an "=" it is an equality operator, NOT assignment operator
-			if (tr.tk == Tk.ASSIGNMENT_OP) {
+			if (TokenReader.tk == Tk.ASSIGNMENT_OP) {
 				infix.add(Tk.EQUAL_OP);
 			}
 			// Adds in and counts parantheses
-			else if (Tk.isParen(tr.tk)) {
+			else if (Tk.isParen(TokenReader.tk)) {
 				// Add 1 if (
-				if (tr.tk == Tk.LPAREN) {
+				if (TokenReader.tk == Tk.LPAREN) {
 					parenCount += 1;
 				}
 				// Subtract 1 if )
@@ -477,23 +415,23 @@ abstract class ExprReader {
 					parenCount -= 1;
 				}
 				// Adds paren to expression
-				infix.add(tr.tk);
+				infix.add(TokenReader.tk);
 			}
 			// Adds in tokens that are math operators
-			else if (Tk.isMathOp(tr.tk)) {
-				infix.add(tr.tk);
+			else if (Tk.isMathOp(TokenReader.tk)) {
+				infix.add(TokenReader.tk);
 			}
 			// Adds in tokens that are boolean operators
-			else if (Tk.isBoolOp(tr.tk)) {
-				infix.add(tr.tk);
+			else if (Tk.isBoolOp(TokenReader.tk)) {
+				infix.add(TokenReader.tk);
 			}
 			// Adds in numerical literals and implicitly adds * if necessary
-			else if (tr.tk == Tk.NUM_LIT) {
-				Scl num = new Scl(tr.tokenStr());
+			else if (TokenReader.tk == Tk.NUM_LIT) {
+				Scl num = new Scl(TokenReader.tokenStr());
 				// Adds the numerical literal to expression
 				infix.add(num);
 				// Adds a * if followed by ( or a var
-				switch(tr.peekNextToken()) {
+				switch(TokenReader.peekNextToken()) {
 				case LPAREN:
 				case VAR_NAME:
 					infix.add(Tk.MULT_OP);
@@ -502,15 +440,15 @@ abstract class ExprReader {
 				}
 			}
 			// Adds in boolean literals
-			else if (tr.tk == Tk.TRUE || tr.tk == Tk.FALSE) {
-				infix.add(tr.tk == Tk.TRUE? Bool.True : Bool.False);
+			else if (TokenReader.tk == Tk.TRUE || TokenReader.tk == Tk.FALSE) {
+				infix.add(TokenReader.tk == Tk.TRUE? Bool.True : Bool.False);
 			}
 			// Implicity adds * if necesssary after a var name
-			else if (tr.tk == Tk.VAR_NAME) {
+			else if (TokenReader.tk == Tk.VAR_NAME) {
 				// Adds the var's name to the infix expression
-				infix.add(tr.tokenStr());
+				infix.add(TokenReader.tokenStr());
 				// Adds * if followed by (
-				switch(tr.peekNextToken()) {
+				switch(TokenReader.peekNextToken()) {
 				case LPAREN:
 					infix.add(Tk.MULT_OP);
 				default:
@@ -519,10 +457,10 @@ abstract class ExprReader {
 			}
 			// Otherwise error
 			else {
-				ep.expectedError("arithmetic symbol or command");
+				Output.expectedError("arithmetic symbol or command");
 				return null;
 			}
-			nextTk = tr.peekNextToken();
+			nextTk = TokenReader.peekNextToken();
 		}
 		// All parantheses matched
 		if (parenCount == 0) {
@@ -531,7 +469,7 @@ abstract class ExprReader {
 		// One unmatched right paranthesis at the END
 		else if (parenCount == -1 && infix.get(infix.size() - 1) == Tk.RPAREN) {
 			// Go back a token
-			tr.prevToken();
+			TokenReader.prevToken();
 			// Remove the extra paranthesis
 			infix.remove(infix.size() - 1);
 			return infix;
@@ -552,7 +490,7 @@ abstract class ExprReader {
 	 * @param infix The expression in infix form
 	 * @return The expression in postfix form
 	 */
-	private List<Object> toPostfix(List<Object> infix) {
+	private static List<Object> toPostfix(List<Object> infix) {
 		// Convert to postfix using a stack
 		Deque<Tk> exprStack = new LinkedList<>();
 		// Postfix arraylist
@@ -626,7 +564,7 @@ abstract class ExprReader {
 	 * @param postfix The arithmetic expression in infix form
 	 * @return The resulting scalar
 	 */
-	private Var evaluateExpr(List<Object> postfix) {		
+	private static Var evaluateExpr(List<Object> postfix) {		
 		// Perform operations described in postfix
 		Deque<Object> opStack = new LinkedList<>();
 		
@@ -801,7 +739,7 @@ abstract class ExprReader {
 				return result;
 			}
 			catch (ClassCastException e) {
-				ep.internalError("Last operator on the stack '%s' was not a var", opStack.peek());
+				Output.internalError("Last operator on the stack '%s' was not a var", opStack.peek());
 				return null;
 			}
 		}
@@ -810,4 +748,161 @@ abstract class ExprReader {
 			return null;
 		}
 	}
+}
+
+abstract class InputReader {
+	/**
+	 * Reads parameters given to a function in a function call
+	 * @return A list of the parameters
+	 */
+	public static List<Var> readCallParams() {
+		List<Var> params = new ArrayList<Var>();
+		// Always ends the token before the next section
+		TokenReader.nextToken();
+		if (Output.hardCheck(Tk.LPAREN, TokenReader.tk)) {
+			do {
+				TokenReader.nextToken();
+				if (TokenReader.tk == Tk.RPAREN)
+					break;
+				TokenReader.prevToken(); // Start the expression reader on the token before the expression
+				Var var = ExprReader.evalExpr(ExprReader.getPostfixExpr());
+				params.add(var);
+				TokenReader.nextToken();
+			} while (TokenReader.tk == Tk.COMMA);
+			
+			if (Output.hardCheck(Tk.RPAREN, TokenReader.tk)) {
+				return params;
+			}
+		}
+		return null;
+	}
+	/**
+	 * Reads a list of parameter names when defining a function
+	 * @return The list of parameter names
+	 */
+	public static List<String> readDefinedParams() {
+		List<String> paramNames = new ArrayList<String>();
+		// Always ends the token before the next section
+		TokenReader.nextToken();
+		if (Output.hardCheck(Tk.LPAREN, TokenReader.tk)) {
+			do {
+				TokenReader.nextToken();
+				if (TokenReader.tk == Tk.RPAREN)
+					break;
+				String name = TokenReader.tokenStr();
+				paramNames.add(name);
+				TokenReader.nextToken();
+			} while (TokenReader.tk == Tk.COMMA);
+			
+			if (Output.hardCheck(Tk.RPAREN, TokenReader.tk)) {
+				return paramNames;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Reads in a matrix via the terminal or file io
+	 * @param fromTerminal True if reading input from the terminal
+	 * @return The matrix read in
+	 */
+	public static Mtx readMtxInput(boolean fromTerminal) {
+		ArrayList<ArrayList<Scl>> mtx = new ArrayList<>();
+		String lineStr;
+		Integer lineLen = null;
+		do {
+			// Will only print brackets if reading input from terminal
+			if (fromTerminal)
+				Output.print("[");
+			lineStr = Input.readLine();
+			TokenReader.readLine(lineStr);
+			ArrayList<Scl> line = new ArrayList<>();
+			while (true) {
+				TokenReader.nextToken();
+				if (TokenReader.tk == Tk.EOL) {
+					break;
+				}
+				else if (TokenReader.tk == Tk.COMMA) {
+					continue;
+				}
+				else {
+					TokenReader.prevToken();
+					Scl s = ExprReader.sclExpr(ExprReader.getPostfixExpr());
+					if (s == null)
+						return null;
+					line.add(s);
+				}
+			}
+			
+			if (!line.isEmpty()) {
+				if (lineLen != null && line.size() != lineLen) {
+					int dif = line.size() - lineLen;
+					// Matrix row has [number] too [few | many] parameters
+					Output.customError("Matrix row has %d too %s parameters", Math.abs(dif), dif<0? "few":"many");
+					return null;
+				}
+				else {
+					mtx.add(line);
+				}
+			}
+			
+			if (lineLen == null)
+				lineLen = line.size();
+			
+		} while (!lineSTokenReader.matches("^(\\s*)$"));
+		
+		
+		if (mtx.isEmpty()) {
+			return null;
+		}
+		
+		Scl [][] mtxArray = new Scl[mtx.size()][mtx.get(0).size()];
+		
+		int r=0;
+		for (ArrayList<Scl> row : mtx) {
+			int c=0;
+			for (Scl cell : row) {
+				try {
+					mtxArray[r][c] = cell;
+				}
+				catch (ArrayIndexOutOfBoundsException e) {
+					Output.customError("Matrix is not rectangular");
+					return null;
+				}
+				c++;
+			}
+			r++;
+		}
+		
+		return new FullMtx(mtxArray);
+	}
+}
+
+abstract class VarReader {
+	/**
+	 * Creates a new var and assigns a value to it
+	 * @return Whether the assignment was successful
+	 */
+	public boolean varAssign() {
+		// a
+		TokenReader.nextToken();
+		String varName = TokenReader.tokenStr();
+		// =
+		TokenReader.nextToken();
+		// cmd?
+		TokenReader.nextToken();
+		Var var = null;
+		if (TokenReader.tk == Tk.EOL) {
+			var = InputReader.readMtxInput(true);
+		}
+		else {
+			TokenReader.prevToken();
+			var = ExprReader.evalExpr(ExprReader.getPostfixExpr());
+		}
+		if (var == null)
+			return false;
+		setVar(varName, var);
+		return true;
+	}
+	
 }

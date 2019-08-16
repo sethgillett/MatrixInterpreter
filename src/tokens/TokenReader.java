@@ -1,8 +1,6 @@
 package tokens;
 import java.util.ArrayList;
 
-import io.Output;
-
 public abstract class TokenReader {
 	/**
 	 * The current token
@@ -28,7 +26,7 @@ public abstract class TokenReader {
 	 * Reads in a new line from the parser
 	 * @param input The input line
 	 */
-	public void readLine(String input) {
+	public static void readLine(String input) {
 		currentLine = input;
 		lineIdx = 0;
 		tkHstIdx = 0;
@@ -38,7 +36,7 @@ public abstract class TokenReader {
 	/**
 	 * Attempts to find the next token closest to the current line index
 	 */
-	public void nextToken() {
+	public static void nextToken() {
 		if (tk != null && tk == Tk.EOL) {
 			// Clears the current line from memory
 			currentLine = null;
@@ -61,7 +59,7 @@ public abstract class TokenReader {
 	 * Peeks the next token without moving the reader forward
 	 * @return The next token
 	 */
-	public Tk peekNextToken() {
+	public static Tk peekNextToken() {
 		nextToken();
 		Tk next = tk;
 		prevToken();
@@ -70,7 +68,7 @@ public abstract class TokenReader {
 	/**
 	 * Moves the current token BACK
 	 */
-	public void prevToken() {
+	public static void prevToken() {
 		// At least 2 tokens present
 		if (tkHstIdx >= 2) {
 			// Token history is 1 ahead of current token
@@ -87,17 +85,17 @@ public abstract class TokenReader {
 	/**
 	 * Restarts the reader at the beginning of the line
 	 */
-	public void restartLine() {
+	public static void restartLine() {
 		tk = null;
 		tkHstIdx = 0;
 	}
 	/**
 	 * Attempts to match the next token closest to the current line index
 	 */
-	private void matchNextToken() {
+	private static void matchNextToken() {
 		if (lineIdx == currentLine.length()) {
 			// Add EOL token to history
-			tkHst.add(new ReadToken(-1, Tk.EOL));
+			tkHst.add(new ReadToken(Tk.EOL));
 			// Return
 			return;
 		}
@@ -113,7 +111,7 @@ public abstract class TokenReader {
 				// Get the token string
 				String tokenStr = currentLine.substring(idx[0], idx[1]);
 				// Add token to history
-				tkHst.add(new ReadToken(idx[0], token, tokenStr));
+				tkHst.add(new ReadToken(token, tokenStr));
 				// Moves the line index forward
 				lineIdx = idx[1];
 				// Mark that we found a token
@@ -129,7 +127,7 @@ public abstract class TokenReader {
 			// Attempts to read the error causing token
 			String errorToken = currentLine.substring(lineIdx, endOfErrorToken());
 			// Adds the error token to the history
-			tkHst.add(new ReadToken(lineIdx, Tk.ERROR, errorToken));
+			tkHst.add(new ReadToken(Tk.ERROR, errorToken));
 			return;
 		}
 	}
@@ -137,13 +135,13 @@ public abstract class TokenReader {
 	 * Returns the string of the current token
 	 * @return The string of the current token
 	 */
-	public String tokenStr() {
+	public static String tokenStr() {
 		return tkHst.get(tkHstIdx - 1).tokenStr();
 	}
 	/**
 	 * Advances past whitespace in the current line
 	 */
-	private void advanceWhitespace() {
+	private static void advanceWhitespace() {
 		while (lineIdx < currentLine.length() && currentLine.charAt(lineIdx) == ' ') {
 			lineIdx++;
 		}
@@ -152,7 +150,7 @@ public abstract class TokenReader {
 	 * Attempts to find the end of an error causing token
 	 * @return The ending index of the error causing token
 	 */
-	private int endOfErrorToken() {
+	private static int endOfErrorToken() {
 		int errorEndIdx = lineIdx;
 		while (errorEndIdx < currentLine.length() && 
 				currentLine.charAt(errorEndIdx) != ' ' &&

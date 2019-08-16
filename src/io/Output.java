@@ -29,7 +29,7 @@ public class Output {
    * @param received The received token
 	 * @return Whether they match
 	 */
-	public static boolean hardCheck(String expected, String received) {
+	public static boolean hardCheck(Object expected, Object received) {
 		if (!expected.equals(received)) {
 			expectedError(expected, received);
 			return false;
