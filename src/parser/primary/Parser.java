@@ -49,8 +49,6 @@ public class Parser extends ParserType {
 				return controlsReader.forStmt();
 			case WHILE:
 				return controlsReader.whileStmt();
-			case DEF:
-				return controlsReader.funcStmt()? Var.Null : null;
 			default:
 				return null;
 			}

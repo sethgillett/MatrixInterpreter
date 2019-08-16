@@ -50,6 +50,6 @@ public class ReadToken {
 	
 	public static boolean tokenStrNeeded(Tk token) {
 		return (token == Tk.ERROR || token == Tk.VAR_NAME ||
-				token == Tk.NUM_LIT || token == Tk.FUNC_NAME);
+				token == Tk.NUM_LIT);
 	}
 }

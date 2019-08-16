@@ -11,7 +11,6 @@ import parser.readers.VarReader;
 import tokens.TokenReader;
 import vars.Var;
 import vars.bool.Bool;
-import vars.function.Function;
 import vars.mtx.Mtx;
 import vars.scl.Scl;
 
@@ -52,26 +51,11 @@ public abstract class ParserType {
 	/**
 	 * The primary parser
 	 */
-	public static Parser primary;
-	/**
-	 * The function at the top of the callstack
-	 */
-	private static Function currentActive;
-	
-	/**
-	 * Sets the current active function to a new function
-	 * @param func The function
-	 */
-	public static void setCurrentActive(Function func) {
-		currentActive = func;
-	}
-	
-	/**
-	 * Gets the function at the top of the call stack
-	 */
-	public static Function getCurrentActive() {
-		return currentActive;
-	}
+  public static Parser primary;
+  /**
+   * The variable container in lieu of function scoping
+   */
+  private static VarContainer currentActive = new VarContainer();
 	
 	/**
 	 * Prints out the supplied variable <b><i>if</i></b> it is found in any variable registry
@@ -142,17 +126,6 @@ public abstract class ParserType {
 		}
 		else {
 			ep.customError("Expected bool, got %s", name);
-			return null;
-		}
-	}
-	
-	public static Function getFunc(String name) {
-		Var var = getVar(name);
-		if (var instanceof Function) {
-			return (Function) var;
-		}
-		else {
-			ep.customError("Expected function, got %s", name);
 			return null;
 		}
 	}

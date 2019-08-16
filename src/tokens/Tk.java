@@ -29,7 +29,6 @@ public enum Tk implements Comparable<Tk> {
 	// PRIORITY 30+: Literals
 	TRUE(30,"\\b(?:True)\\b"), FALSE(30, "\\b(?:False)\\b"),
 	// PRIORITY 50+: User defined symbols
-	FUNC_NAME(50, "\\b(?:[A-Za-z_]\\w*)(?=\\(.*\\))"),
 	VAR_NAME(50, "\\b(?:[A-Za-z_]\\w*\\b)(?!\\()"),
 	NUM_LIT(51, "(?:\\d+)?(?:\\.?\\d+)(?:[Ee][+-]?\\d+)?");
 	/**
@@ -101,8 +100,7 @@ public enum Tk implements Comparable<Tk> {
 	
 	public static boolean isExprTk(Tk tk) {
 		return (isMathOp(tk) || isBoolOp(tk) || isParen(tk)
-				|| tk == Tk.NUM_LIT || tk == Tk.FUNC_NAME
-				|| tk == Tk.VAR_NAME);
+				|| tk == Tk.NUM_LIT || tk == Tk.VAR_NAME);
 	}
 	
 	public static boolean isControlTk(Tk tk) {
@@ -185,8 +183,6 @@ public enum Tk implements Comparable<Tk> {
 			return ": operator";
 		case DEF:
 			return "'def' command";
-		case FUNC_NAME:
-			return "function name";
 		case RETURN:
 			return "return";
 		default:

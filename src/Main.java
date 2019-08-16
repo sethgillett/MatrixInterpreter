@@ -7,7 +7,6 @@ import io.Input;
 import io.Output;
 import parser.ParserType;
 import parser.primary.Parser;
-import vars.function.DynamicFunction;
 
 public class Main {
 	
@@ -43,10 +42,6 @@ public class Main {
 		ParserType.primary = new Parser();
 		// String for reading input
 		String inputLine = "";
-		// REPL will be implemented as a function with lines added dynamically
-		DynamicFunction main = new DynamicFunction(ParserType.primary);
-		// Start up the function with no arguments
-		main.start(null);
 		
 		while (true) {
 			Output.print(">>> ");
@@ -56,8 +51,7 @@ public class Main {
 				break;
 			}
 			
-			main.read(inputLine);
-			main.run();
+			ParserType.primary.read(inputLine);
 		}
 		
 		ParserType.input.close();

@@ -7,8 +7,6 @@ import parser.ParserType;
 import tokens.Tk;
 import vars.Var;
 import vars.bool.Bool;
-import vars.function.Function;
-import vars.function.MIFunction;
 import vars.scl.Scl;
 
 public class ControlsReader extends ParserType {
@@ -199,38 +197,5 @@ public class ControlsReader extends ParserType {
 			}
 		}
 		return null;
-	}
-	
-	public boolean funcStmt() {
-		// DEF token flagged
-		tr.nextToken();
-		if (ep.checkToken(Tk.FUNC_NAME)) {
-			String funcName = tr.tokenStr();
-			List<String> paramNames = inpReader.readDefinedParams();
-			tr.nextToken();
-			if (ep.checkToken(Tk.COLON)) {
-				List<String> lines = new ArrayList<>();
-				String newLine = input.readLine();
-				// Count of colon's (+) and :'s (-)
-				int colonCount = 1;
-				// Once colonCount == 0, 
-				while (colonCount > 0) {
-					// Make sure # :'s matches # end's
-					// Colon to be matched
-					if (newLine.matches(".*:\\s*$"))
-						colonCount += 1;
-					// end matches colon
-					if (newLine.matches("\\s*\\b(?:end)\\b"))
-						colonCount -= 1;
-					
-					lines.add(newLine);
-					newLine = input.readLine();
-				}
-				Function func = new MIFunction(primary, paramNames, lines);
-				setVar(funcName, func);
-				return true;
-			}
-		}
-		return false;
 	}
 }
