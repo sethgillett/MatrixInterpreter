@@ -1,7 +1,6 @@
 package parser;
 
 import errors.ErrorPrinter;
-import io.Input;
 import io.Output;
 import parser.primary.Parser;
 import parser.readers.ControlsReader;
@@ -44,10 +43,6 @@ public abstract class ParserType {
 	 * Deals with control statements (if, while, for)
 	 */
 	protected static ControlsReader controlsReader;
-	/**
-	 * The input reader
-	 */
-	public static Input input;
 	/**
 	 * The primary parser
 	 */

@@ -1,12 +1,6 @@
 package io;
 
-import java.util.function.Consumer;
-
 public class Output {
-	/**
-	 * The default way of getting text onto the screen
-	 */
-	public static Consumer<String> output = null;
 	/**
 	 * Prints a message plus a newline
 	 * @param msg The message
@@ -34,6 +28,6 @@ public class Output {
 	 * @param msg The message
 	 */
 	private static void print(String msg) {
-		output.accept(msg);
+		System.out.print(msg);
 	}
 }

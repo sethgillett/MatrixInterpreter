@@ -3,6 +3,7 @@ package parser.readers;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.Input;
 import io.Output;
 import parser.ParserType;
 import tokens.Tk;
@@ -217,7 +218,7 @@ public class InputReader extends ParserType {
 			// Will only print brackets if reading input from terminal
 			if (fromTerminal)
 				Output.print("[");
-			lineStr = input.readLine();
+			lineStr = Input.readLine();
 			tr.readLine(lineStr);
 			ArrayList<Scl> line = new ArrayList<>();
 			while (true) {
