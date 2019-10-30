@@ -6,7 +6,20 @@ import vars.scl.Scl;
 
 public abstract class Mtx extends Var {
 	public int rCount, cCount;
+	/**
+	 * Gets a scalar in the matrix
+	 * @param row The row
+	 * @param col The column
+	 * @return The scalar
+	 */
 	public abstract Scl get(int row, int col);
+	/**
+	 * Sets an element in the matrix
+	 * @param row The row
+	 * @param col The column
+	 * @param s The scalar to set
+	 * @return The matrix (for chaining)
+	 */
 	public abstract Mtx set(int row, int col, Scl s);
 	
 	/**
