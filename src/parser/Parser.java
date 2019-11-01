@@ -81,7 +81,7 @@ public abstract class Parser {
       // If name is followed by assignment, send to appropriate assignment
       if (TokenReader.tk == Tk.ASSIGNMENT_OP) {
         TokenReader.restartLine();
-        return VarReader.varAssign() ? Var.Null : null;
+        return VarReader.varAssign();
       } else if (Tk.isExprTk(TokenReader.tk)) {
         // If it's an expression print out the value of the expression
         TokenReader.restartLine();

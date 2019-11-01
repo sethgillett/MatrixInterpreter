@@ -3,6 +3,7 @@ package vars.scl;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
+import io.Output;
 import vars.Var;
 import vars.bool.Bool;
 
@@ -39,6 +40,11 @@ public class Scl extends Var {
    * @return The resulting scalar
    */
   public static Scl add(Scl a, Scl b) {
+    // Optimized cases:
+    if (a == Scl.ZERO)
+      return (Scl) b.clearName();
+    if (b == Scl.ZERO)
+      return (Scl) a.clearName();
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(a.val.add(b.val, maxPrecision(a, b)));
   }
@@ -50,6 +56,11 @@ public class Scl extends Var {
    * @return The resulting scalar
    */
   public static Scl sub(Scl a, Scl b) {
+    // Optimized cases:
+    if (a == Scl.ZERO)
+      return (Scl) b.clearName();
+    if (b == Scl.ZERO)
+      return (Scl) a.clearName();
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(a.val.subtract(b.val, maxPrecision(a, b)));
   }
@@ -60,6 +71,9 @@ public class Scl extends Var {
    * @return The negated scalar
    */
   public static Scl neg(Scl a) {
+    // Optimized cases:
+    if (a == Scl.ZERO)
+      return (Scl) a.clearName();
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(a.val.negate(maxPrecision(a, a)));
   }
@@ -71,6 +85,19 @@ public class Scl extends Var {
    * @return The resulting scalar
    */
   public static Scl mult(Scl a, Scl b) {
+    // Optimized cases:
+    if (a == Scl.ZERO)
+      return Scl.ZERO;
+    if (b == Scl.ZERO)
+      return Scl.ZERO;
+    if (a == Scl.ONE)
+      return (Scl) b.clearName();
+    if (b == Scl.ONE)
+      return (Scl) a.clearName();
+    if (a == Scl.TEN)
+      return new Scl(b.val.scaleByPowerOfTen(1));
+    if (b == Scl.TEN)
+      return new Scl(a.val.scaleByPowerOfTen(1));
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(a.val.multiply(b.val, maxPrecision(a, b)));
   }
@@ -82,8 +109,23 @@ public class Scl extends Var {
    * @return The resulting scalar
    */
   public static Scl div(Scl a, Scl b) {
+    // Optimized cases:
+    if (a == Scl.ZERO)
+      return Scl.ZERO;
+    if (b == Scl.ZERO) {
+      Output.customError("Cannot divide by 0"); 
+      return null;
+    }
+    if (a == Scl.ONE)
+      return (Scl) b.clearName();
+    if (b == Scl.ONE)
+      return (Scl) a.clearName();
+    if (a == Scl.TEN)
+      return new Scl(b.val.scaleByPowerOfTen(-1));
+    if (b == Scl.TEN)
+      return new Scl(a.val.scaleByPowerOfTen(-1));
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(a.val.add(b.val, maxPrecision(a, b)));
+    return new Scl(a.val.divide(b.val, maxPrecision(a, b)));
   }
 
   /**
@@ -93,6 +135,11 @@ public class Scl extends Var {
    * @return The resulting scalar
    */
   public static Scl exp(Scl a, Scl b) {
+    // Optimized cases:
+    if (a == Scl.ZERO && b != Scl.ZERO)
+      return Scl.ZERO;
+    if (b == Scl.ZERO && a != Scl.ZERO)
+      return Scl.ONE;
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(Math.pow(a.val.doubleValue(), b.val.doubleValue()), maxPrecision(a, b).getPrecision());
   }

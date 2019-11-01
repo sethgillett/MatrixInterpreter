@@ -86,9 +86,9 @@ public abstract class Mtx extends Var {
 			return null;
 		}
 		if (a instanceof IdMtx)
-			return b;
+			return (Mtx) b.clearName();
 		if (b instanceof IdMtx)
-			return a;
+			return (Mtx) a.clearName();
 		if (a instanceof ZeroMtx || b instanceof ZeroMtx)
 			return new ZeroMtx(a.rCount, b.cCount);
 		
@@ -117,10 +117,10 @@ public abstract class Mtx extends Var {
 	 */
 	public static Mtx ADD(Mtx a, Mtx b) {
 		if (a instanceof ZeroMtx) {
-			return b;
+			return (Mtx) b.clearName();
 		}
 		if (b instanceof ZeroMtx) {
-			return a;
+			return (Mtx) a.clearName();
 		}
 		
 		if (a.rCount == b.rCount && a.cCount == b.cCount) {
@@ -146,10 +146,10 @@ public abstract class Mtx extends Var {
 	 */
 	public static Mtx SUB(Mtx a, Mtx b) {
 		if (a instanceof ZeroMtx) {
-			return b;
+			return (Mtx) b.clearName();
 		}
 		if (b instanceof ZeroMtx) {
-			return a;
+			return (Mtx) a.clearName();
 		}
 		
 		if (a.rCount == b.rCount && a.cCount == b.cCount) {
@@ -174,7 +174,7 @@ public abstract class Mtx extends Var {
 	 */
 	public static Mtx NEG(Mtx a) {
 		if (a instanceof ZeroMtx) {
-			return a;
+			return (Mtx) a.clearName();
 		}
 		Mtx res = new FullMtx(a.rCount, a.cCount);
 		for (int r=0; r<a.rCount; r++) {
@@ -233,8 +233,6 @@ public abstract class Mtx extends Var {
 			maxLast = Math.max(len, maxLast);
 		}
 		StringBuilder s = new StringBuilder();
-		
-		s.append("Mtx = \n");
 		
 		for (int r=0; r<rCount; r++) {
 			s.append("[");

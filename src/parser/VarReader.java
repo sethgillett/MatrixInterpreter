@@ -9,7 +9,7 @@ abstract class VarReader {
    * Creates a new var and assigns a value to it   
    * @return Whether the assignment was successful
    */
-  public static boolean varAssign() {
+  public static Var varAssign() {
     // a
     TokenReader.nextToken();
     String varName = TokenReader.tokenStr();
@@ -25,9 +25,11 @@ abstract class VarReader {
       var = ExprReader.expr();
     }
     if (var == null)
-      return false;
+      return null;
+
+    var.setName(varName);
     Parser.setVar(varName, var);
-    return true;
+    return var;
   }
 
 }
