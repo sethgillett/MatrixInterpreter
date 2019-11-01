@@ -222,14 +222,14 @@ public abstract class Mtx extends Var {
 		int max = 4;
 		for (int r=0; r<rCount; r++) {
 			for (int c=0; c<cCount; c++) {
-				int len = get(r,c).strLength();
+				int len = get(r,c).toString().length();
 				max = Math.max(len, max);
 			}
 		}
 		// Find out how long the last scalar in a matrix is
 		int maxLast = 1;
 		for (int r=0; r<rCount; r++) {
-			int len = get(r,cCount-1).strLength();
+			int len = get(r,cCount-1).toString().length();
 			maxLast = Math.max(len, maxLast);
 		}
 		StringBuilder s = new StringBuilder();

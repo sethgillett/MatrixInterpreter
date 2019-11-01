@@ -120,13 +120,14 @@ abstract class ControlsReader {
           if (Output.hardCheck(Tk.COLON, TokenReader.tk)) {
             List<String> stmts = collectStmts();
             // Create the iterator
-            Scl iterator = new Scl(start);
+            Scl iterator = start;
             // Put it in the var reg so it can be accessed within code
             Parser.setVar(iterName, iterator);
             // Iterate while true
             while (Scl.lesser(iterator, end) == Bool.True) {
               execStmts(stmts);
               iterator = Scl.add(iterator, Scl.ONE);
+              Parser.setVar(iterName, iterator);
             }
             return Var.Null;
           }
