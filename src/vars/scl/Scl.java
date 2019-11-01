@@ -1,5 +1,8 @@
 package vars.scl;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 import vars.Var;
 import vars.bool.Bool;
 
@@ -12,22 +15,22 @@ public class Scl extends Var {
   /**
    * The variable being stored
    */
-  private double val;
-
-  /**
-   * The number of decimal places (preserved) in the number
-   */
-  private int decimalPlaces;
+  private BigDecimal val;
 
   /**
    * Scalar representing zero
    */
-  public static Scl ZERO = new Scl(0.0, 0);
+  public static Scl ZERO = new Scl(BigDecimal.ZERO);
 
   /**
    * Scalar representing one
    */
-  public static Scl ONE = new Scl(1.0, 0);
+  public static Scl ONE = new Scl(BigDecimal.ONE);
+
+  /**
+   * Scalar representing ten
+   */
+  public static Scl TEN = new Scl(BigDecimal.TEN);
 
   /**
    * Returns the result of a + b   
@@ -37,7 +40,7 @@ public class Scl extends Var {
    */
   public static Scl add(Scl a, Scl b) {
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(a.val + b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
+    return new Scl(a.val.add(b.val, maxPrecision(a, b)));
   }
 
   /**
@@ -48,7 +51,7 @@ public class Scl extends Var {
    */
   public static Scl sub(Scl a, Scl b) {
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(a.val - b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
+    return new Scl(a.val.subtract(b.val, maxPrecision(a, b)));
   }
 
   /**
@@ -58,7 +61,7 @@ public class Scl extends Var {
    */
   public static Scl neg(Scl a) {
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(-a.val, a.decimalPlaces);
+    return new Scl(a.val.negate(maxPrecision(a, a)));
   }
 
   /**
@@ -69,7 +72,7 @@ public class Scl extends Var {
    */
   public static Scl mult(Scl a, Scl b) {
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(a.val * b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
+    return new Scl(a.val.multiply(b.val, maxPrecision(a, b)));
   }
 
   /**
@@ -80,38 +83,38 @@ public class Scl extends Var {
    */
   public static Scl div(Scl a, Scl b) {
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(a.val / b.val, Math.max(a.decimalPlaces, b.decimalPlaces));
+    return new Scl(a.val.add(b.val, maxPrecision(a, b)));
   }
 
   /**
-   * Returns the result of a ^ b   
+   * Returns the result of a ^ b (WILL ONLY HAVE DOUBLE PRECISION)
    * @param a The 1st scalar
    * @param b The 2nd scalar
    * @return The resulting scalar
    */
   public static Scl exp(Scl a, Scl b) {
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(Math.pow(a.val, b.val), Math.max(a.decimalPlaces, b.decimalPlaces));
+    return new Scl(Math.pow(a.val.doubleValue(), b.val.doubleValue()), maxPrecision(a, b).getPrecision());
   }
 
   public static Bool great_or_equal(Scl a, Scl b) {
-    return Bool.bool(a.val >= b.val);
+    return Bool.bool(a.val.compareTo(b.val) >= 0);
   }
 
   public static Bool less_or_equal(Scl a, Scl b) {
-    return Bool.bool(a.val <= b.val);
+    return Bool.bool(a.val.compareTo(b.val) <= 0);
   }
 
   public static Bool greater(Scl a, Scl b) {
-    return Bool.bool(a.val > b.val);
+    return Bool.bool(a.val.compareTo(b.val) > 0);
   }
 
   public static Bool lesser(Scl a, Scl b) {
-    return Bool.bool(a.val < b.val);
+    return Bool.bool(a.val.compareTo(b.val) < 0);
   }
 
   public static Bool equal(Scl a, Scl b) {
-    return Bool.bool(a.val == b.val);
+    return Bool.bool(a.val.compareTo(b.val) == 0);
   }
 
   /**
@@ -119,66 +122,38 @@ public class Scl extends Var {
    * @param val The string of the number
    */
   public Scl(String val) {
-    int dotIdx = val.indexOf('.');
-    if (dotIdx != -1) {
-      this.decimalPlaces = val.length() - 1 - dotIdx;
-    } else {
-      this.decimalPlaces = 0;
-    }
-
-    this.val = Double.parseDouble(val);
+    this.val = new BigDecimal(val);
   }
 
   /**
-   * Copies a scalar from another scalar   
-   * @param other The other scalar
+   * Creates a new scalar from a double and precision
+   * @param val The double value
+   * @param precision The precision
    */
-  public Scl(Scl other) {
-    this.val = other.val;
-    this.decimalPlaces = other.decimalPlaces;
+  private Scl(double val, int precision) {
+    this.val = new BigDecimal(val, new MathContext(precision));
   }
 
   /**
-   * Creates a new scalar from a double and # of decimal places, will
-   * automatically extend or reduce decimals as needed   
-   * @param val           The double value
-   * @param decimalPlaces The number of decimal places to preserve
+   * Creates a scalar from a BigDecimal
+   * @param val The BigDecimal
    */
-  Scl(double val, int decimalPlaces) {
+  private Scl(BigDecimal val) {
     this.val = val;
-    if (this.isInt()) {
-      this.decimalPlaces = 0;
-    } else {
-      this.decimalPlaces = Math.max(decimalPlaces, 2);
-    }
   }
 
   /**
-   * Checks if the current scalar is an int   
-   * @return True or false
+   * Returns the maximum precision of two scalars
+   * @param a The first scalar
+   * @param b The second scalar
+   * @return The maximum precision as a MathContext object
    */
-  public boolean isInt() {
-    return (val <= Integer.MAX_VALUE && val >= Integer.MIN_VALUE && val == Math.floor(val));
-  }
-
-  /**
-   * Returns the current scalar as an int   
-   * @return The scalar as an int
-   */
-  public int valueAsInt() {
-    return (int) Math.floor(val);
-  }
-
-  /**
-   * Finds the character length of the scalar   
-   * @return The character length of the scalar
-   */
-  public int strLength() {
-    return this.toString().length();
+  private static MathContext maxPrecision(Scl a, Scl b) {
+    return new MathContext(Math.max(a.val.precision(), b.val.precision()));
   }
 
   @Override
   public String toString() {
-    return String.format("%." + decimalPlaces + "f", val);
+    return this.val.toPlainString();
   }
 }
