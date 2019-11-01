@@ -1,6 +1,7 @@
 package vars.scl;
 
 import vars.Var;
+import vars.bool.Bool;
 
 /**
  * Scalars of any type, abstract or literal
@@ -100,24 +101,24 @@ public class Scl extends Var {
     return new Scl(Math.pow(a.val, b.val), Math.max(a.decimalPlaces, b.decimalPlaces));
   }
 
-  public static Boolean great_or_equal(Scl a, Scl b) {
-    return a.val >= b.val;
+  public static Bool great_or_equal(Scl a, Scl b) {
+    return Bool.bool(a.val >= b.val);
   }
 
-  public static Boolean less_or_equal(Scl a, Scl b) {
-    return a.val <= b.val;
+  public static Bool less_or_equal(Scl a, Scl b) {
+    return Bool.bool(a.val <= b.val);
   }
 
-  public static Boolean greater(Scl a, Scl b) {
-    return a.val > b.val;
+  public static Bool greater(Scl a, Scl b) {
+    return Bool.bool(a.val > b.val);
   }
 
-  public static Boolean lesser(Scl a, Scl b) {
-    return a.val < b.val;
+  public static Bool lesser(Scl a, Scl b) {
+    return Bool.bool(a.val < b.val);
   }
 
-  public static Boolean equal(Scl a, Scl b) {
-    return a.val == b.val;
+  public static Bool equal(Scl a, Scl b) {
+    return Bool.bool(a.val == b.val);
   }
 
   /**

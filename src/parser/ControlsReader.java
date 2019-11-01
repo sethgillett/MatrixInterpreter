@@ -13,19 +13,25 @@ import vars.scl.Scl;
 
 abstract class ControlsReader {
   /**
+   * 
+   * Executes code inside an if statement if the condition contained is true
+   * 
    * @return The var returned (if any)
    */
   public static Var ifStmt() {
     // IF token flagged
+    // Read condition
     Bool ifCondition = (Bool) ExprReader.expr();
     if (ifCondition == null)
       return null;
     if (ifCondition == Bool.False)
       return Bool.Null;
     TokenReader.nextToken();
-    if (TokenReader.tk == Tk.COLON) {
+    // HARD check for a colon
+    if (Output.hardCheck(Tk.COLON, TokenReader.tk)) {
       TokenReader.nextToken();
-      if (TokenReader.tk == Tk.EOL) {
+      // HARD check for EOL
+      if (Output.hardCheck(Tk.EOL, TokenReader.tk)) {
         ArrayList<String> stmts = new ArrayList<>();
         String newLine = Input.readLine();
         // If newLine can't be read
@@ -60,57 +66,41 @@ abstract class ControlsReader {
           }
         }
         return Bool.True;
-      } else {
-        Output.expectedError(Tk.EOL, TokenReader.tk);
       }
-    } else {
-      Output.customError("Expected : after if statement");
     }
     return null;
   }
 
   /**
-   * <p>
-   * while condition:
-   * <li>stmt</li>
-   * <li>stmt</li>
-   * <li>stmt</li>
-   * </p>
+   *
+   * Executes a series of lines in a while statement while the condition is true
    * 
    * @return The var returned (if any)
    */
   public static Var whileStmt() {
     // WHILE token flagged
     List<Object> whileExpr = ExprReader.convertExpr(ExprReader.readExpr());
-    Bool whileCondition = (Bool) ExprReader.evaluateExpr(whileExpr);
-    if (whileCondition == null)
-      return null;
-    if (whileCondition == Bool.False)
-      return null;
     TokenReader.nextToken();
-    if (TokenReader.tk == Tk.COLON) {
+    // HARD check for colon
+    if (Output.hardCheck(Tk.COLON, TokenReader.tk)) {
       TokenReader.nextToken();
+      // HARD check for EOL
       if (Output.hardCheck(Tk.EOL, TokenReader.tk)) {
+        // Reads lines to a list
         List<String> stmts = new ArrayList<>();
-        // Reads a line from current active Input
         String newLine = Input.readLine();
-        // If newLine can't be read
-        if (newLine == null) {
-          Output.customError("No additional lines found after while statement");
-          return null;
-        }
         while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b")) {
-          // Only executes the line if the if statement was true
-          if (whileCondition.val()) {
-            stmts.add(newLine);
-          }
+          stmts.add(newLine);
           newLine = Input.readLine();
         }
-        // If no end statement has been found
-        if (newLine == null) {
+        // Look for an end statement
+        if (!newLine.matches("\\s*\\b(?:end)\\b")) {
           Output.customError("No end statement found after while statement");
-          return null;
+          return null; // ERROR
         }
+        // Evaluate the while conditional
+        Bool whileCondition = (Bool) ExprReader.evaluateExpr(whileExpr);
+        // While the condition is true execute the contained lines
         while (whileCondition.val()) {
           for (String stmt : stmts) {
             Var result = Parser.read(stmt);
@@ -127,12 +117,11 @@ abstract class ControlsReader {
               return result;
             }
           }
+          // Re-evaluate the while conditional
           whileCondition = (Bool) ExprReader.evaluateExpr(whileExpr);
         }
         return Bool.Null;
       }
-    } else {
-      Output.customError("Expected : after while statement");
     }
     return null;
   }
@@ -178,7 +167,7 @@ abstract class ControlsReader {
             }
             Scl iterator = new Scl(start);
             Parser.setVar(iterName, iterator);
-            while (Scl.lesser(iterator, end)) {
+            while (Scl.lesser(iterator, end) == Bool.True) {
               for (String stmt : stmts) {
                 if (Parser.read(stmt) == null) {
                   return null;
