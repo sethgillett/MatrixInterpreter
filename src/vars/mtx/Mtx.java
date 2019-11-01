@@ -86,9 +86,9 @@ public abstract class Mtx extends Var {
 			return null;
 		}
 		if (a instanceof IdMtx)
-			return (Mtx) b.clearName();
+			return b;
 		if (b instanceof IdMtx)
-			return (Mtx) a.clearName();
+			return a;
 		if (a instanceof ZeroMtx || b instanceof ZeroMtx)
 			return new ZeroMtx(a.rCount, b.cCount);
 		
@@ -117,10 +117,10 @@ public abstract class Mtx extends Var {
 	 */
 	public static Mtx ADD(Mtx a, Mtx b) {
 		if (a instanceof ZeroMtx) {
-			return (Mtx) b.clearName();
+			return b;
 		}
 		if (b instanceof ZeroMtx) {
-			return (Mtx) a.clearName();
+			return a;
 		}
 		
 		if (a.rCount == b.rCount && a.cCount == b.cCount) {
@@ -146,10 +146,10 @@ public abstract class Mtx extends Var {
 	 */
 	public static Mtx SUB(Mtx a, Mtx b) {
 		if (a instanceof ZeroMtx) {
-			return (Mtx) b.clearName();
+			return b;
 		}
 		if (b instanceof ZeroMtx) {
-			return (Mtx) a.clearName();
+			return a;
 		}
 		
 		if (a.rCount == b.rCount && a.cCount == b.cCount) {
@@ -174,7 +174,7 @@ public abstract class Mtx extends Var {
 	 */
 	public static Mtx NEG(Mtx a) {
 		if (a instanceof ZeroMtx) {
-			return (Mtx) a.clearName();
+			return a;
 		}
 		Mtx res = new FullMtx(a.rCount, a.cCount);
 		for (int r=0; r<a.rCount; r++) {

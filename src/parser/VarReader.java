@@ -27,7 +27,6 @@ abstract class VarReader {
     if (var == null)
       return null;
 
-    var.setName(varName);
     Parser.setVar(varName, var);
     return var;
   }

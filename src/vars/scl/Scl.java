@@ -42,9 +42,9 @@ public class Scl extends Var {
   public static Scl add(Scl a, Scl b) {
     // Optimized cases:
     if (a == Scl.ZERO)
-      return (Scl) b.clearName();
+      return b;
     if (b == Scl.ZERO)
-      return (Scl) a.clearName();
+      return a;
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(a.val.add(b.val, maxPrecision(a, b)));
   }
@@ -58,9 +58,9 @@ public class Scl extends Var {
   public static Scl sub(Scl a, Scl b) {
     // Optimized cases:
     if (a == Scl.ZERO)
-      return (Scl) b.clearName();
+      return b;
     if (b == Scl.ZERO)
-      return (Scl) a.clearName();
+      return a;
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(a.val.subtract(b.val, maxPrecision(a, b)));
   }
@@ -73,7 +73,7 @@ public class Scl extends Var {
   public static Scl neg(Scl a) {
     // Optimized cases:
     if (a == Scl.ZERO)
-      return (Scl) a.clearName();
+      return a;
     // Returns a new scalar representing the result with preserved decimal places
     return new Scl(a.val.negate(maxPrecision(a, a)));
   }
@@ -91,9 +91,9 @@ public class Scl extends Var {
     if (b == Scl.ZERO)
       return Scl.ZERO;
     if (a == Scl.ONE)
-      return (Scl) b.clearName();
+      return b;
     if (b == Scl.ONE)
-      return (Scl) a.clearName();
+      return a;
     if (a == Scl.TEN)
       return new Scl(b.val.scaleByPowerOfTen(1));
     if (b == Scl.TEN)
@@ -117,9 +117,9 @@ public class Scl extends Var {
       return null;
     }
     if (a == Scl.ONE)
-      return (Scl) b.clearName();
+      return b;
     if (b == Scl.ONE)
-      return (Scl) a.clearName();
+      return a;
     if (a == Scl.TEN)
       return new Scl(b.val.scaleByPowerOfTen(-1));
     if (b == Scl.TEN)
