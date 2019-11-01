@@ -26,11 +26,11 @@ Make control statements count openers (if, for, while, def) and enders (end, ret
 Or, using matrices:
 ```python
 >>> A = 
-[1 2
-[3 4
+[1, 2
+[3, 4
 >>> B =
-[5 6
-[7 8
+[5, 6
+[7, 8
 >>> A*B
 [20   30]
 [50   50]
