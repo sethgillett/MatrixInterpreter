@@ -2,8 +2,7 @@ package io;
 
 public class Output {
   /**
-   * Prints a message plus a newline
-   * 
+   * Prints a message plus a newline   
    * @param msg The message
    */
   public static void println(Object msg) {
@@ -11,8 +10,7 @@ public class Output {
   }
 
   /**
-   * Prints a message with formatting
-   * 
+   * Prints a message with formatting   
    * @param msg  The message
    * @param args The formatting arguments
    */
@@ -21,8 +19,7 @@ public class Output {
   }
 
   /**
-   * Actually outputs the message to the screen
-   * 
+   * Actually outputs the message to the screen   
    * @param msg The message
    */
   public static void print(Object msg) {
@@ -31,8 +28,7 @@ public class Output {
 
   /**
    * Checks the current token and raises an expected error if it doesn't match the
-   * expected token
-   * 
+   * expected token   
    * @param expected The expected token
    * @param received The received token
    * @return Whether they match
@@ -46,8 +42,7 @@ public class Output {
   }
 
   /**
-   * Error in the format of "Expected [expected], got [last token]"
-   * 
+   * Error in the format of "Expected [expected], got [last token]"   
    * @param expected The expected token
    * @param received The received token
    */
@@ -58,8 +53,7 @@ public class Output {
   }
 
   /**
-   * An error with a custom message
-   * 
+   * An error with a custom message   
    * @param msg  The message to be printed
    * @param args Any arguments to go with the message
    */
@@ -70,8 +64,7 @@ public class Output {
   }
 
   /**
-   * Printer for errors that occur within the software
-   * 
+   * Printer for errors that occur within the software   
    * @param msg  The message to be printed
    * @param args Any additional arguments
    */

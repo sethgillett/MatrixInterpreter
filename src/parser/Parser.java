@@ -8,8 +8,7 @@ import vars.Var;
 import vars.bool.Bool;
 
 /**
- * Primary parser/interpreter for the program
- * 
+ * Primary parser/interpreter for the program 
  * @author Seth Gillett
  *
  */
@@ -21,11 +20,10 @@ public abstract class Parser {
   /**
    * The variable container in lieu of function scoping
    */
-  public static VarContainer vars = new VarContainer();
+  public static VarContainer vars = new VarContainer(null);
 
   /**
-   * Attempts to get a var by name
-   * 
+   * Attempts to get a var by name   
    * @param name The name of the var
    * @return The var
    */
@@ -34,8 +32,7 @@ public abstract class Parser {
   }
 
   /**
-   * Attempts to set a var by name and valud
-   * 
+   * Attempts to set a var by name and valud   
    * @param name The name of the var
    * @param val  The value of the var
    */
@@ -44,8 +41,7 @@ public abstract class Parser {
   }
 
   /**
-   * Checks for the existence of a var
-   * 
+   * Checks for the existence of a var   
    * @param name The name of the var
    * @return True or false
    */
@@ -54,8 +50,7 @@ public abstract class Parser {
   }
 
   /**
-   * Reads in a new line
-   * 
+   * Reads in a new line   
    * @param line The new line read in
    * @return Whether the run was successful <b>or a returned variable</b>
    */

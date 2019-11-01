@@ -4,8 +4,7 @@ import vars.Var;
 import vars.bool.Bool;
 
 /**
- * Scalars of any type, abstract or literal
- * 
+ * Scalars of any type, abstract or literal 
  * @author Seth Gillett
  *
  */
@@ -31,8 +30,7 @@ public class Scl extends Var {
   public static Scl ONE = new Scl(1.0, 0);
 
   /**
-   * Returns the result of a + b
-   * 
+   * Returns the result of a + b   
    * @param a The 1st scalar
    * @param b The 2nd scalar
    * @return The resulting scalar
@@ -43,8 +41,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Returns the result of a - b
-   * 
+   * Returns the result of a - b   
    * @param a The 1st scalar
    * @param b The 2nd scalar
    * @return The resulting scalar
@@ -55,8 +52,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Negates a scalar
-   * 
+   * Negates a scalar   
    * @param a The scalar
    * @return The negated scalar
    */
@@ -66,8 +62,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Returns the result of a * b
-   * 
+   * Returns the result of a * b   
    * @param a The 1st scalar
    * @param b The 2nd scalar
    * @return The resulting scalar
@@ -78,8 +73,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Returns the result of a / b
-   * 
+   * Returns the result of a / b   
    * @param a The 1st scalar
    * @param b The 2nd scalar
    * @return The resulting scalar
@@ -90,8 +84,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Returns the result of a ^ b
-   * 
+   * Returns the result of a ^ b   
    * @param a The 1st scalar
    * @param b The 2nd scalar
    * @return The resulting scalar
@@ -122,8 +115,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Parses the value as a double and preserves the number of decimal places
-   * 
+   * Parses the value as a double and preserves the number of decimal places   
    * @param val The string of the number
    */
   public Scl(String val) {
@@ -138,8 +130,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Copies a scalar from another scalar
-   * 
+   * Copies a scalar from another scalar   
    * @param other The other scalar
    */
   public Scl(Scl other) {
@@ -149,8 +140,7 @@ public class Scl extends Var {
 
   /**
    * Creates a new scalar from a double and # of decimal places, will
-   * automatically extend or reduce decimals as needed
-   * 
+   * automatically extend or reduce decimals as needed   
    * @param val           The double value
    * @param decimalPlaces The number of decimal places to preserve
    */
@@ -164,8 +154,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Checks if the current scalar is an int
-   * 
+   * Checks if the current scalar is an int   
    * @return True or false
    */
   public boolean isInt() {
@@ -173,8 +162,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Returns the current scalar as an int
-   * 
+   * Returns the current scalar as an int   
    * @return The scalar as an int
    */
   public int valueAsInt() {
@@ -182,8 +170,7 @@ public class Scl extends Var {
   }
 
   /**
-   * Finds the character length of the scalar
-   * 
+   * Finds the character length of the scalar   
    * @return The character length of the scalar
    */
   public int strLength() {

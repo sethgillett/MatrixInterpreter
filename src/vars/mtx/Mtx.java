@@ -1,5 +1,6 @@
 package vars.mtx;
 
+import io.Output;
 import vars.Var;
 import vars.bool.Bool;
 import vars.scl.Scl;
@@ -81,7 +82,7 @@ public abstract class Mtx extends Var {
 	 */
 	public static Mtx MULT(Mtx a, Mtx b) {
 		if (a.cCount != b.rCount) {
-			throwError("Cannot multiply matrices; column count and row count do not match");
+			Output.customError("Cannot multiply matrices; column count and row count do not match");
 			return null;
 		}
 		if (a instanceof IdMtx)
@@ -132,7 +133,7 @@ public abstract class Mtx extends Var {
 			return res;
 		}
 		else {
-			throwError("Cannot add matrices; dimensions do not match");
+			Output.customError("Cannot add matrices; dimensions do not match");
 			return null;
 		}
 	}
@@ -161,7 +162,7 @@ public abstract class Mtx extends Var {
 			return res;
 		}
 		else {
-			throwError("Cannot subtract matrices; dimensions do not match");
+			Output.customError("Cannot subtract matrices; dimensions do not match");
 			return null;
 		}
 	}
@@ -210,7 +211,7 @@ public abstract class Mtx extends Var {
 			}
 		}
 		else {
-			throwError("Cannot check matrix equality; dimensions do not match");
+			Output.customError("Cannot check matrix equality; dimensions do not match");
 			return null;
 		}
 	}

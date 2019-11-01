@@ -15,8 +15,7 @@ import vars.scl.Scl;
 
 abstract class ExprReader {
   /**
-   * Reads, converts, and evaluates an expression
-   * 
+   * Reads, converts, and evaluates an expression   
    * @return
    */
   public static Var expr() {
@@ -24,8 +23,7 @@ abstract class ExprReader {
   }
 
   /**
-   * Reads an arithmetic expression from tokens in infix form
-   * 
+   * Reads an arithmetic expression from tokens in infix form   
    * @param first The first scalar of the expression
    * @return The expression in infix form
    */
@@ -129,8 +127,7 @@ abstract class ExprReader {
   }
 
   /**
-   * Converts an arithmetic expression from infix to postfix form
-   * 
+   * Converts an arithmetic expression from infix to postfix form   
    * @param infix The expression in infix form
    * @return The expression in postfix form
    */
@@ -203,8 +200,7 @@ abstract class ExprReader {
   }
 
   /**
-   * Evaluates a scalar expression and returns the resulting scalar
-   * 
+   * Evaluates a scalar expression and returns the resulting scalar   
    * @param postfix The arithmetic expression in infix form
    * @return The resulting scalar
    */

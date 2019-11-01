@@ -6,8 +6,7 @@ import vars.Var;
 
 abstract class VarReader {
   /**
-   * Creates a new var and assigns a value to it
-   * 
+   * Creates a new var and assigns a value to it   
    * @return Whether the assignment was successful
    */
   public static boolean varAssign() {

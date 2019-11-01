@@ -11,8 +11,7 @@ public class FullMtx extends Mtx {
   }
 
   /**
-   * Instantiates a new array to represent the matrix
-   * 
+   * Instantiates a new array to represent the matrix   
    * @param rCount # of rows
    * @param cCount # of cols
    */
@@ -22,8 +21,7 @@ public class FullMtx extends Mtx {
   }
 
   /**
-   * Instantiates a new full matrix as a copy of an existing matrix
-   * 
+   * Instantiates a new full matrix as a copy of an existing matrix   
    * @param other The other matrix
    */
   public FullMtx(Mtx other) {

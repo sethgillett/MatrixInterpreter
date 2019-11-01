@@ -25,8 +25,7 @@ public abstract class TokenReader {
   static ArrayList<ReadToken> tkHst = new ArrayList<>();
 
   /**
-   * Reads in a new line from the parser
-   * 
+   * Reads in a new line from the parser   
    * @param input The input line
    */
   public static void readLine(String input) {
@@ -61,8 +60,7 @@ public abstract class TokenReader {
   }
 
   /**
-   * Peeks the next token without moving the reader forward
-   * 
+   * Peeks the next token without moving the reader forward   
    * @return The next token
    */
   public static Tk peekNextToken() {
@@ -141,8 +139,7 @@ public abstract class TokenReader {
   }
 
   /**
-   * Returns the string of the current token
-   * 
+   * Returns the string of the current token   
    * @return The string of the current token
    */
   public static String tokenStr() {
@@ -159,8 +156,7 @@ public abstract class TokenReader {
   }
 
   /**
-   * Attempts to find the end of an error causing token
-   * 
+   * Attempts to find the end of an error causing token   
    * @return The ending index of the error causing token
    */
   private static int endOfErrorToken() {

@@ -14,8 +14,7 @@ import vars.scl.Scl;
 
 abstract class InputReader {
   /**
-   * Reads parameters given to a function in a function call
-   * 
+   * Reads parameters given to a function in a function call   
    * @return A list of the parameters
    */
   public static List<Var> readCallParams() {
@@ -41,8 +40,7 @@ abstract class InputReader {
   }
 
   /**
-   * Reads a list of parameter names when defining a function
-   * 
+   * Reads a list of parameter names when defining a function   
    * @return The list of parameter names
    */
   public static List<String> readDefinedParams() {
@@ -67,8 +65,7 @@ abstract class InputReader {
   }
 
   /**
-   * Reads in a matrix via the terminal or file io
-   * 
+   * Reads in a matrix via the terminal or file io   
    * @param fromTerminal True if reading input from the terminal
    * @return The matrix read in
    */

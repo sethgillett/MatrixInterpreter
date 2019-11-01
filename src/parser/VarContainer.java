@@ -12,21 +12,36 @@ import vars.Var;
  */
 public class VarContainer {
   private Map<String, Var> vars;
+  private VarContainer parent;
 
-  public VarContainer() {
-    vars = new HashMap<>();
+  public VarContainer(VarContainer parent) {
+    this.vars = new HashMap<>();
+    this.parent = parent;
   }
 
   public boolean printVar(String name) {
-    if (vars.containsKey(name))
-      Output.println(vars.get(name));
-    else
+    if (hasLocalVar(name)) {
+      Output.println(getLocalVar(name));
+      return true;
+    }
+    else {
       Output.customError("Var %s cannot be printed because it doesn't exist", name);
-    return vars.containsKey(name);
+      return false;
+    }
   }
 
   public Var getLocalVar(String name) {
-    return vars.get(name);
+    if (vars.containsKey(name)) {
+      return vars.get(name);
+    }
+    else {
+      if (this.parent != null) {
+        return parent.getLocalVar(name);
+      }
+      else {
+        return null;
+      }
+    }
   }
   
   public void setLocalVar(String name, Var val) {
@@ -34,6 +49,10 @@ public class VarContainer {
   }
 
   public boolean hasLocalVar(String name) {
-    return vars.containsKey(name);
+    return getLocalVar(name) != null;
+  }
+
+  public VarContainer getParent() {
+    return this.parent;
   }
 }

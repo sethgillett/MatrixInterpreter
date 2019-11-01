@@ -4,8 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Token class
- * 
+ * Token class 
  * @author Seth Gillett
  *
  */
@@ -38,8 +37,7 @@ public enum Tk implements Comparable<Tk> {
   private Pattern pattern;
 
   /**
-   * Initializes a new token
-   * 
+   * Initializes a new token   
    * @param priority The priority of the token over other tokens
    * @param pattern  The regex pattern used to match this token
    */
@@ -53,8 +51,7 @@ public enum Tk implements Comparable<Tk> {
   }
 
   /**
-   * Attempts to find this token in a string
-   * 
+   * Attempts to find this token in a string   
    * @param line  The string
    * @param start The starting index
    * @return {start, end} or null
@@ -73,8 +70,7 @@ public enum Tk implements Comparable<Tk> {
   }
 
   /**
-   * Is this token * + ^ / or -
-   * 
+   * Is this token * + ^ / or -   
    * @param tk The token
    * @return True or false
    */
@@ -104,8 +100,7 @@ public enum Tk implements Comparable<Tk> {
   }
 
   /**
-   * This operator's precedence - the other's
-   * 
+   * This operator's precedence - the other's   
    * @param other The other math token
    * @return > 0 if greater = 0 if equal, < 0 if lesser
    */
