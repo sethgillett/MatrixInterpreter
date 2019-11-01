@@ -125,7 +125,7 @@ public class Scl extends Var {
     if (b == Scl.TEN)
       return new Scl(a.val.scaleByPowerOfTen(-1));
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(a.val.divide(b.val, maxPrecision(a, b)));
+    return new Scl(a.val.divide(b.val, maxPrecisionPlus(a, b)));
   }
 
   /**
@@ -141,7 +141,7 @@ public class Scl extends Var {
     if (b == Scl.ZERO && a != Scl.ZERO)
       return Scl.ONE;
     // Returns a new scalar representing the result with preserved decimal places
-    return new Scl(Math.pow(a.val.doubleValue(), b.val.doubleValue()), maxPrecision(a, b).getPrecision());
+    return new Scl(Math.pow(a.val.doubleValue(), b.val.doubleValue()), maxPrecisionPlus(a, b).getPrecision());
   }
 
   public static Bool great_or_equal(Scl a, Scl b) {
@@ -190,13 +190,28 @@ public class Scl extends Var {
   }
 
   /**
-   * Returns the maximum precision of two scalars
+   * Returns the maximum precision of two scalars (at least the number of non-decimal digits)
    * @param a The first scalar
    * @param b The second scalar
    * @return The maximum precision as a MathContext object
    */
   private static MathContext maxPrecision(Scl a, Scl b) {
-    return new MathContext(Math.max(a.val.precision(), b.val.precision()));
+    return new MathContext(Math.max(Math.abs(a.val.scale()), Math.abs(b.val.scale())));
+  }
+
+  /**
+   * Returns the maximum precision of two scalars PLUS two
+   * @param a The first scalar
+   * @param b The second scalar
+   * @return The maximum precision as a MathContext object
+   */
+  private static MathContext maxPrecisionPlus(Scl a, Scl b) {
+    if (Math.abs(a.val.scale()) <= 1 || Math.abs(b.val.scale()) == 1) {
+      return new MathContext(maxPrecision(a, b).getPrecision() + 2);
+    }
+    else {
+      return maxPrecision(a, b);
+    }
   }
 
   @Override
