@@ -16,15 +16,15 @@ public class Bool extends Var {
     return (val) ? True : False;
   }
 
-  public static Bool AND(Bool a, Bool b) {
+  public static Bool and(Bool a, Bool b) {
     return (a.val() && b.val()) ? True : False;
   }
 
-  public static Bool OR(Bool a, Bool b) {
+  public static Bool or(Bool a, Bool b) {
     return (a.val() || b.val()) ? True : False;
   }
 
-  public static Bool NOT(Bool a) {
+  public static Bool not(Bool a) {
     return (a.val()) ? True : False;
   }
 

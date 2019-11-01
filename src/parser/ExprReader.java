@@ -339,10 +339,10 @@ abstract class ExprReader {
         } else if (a instanceof Bool && b instanceof Bool) {
           switch (token) {
           case AND_OP:
-            res = Bool.AND((Bool) a, (Bool) b);
+            res = Bool.and((Bool) a, (Bool) b);
             break;
           case OR_OP:
-            res = Bool.OR((Bool) a, (Bool) b);
+            res = Bool.or((Bool) a, (Bool) b);
             break;
           default:
             Output.customError("Invalid token %s between true/false expressions", token);
@@ -351,7 +351,7 @@ abstract class ExprReader {
         } else if (a == null && b instanceof Bool) {
           switch (token) {
           case NOT_OP:
-            res = Bool.NOT((Bool) b);
+            res = Bool.not((Bool) b);
             break;
           default:
             Output.customError("Invalid token %s for single true/false", token);

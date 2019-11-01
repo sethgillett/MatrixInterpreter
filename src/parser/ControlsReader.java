@@ -89,12 +89,18 @@ abstract class ControlsReader {
         // Reads lines to a list
         List<String> stmts = new ArrayList<>();
         String newLine = Input.readLine();
-        while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b")) {
+        while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b") && !newLine.matches("\\s*\\b(?:return)\\b.*")) {
           stmts.add(newLine);
           newLine = Input.readLine();
         }
         // Look for an end statement
-        if (!newLine.matches("\\s*\\b(?:end)\\b")) {
+        if (newLine.matches("\\s*\\b(?:return)\\b.*")) {
+          stmts.add(newLine); // Add the return statement
+        }
+        else if (newLine.matches("\\s*\\b(?:end)\\b")) {
+          ; // fine
+        }
+        else {
           Output.customError("No end statement found after while statement");
           return null; // ERROR
         }
@@ -128,45 +134,68 @@ abstract class ControlsReader {
 
   public static Var forStmt() {
     // FOR token flagged
+    // Components of for loop
+    Scl start, end, inc;
+
     TokenReader.nextToken();
+    // HARD check for iterator name
     if (Output.hardCheck(Tk.VAR_NAME, TokenReader.tk)) {
       String iterName = TokenReader.tokenStr();
       TokenReader.nextToken();
+      // HARD check for IN token
       if (Output.hardCheck(Tk.IN, TokenReader.tk)) {
-        Scl start;
         start = (Scl) ExprReader.expr();
         if (start == null) {
           Output.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
           return null;
         }
+        // HARD check for ARROW token
         TokenReader.nextToken();
         if (Output.hardCheck(Tk.ARROW, TokenReader.tk)) {
-          Scl end;
           end = (Scl) ExprReader.expr();
           if (end == null) {
             Output.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
             return null;
           }
+          // SOFT check for BY token
           TokenReader.nextToken();
+          if (TokenReader.tk == Tk.BY) {
+            // Set the increment
+            inc = (Scl) ExprReader.expr();
+            if (inc == null) {
+              Output.expectedError(Tk.NUM_LIT, Tk.VAR_NAME);
+              return null;
+            }
+            TokenReader.nextToken();
+          }
+          else {
+            // Default increment of one
+            inc = Scl.ONE;
+          }
           if (Output.hardCheck(Tk.COLON, TokenReader.tk)) {
             List<String> stmts = new ArrayList<>();
             String newLine = Input.readLine();
-            // If newLine can't be read
-            if (newLine == null) {
-              Output.customError("No end statement found after for statement");
-              return null;
-            }
-            while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b")) {
+            // Read line by line
+            while (newLine != null && !newLine.matches("\\s*\\b(?:end)\\b") && !newLine.matches("\\s*\\b(?:return)\\b.*")) {
               stmts.add(newLine);
               newLine = Input.readLine();
             }
-            // If no end statement has been found
-            if (newLine == null) {
-              Output.customError("No end statement found after for statement");
+            // Look for an end statement
+            if (newLine.matches("\\s*\\b(?:return)\\b.*")) {
+              stmts.add(newLine); // Add the return statement
+            }
+            else if (newLine.matches("\\s*\\b(?:end)\\b")) {
+              ; // fine
+            }
+            else {
+              Output.customError("No end statement found after while statement");
               return null;
             }
+            // Create the iterator
             Scl iterator = new Scl(start);
+            // Put it in the var reg so it can be accessed within code
             Parser.setVar(iterName, iterator);
+            // Iterate while true
             while (Scl.lesser(iterator, end) == Bool.True) {
               for (String stmt : stmts) {
                 if (Parser.read(stmt) == null) {
